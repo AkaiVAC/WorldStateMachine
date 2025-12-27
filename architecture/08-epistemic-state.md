@@ -87,9 +87,15 @@ Event: "Conspiracy Discussion"
 If Lucius later learns about this event, the system flags it:
 → "Lucius shouldn't know this. Was this intentional?"
 
-### 9.7 Lazy Evaluation
+### 9.7 Always Query, Never Cache
 
-We don't pre-compute every character's complete knowledge state. We track constraints and resolve "does X know Y?" when the story asks.
+We **never** pre-compute or cache character knowledge state. The timeline is the single source of truth.
+
+**Every epistemic query is computed fresh from:**
+- Event participation records
+- Visibility level filters
+- Explicit revelation links
+- Group membership + temporal bounds
 
 **Query returns:**
 - **Definitely yes**: X was present, or was explicitly told
@@ -103,6 +109,18 @@ Query: "Does Marcus know about the Year 12 treaty?"
 ├── No explicit briefing recorded
 └── Result: AMBIGUOUS - author decides
 ```
+
+**Why no caching/snapshots?**
+- Caching creates "character cards 2.0" - the exact anti-pattern we're avoiding
+- Timeline changes would require cache invalidation (complex, error-prone)
+- Query performance is bounded by token budget anyway
+- If queries get slow, optimize the query algorithm, not the data model
+
+**Performance strategy:**
+- Index events by participant, visibility, time
+- Filter early (time window → visibility → participants)
+- Most queries touch <100 events even in large worlds
+- Profile before optimizing
 
 ### 9.8 Retrieval Implications
 
