@@ -22,7 +22,7 @@ This tests:
 
 ### 14.2 Current Progress
 
-#### Completed Components (Phase 1 Partial)
+#### Completed Components
 
 | Component | File | Tests | Status |
 |-----------|------|-------|--------|
@@ -32,8 +32,9 @@ This tests:
 | `EntityStore` | `world-state/entity/entity-store.ts` | 9 | ✅ Complete |
 | `getEntities()` | `world-state/entity/entity-view.ts` | 5 | ✅ Complete |
 | `Lexicon` | `world-state/lexicon/lexicon.ts` | 5 | ✅ Complete |
+| `importSillyTavernLorebook` | `import/silly-tavern-importer.ts` | 8 | ✅ Complete |
 
-**Total: 23 tests passing**
+**Total: 31 tests passing**
 
 #### Data Model Summary
 
@@ -64,7 +65,29 @@ type Entity = {
 - Lexicon tracks valid terms per world (case-insensitive)
 - All stores use simple closure-based state (no state management library)
 
-#### Remaining for Phase 1
+#### Import API
+
+**importSillyTavernLorebook** - Async function to parse SillyTavern lorebook JSON:
+```typescript
+type ImportResult = {
+  entities: Entity[];
+  lexiconTerms: string[];
+  skipped: SkippedEntry[];
+};
+
+importSillyTavernLorebook(filePath: string, worldId: string): Promise<ImportResult>
+```
+
+**Behavior:**
+- Parses SillyTavern lorebook JSON files
+- Creates Entity from each entry (comment → name, keys → aliases, group → group)
+- Generates UUIDs for entity IDs
+- Adds all keys (or name if keys empty) to lexicon terms
+- Skips disabled entries silently
+- Skips entries missing both key and comment (with reason in `skipped`)
+- Throws on file not found or invalid JSON
+
+#### Deferred
 
 - **Containment** - Hierarchy relationships (part-of, located-in)
   - May be needed for "Sunnarian Royal Gardens" → Sunnaria relationship
@@ -72,8 +95,7 @@ type Entity = {
 
 #### Next Steps
 
-1. **Import (Phase 2)** - Parse SillyTavern JSON into EntityStore + Lexicon
-2. **Constraint Checking (Phase 3)** - Validate prompts against world state
+1. **Constraint Checking (Phase 3)** - Validate prompts against world state
 
 ---
 
@@ -178,13 +200,15 @@ src/
 │   │   └── lexicon.test.ts           # ✅ 5 tests
 │   │
 │   └── containment/                  # 🔜 Hierarchy: part-of relationships
-│       └── (not yet implemented)
+│       └── (deferred)
+│
+├── import/                           # IMPORT - getting data in
+│   ├── silly-tavern-importer.ts      # ✅ SillyTavern JSON importer
+│   ├── silly-tavern-importer.test.ts # ✅ 8 tests
+│   └── __fixtures__/                 # ✅ Test fixture files
 │
 ├── validation/                       # 🔜 CONSTRAINTS - checking consistency
 │   └── (Phase 3)
-│
-├── import/                           # 🔜 IMPORT - getting data in
-│   └── (Phase 2)
 │
 ├── prompt-analysis/                  # 🔜 ANALYSIS - understanding input
 │   └── (Phase 3)
@@ -202,32 +226,30 @@ src/
 
 ### 14.6 Four Phases
 
-#### Phase 1: Data Model (In Progress)
+#### Phase 1: Data Model ✅
 
 Core types that everything else builds on.
 
-**Completed:**
 - ✅ `Fact` type with subject, property, value, worldId
 - ✅ `FactStore` for storing and querying facts
 - ✅ `Entity` type with id, name, aliases, group, worldId
 - ✅ `EntityStore` for storing and querying entities
 - ✅ `getEntities()` for computing entity list from facts
 - ✅ `Lexicon` for tracking valid terms per world
+- 🔜 `Containment` for hierarchy relationships (deferred)
 
-**Remaining:**
-- 🔜 `Containment` for hierarchy relationships (may defer)
-
-#### Phase 2: Import
+#### Phase 2: Import ✅
 
 Get SillyTavern data into the system.
 
-**Deliverables:**
-- `Importer` interface for pluggable import sources
-- `SillyTavernImporter` implementation
-- Parse lorebook JSON structure
-- Create Entity from each entry (key → aliases, comment → name, group → group)
-- Add all key[] values to Lexicon
-- Store raw content for future parsing
+- ✅ `importSillyTavernLorebook()` async function
+- ✅ Parse lorebook JSON structure
+- ✅ Create Entity from each entry (comment → name, keys → aliases, group → group)
+- ✅ Generate UUIDs for entity IDs
+- ✅ Add all keys to lexicon terms (or name if keys empty)
+- ✅ Skip disabled entries
+- ✅ Track skipped entries with reasons
+- ✅ Error handling for file not found / invalid JSON
 
 #### Phase 3: Constraint Checking
 
@@ -353,12 +375,12 @@ This provides rich test data for validation.
 
 MVP is complete when:
 
-1. ☐ Excelsia lorebooks are imported into the system
-2. ☐ Entities are queryable (who is in Sunnaria's royal family?)
-3. ☐ World lexicon is seeded from content
+1. ☑ Excelsia lorebooks can be imported into the system
+2. ☑ Entities are queryable (who is in Sunnaria's royal family?)
+3. ☑ World lexicon is seeded from import
 4. ☐ Prompts can be analyzed for entity/concept mentions
 5. ☐ The "prince snorkeling" test passes with correct violations
-6. ☐ All tests pass (`bun test`)
-7. ☐ Code passes lint/format (`bun run check`)
+6. ☑ All tests pass (`bun test`) - 31 tests
+7. ☑ Code passes lint/format (`bun run check`)
 
 ---
