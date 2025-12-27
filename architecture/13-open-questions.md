@@ -29,7 +29,7 @@
 - **Validation rules:** How to define and check consistency constraints
 - **Spatial consistency:** Scene-level spatial model (who is where, relative positions) - acknowledged but not yet designed
 - **Meta-state:** Prose style, tone, detail level (shelved for now)
-- **Performance at scale:** Indexing strategy for large worlds (1000+ entities)
+- **Performance at scale:** Profile-driven optimization; brute force + basic indexing is fine for expected usage (100 scenes/story, 5K facts). Optimize bottlenecks only after measuring real-world usage
 - **Image attachments:** How multimodal content integrates
 - **Dialogue flow in multi-agent:** Turn-based vs structure-first approaches need experimentation
 - **Fact extraction UX:** Reducing cognitive load of constant human review

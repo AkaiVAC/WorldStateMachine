@@ -140,5 +140,40 @@ Effects are still DATA, not runtime inference. The difference:
 - Selected effects are stored as **explicit facts**
 - Query time remains **deterministic** (just reads stored facts)
 
+### 3.8 Sticky Facts: Query-Time Effects
+
+An alternative to cascading writes is **sticky facts** that affect retrieval without propagating:
+
+```
+Event: "King Aldric dies" (Year 100)
+{ subject: "Aldric", property: "alive", value: false, validFrom: 100 }
+
+Query at Year 101: "Who rules Sunnaria?"
+→ Check succession rules + timeline state
+→ Compute current ruler from facts
+→ No need to write "Heir becomes king" fact
+```
+
+**When to use sticky vs. cascading:**
+
+| Pattern | Approach | Example |
+|---------|----------|---------|
+| **Sticky** | Computable from existing facts | Death → succession (deterministic) |
+| **Cascading** | Creates new narrative state | Poison river → health crisis (author choice) |
+| **Sticky** | Affects queries in bounded way | Location change → spatial constraints |
+| **Cascading** | Ripples unpredictably | Assassination → political chaos |
+
+**Benefits of sticky facts:**
+- Moves cost from write-time (unpredictable cascade) to read-time (already bounded by token budget)
+- Prevents effect explosion (50 relationships don't need 50 new facts)
+- Computable effects stay fresh (succession rules can change without rewriting history)
+
+**When cascading is still needed:**
+- Effects require author/dice selection (not deterministic)
+- New narrative state emerges (not just querying existing rules)
+- Secondary effects create story opportunities
+
+Both approaches coexist: sticky facts for mechanical propagation, cascading for narrative richness.
+
 ---
 
