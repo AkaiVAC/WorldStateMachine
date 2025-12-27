@@ -1,218 +1,73 @@
-import type { EntityStore } from "../world-state/entity/entity-store";
-import type { Rule, Violation } from "./validator";
+import type { PromptAnalyzer } from '../analysis/prompt-analyzer';
+import type { EntityStore } from '../world-state/entity/entity-store';
+import type { Rule, Violation } from './validator';
 
-const STOP_WORDS = new Set([
-	"i",
-	"me",
-	"my",
-	"myself",
-	"we",
-	"our",
-	"ours",
-	"you",
-	"your",
-	"he",
-	"him",
-	"his",
-	"she",
-	"her",
-	"it",
-	"its",
-	"they",
-	"them",
-	"the",
-	"a",
-	"an",
-	"and",
-	"but",
-	"or",
-	"for",
-	"nor",
-	"on",
-	"at",
-	"to",
-	"from",
-	"by",
-	"with",
-	"in",
-	"out",
-	"is",
-	"are",
-	"was",
-	"were",
-	"be",
-	"been",
-	"being",
-	"have",
-	"has",
-	"had",
-	"do",
-	"does",
-	"did",
-	"will",
-	"would",
-	"could",
-	"should",
-	"may",
-	"might",
-	"must",
-	"shall",
-	"can",
-	"of",
-	"that",
-	"this",
-	"these",
-	"those",
-	"am",
-	"as",
-	"if",
-	"then",
-	"so",
-	"than",
-	"too",
-	"very",
-	"just",
-	"also",
-	"now",
-	"here",
-	"there",
-	"when",
-	"where",
-	"why",
-	"how",
-	"all",
-	"each",
-	"every",
-	"both",
-	"few",
-	"more",
-	"most",
-	"other",
-	"some",
-	"such",
-	"no",
-	"not",
-	"only",
-	"own",
-	"same",
-	"into",
-	"over",
-	"after",
-	"before",
-	"between",
-	"under",
-	"again",
-	"further",
-	"once",
-	"during",
-	"while",
-	"about",
-	"against",
-	"through",
-	"above",
-	"below",
-	"up",
-	"down",
-	"off",
-	"because",
-	"until",
-	"although",
-	"find",
-	"enter",
-	"arrived",
-	"visited",
-	"met",
-	"saw",
-	"walk",
-	"today",
-	"yesterday",
-	"garden",
-]);
-
-const TITLE_WORDS = new Set([
-	"king",
-	"queen",
-	"prince",
-	"princess",
-	"lord",
-	"lady",
-	"duke",
-	"duchess",
-	"count",
-	"countess",
-	"baron",
-	"baroness",
-	"emperor",
-	"empress",
-	"knight",
-	"sir",
-	"dame",
-]);
-
-const isCapitalized = (word: string): boolean => {
-	const first = word[0];
-	return first === first?.toUpperCase() && first !== first?.toLowerCase();
-};
-
-const cleanWord = (word: string): string => {
-	return word.replace(/[.,!?;:'"]+$/g, "").replace(/^['"]+/g, "");
+const isFuzzyMatch = (term: string, candidate: string): boolean => {
+    if (candidate.includes(term)) return true;
+    if (term.includes(candidate)) {
+        if (candidate.length > 3) return true;
+        const tokens = term.split(/[\s\p{P}]+/u);
+        return tokens.includes(candidate);
+    }
+    return false;
 };
 
 const findSimilarEntity = (
-	term: string,
-	entityStore: EntityStore,
-	worldId: string,
+    term: string,
+    entityStore: EntityStore,
+    worldId: string
 ): string | undefined => {
-	const lowerTerm = term.toLowerCase();
-	const entities = entityStore.getAllByWorld(worldId);
+    const lowerTerm = term.toLowerCase();
+    const entities = entityStore.getAllByWorld(worldId);
 
-	for (const entity of entities) {
-		const lowerName = entity.name.toLowerCase();
-		if (lowerName.includes(lowerTerm) || lowerTerm.includes(lowerName)) {
-			return entity.name;
-		}
-		for (const alias of entity.aliases) {
-			const lowerAlias = alias.toLowerCase();
-			if (lowerAlias.includes(lowerTerm) || lowerTerm.includes(lowerAlias)) {
-				return entity.name;
-			}
-		}
-	}
+    for (const entity of entities) {
+        if (isFuzzyMatch(lowerTerm, entity.name.toLowerCase())) {
+            return entity.name;
+        }
+        for (const alias of entity.aliases) {
+            if (isFuzzyMatch(lowerTerm, alias.toLowerCase())) {
+                return entity.name;
+            }
+        }
+    }
 
-	return undefined;
+    return undefined;
+};
+
+type EntityExistsRuleOptions = {
+    analyzer: PromptAnalyzer;
+    entityStore: EntityStore;
+    worldId: string;
 };
 
 export const createEntityExistsRule = (
-	entityStore: EntityStore,
-	worldId: string,
+    options: EntityExistsRuleOptions
 ): Rule => {
-	return {
-		check: async (prompt: string): Promise<Violation[]> => {
-			const words = prompt.split(/\s+/).map(cleanWord).filter(Boolean);
+    const { analyzer, entityStore, worldId } = options;
 
-			const candidates = words.filter((word) => {
-				const lower = word.toLowerCase();
-				if (STOP_WORDS.has(lower)) return false;
-				if (word.length <= 1) return false;
-				if (TITLE_WORDS.has(lower)) return true;
-				return isCapitalized(word);
-			});
+    return {
+        check: async (prompt: string): Promise<Violation[]> => {
+            const { entityReferences } = await analyzer.analyze(prompt);
 
-			const violations: Violation[] = [];
-			for (const word of candidates) {
-				if (!entityStore.getByName(worldId, word)) {
-					const suggestion = findSimilarEntity(word, entityStore, worldId);
-					violations.push({
-						type: "unknown-entity",
-						term: word,
-						message: suggestion
-							? `Unknown entity: ${word}. Did you mean ${suggestion}?`
-							: `Unknown entity: ${word}`,
-						suggestion,
-					});
-				}
-			}
-			return violations;
-		},
-	};
+            const violations: Violation[] = [];
+            for (const term of entityReferences) {
+                if (!entityStore.getByName(worldId, term)) {
+                    const suggestion = findSimilarEntity(
+                        term,
+                        entityStore,
+                        worldId
+                    );
+                    violations.push({
+                        type: 'unknown-entity',
+                        term,
+                        message: suggestion
+                            ? `Unknown entity: ${term}. Did you mean ${suggestion}?`
+                            : `Unknown entity: ${term}`,
+                        suggestion,
+                    });
+                }
+            }
+            return violations;
+        },
+    };
 };

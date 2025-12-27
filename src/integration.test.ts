@@ -5,6 +5,7 @@ import { validate } from "./validation/validator";
 import { createWorldBoundaryRule } from "./validation/world-boundary-rule";
 import { createEntityStore } from "./world-state/entity/entity-store";
 import { createLexicon } from "./world-state/lexicon/lexicon";
+import type { PromptAnalyzer } from "./analysis/prompt-analyzer";
 
 const examplesDir = `${import.meta.dir}/example/Excelsia`;
 const worldId = "excelsia";
@@ -108,6 +109,22 @@ describe("Integration: Import → Store → Query", () => {
 });
 
 describe("MVP: Prince Snorkeling Test", () => {
+	const mockAnalyzer: PromptAnalyzer = {
+		analyze: async (text: string) => {
+			const result = {
+				entityReferences: [] as string[],
+				anachronisms: [] as string[],
+			};
+			if (text.includes("prince")) {
+				result.entityReferences.push("prince");
+			}
+			if (text.includes("snorkeling")) {
+				result.anachronisms.push("snorkeling");
+			}
+			return result;
+		},
+	};
+
 	test("flags 'prince' as unknown entity with suggestion", async () => {
 		const result = await importSillyTavernLorebook(
 			`${examplesDir}/Excelsia - Characters.json`,
@@ -119,7 +136,11 @@ describe("MVP: Prince Snorkeling Test", () => {
 			entityStore.add(entity);
 		}
 
-		const rule = createEntityExistsRule(entityStore, worldId);
+		const rule = createEntityExistsRule({
+			analyzer: mockAnalyzer,
+			entityStore,
+			worldId,
+		});
 		const violations = await rule.check(
 			"I enter the Sunnarian Royal Gardens and find the prince snorkeling.",
 		);
@@ -131,31 +152,8 @@ describe("MVP: Prince Snorkeling Test", () => {
 	});
 
 	test("flags 'snorkeling' as world-boundary violation", async () => {
-		const result = await importSillyTavernLorebook(
-			`${examplesDir}/Excelsia - Characters.json`,
-			worldId,
-		);
-
-		const entityStore = createEntityStore();
-		const lexicon = createLexicon();
-
-		for (const entity of result.entities) {
-			entityStore.add(entity);
-		}
-		for (const term of result.lexiconTerms) {
-			lexicon.addTerm(worldId, term);
-		}
-
-		const mockAsk = (prompt: string) => {
-			if (prompt.includes("snorkeling")) return Promise.resolve("NO");
-			return Promise.resolve("YES");
-		};
-
 		const rule = createWorldBoundaryRule({
-			askFn: mockAsk,
-			entityStore,
-			lexicon,
-			worldId,
+			analyzer: mockAnalyzer,
 			worldSetting: "medieval fantasy",
 		});
 
@@ -175,26 +173,17 @@ describe("MVP: Prince Snorkeling Test", () => {
 		);
 
 		const entityStore = createEntityStore();
-		const lexicon = createLexicon();
-
 		for (const entity of result.entities) {
 			entityStore.add(entity);
 		}
-		for (const term of result.lexiconTerms) {
-			lexicon.addTerm(worldId, term);
-		}
 
-		const mockAsk = (prompt: string) => {
-			if (prompt.includes("snorkeling")) return Promise.resolve("NO");
-			return Promise.resolve("YES");
-		};
-
-		const entityRule = createEntityExistsRule(entityStore, worldId);
-		const worldBoundaryRule = createWorldBoundaryRule({
-			askFn: mockAsk,
+		const entityRule = createEntityExistsRule({
+			analyzer: mockAnalyzer,
 			entityStore,
-			lexicon,
 			worldId,
+		});
+		const worldBoundaryRule = createWorldBoundaryRule({
+			analyzer: mockAnalyzer,
 			worldSetting: "medieval fantasy",
 		});
 

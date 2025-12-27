@@ -1,13 +1,14 @@
+import { createPromptAnalyzer } from "./analysis/prompt-analyzer";
 import { importSillyTavernLorebook } from "./import/silly-tavern-importer";
 import { ask } from "./llm/openrouter";
 import { createEntityExistsRule } from "./validation/entity-exists-rule";
 import { validate } from "./validation/validator";
 import { createWorldBoundaryRule } from "./validation/world-boundary-rule";
 import { createEntityStore } from "./world-state/entity/entity-store";
-import { createLexicon } from "./world-state/lexicon/lexicon";
 
 const examplesDir = `${import.meta.dir}/example/Excelsia`;
 const worldId = "excelsia";
+const worldSetting = "medieval fantasy";
 
 const setupWorld = async () => {
 	const result = await importSillyTavernLorebook(
@@ -16,31 +17,33 @@ const setupWorld = async () => {
 	);
 
 	const entityStore = createEntityStore();
-	const lexicon = createLexicon();
 
 	for (const entity of result.entities) {
 		entityStore.add(entity);
 	}
-	for (const term of result.lexiconTerms) {
-		lexicon.addTerm(worldId, term);
-	}
 
-	return { entityStore, lexicon };
+	return { entityStore };
 };
 
 const validatePrompt = async (prompt: string) => {
 	console.log("\n=== Validating Prompt ===");
 	console.log(`"${prompt}"\n`);
 
-	const { entityStore, lexicon } = await setupWorld();
+	const { entityStore } = await setupWorld();
 
-	const entityRule = createEntityExistsRule(entityStore, worldId);
-	const worldBoundaryRule = createWorldBoundaryRule({
+	const analyzer = createPromptAnalyzer({
 		askFn: ask,
+		worldSetting,
+	});
+
+	const entityRule = createEntityExistsRule({
+		analyzer,
 		entityStore,
-		lexicon,
 		worldId,
-		worldSetting: "medieval fantasy",
+	});
+	const worldBoundaryRule = createWorldBoundaryRule({
+		analyzer,
+		worldSetting,
 	});
 
 	const violations = await validate(prompt, [entityRule, worldBoundaryRule]);
