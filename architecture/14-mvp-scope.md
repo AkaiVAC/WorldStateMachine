@@ -20,7 +20,102 @@ This tests:
 
 ---
 
-### 14.2 Architectural Considerations
+### 14.2 Current Progress
+
+#### Completed Components (Phase 1 Partial)
+
+| Component | File | Tests | Status |
+|-----------|------|-------|--------|
+| `Fact` | `world-state/fact/fact.ts` | - | ✅ Type only |
+| `FactStore` | `world-state/fact/fact-store.ts` | 4 | ✅ Complete |
+| `Entity` | `world-state/entity/entity.ts` | - | ✅ Type only |
+| `EntityStore` | `world-state/entity/entity-store.ts` | 9 | ✅ Complete |
+| `getEntities()` | `world-state/entity/entity-view.ts` | 5 | ✅ Complete |
+| `Lexicon` | `world-state/lexicon/lexicon.ts` | 5 | ✅ Complete |
+
+**Total: 23 tests passing**
+
+#### Data Model Summary
+
+**Fact** - Atomic unit of world knowledge:
+```typescript
+type Fact = {
+  worldId: string;
+  subject: string;
+  property: string;
+  value: string | number | boolean;
+};
+```
+
+**Entity** - First-class entity with identity:
+```typescript
+type Entity = {
+  id: string;
+  name: string;
+  aliases: string[];
+  group: string;
+  worldId: string;
+};
+```
+
+**Key Design Decisions:**
+- `worldId` on both Fact and Entity enables multi-world support
+- EntityStore supports lookup by id, name, or alias (case-insensitive)
+- Lexicon tracks valid terms per world (case-insensitive)
+- All stores use simple closure-based state (no state management library)
+
+#### Remaining for Phase 1
+
+- **Containment** - Hierarchy relationships (part-of, located-in)
+  - May be needed for "Sunnarian Royal Gardens" → Sunnaria relationship
+  - Could be deferred if entity grouping is sufficient
+
+#### Next Steps
+
+1. **Import (Phase 2)** - Parse SillyTavern JSON into EntityStore + Lexicon
+2. **Constraint Checking (Phase 3)** - Validate prompts against world state
+
+---
+
+### 14.3 SillyTavern Format Analysis
+
+The `src/example/Excelsia/` folder contains 11 lorebook JSON files.
+
+#### Entry Structure
+
+```typescript
+type LorebookEntry = {
+  uid: number;                    // Unique ID within lorebook
+  key: string[];                  // Trigger keywords (names, aliases)
+  keysecondary: string[];         // Secondary keywords (rarely used)
+  comment: string;                // Entry title/display name
+  content: string;                // Free-form prose description
+  group: string;                  // Category (Characters, Kingdoms, etc.)
+  disable: boolean;               // Whether entry is active
+  // ... many SillyTavern-specific fields (injection control, matching options)
+};
+```
+
+#### What Maps to Our Model
+
+| SillyTavern | Our Model |
+|-------------|-----------|
+| `key[0]` or `comment` | Entity.name |
+| `key[]` (all) | Entity.aliases + Lexicon terms |
+| `group` | Entity.group |
+| `uid` | Entity.id (with world prefix) |
+| `content` | Stored for future parsing |
+| `disable: true` | Skip during import |
+
+#### What Requires Future Work
+
+- **Relationship extraction** from `content` prose (e.g., "daughter of King Alaric")
+- **Structured sections** parsing (some entries have `[Character Identity]` blocks)
+- **Injection control** fields are SillyTavern-specific, not needed for constraint checking
+
+---
+
+### 14.4 Architectural Considerations
 
 #### Multi-World Support
 
@@ -31,10 +126,10 @@ Examples:
 - A user might have multiple worlds for different stories
 - Each world can be loaded, saved, and exported independently
 
-**Implications for MVP:**
-- Facts belong to a world (world identifier in data model)
-- API operations specify which world to query
-- Persistence is deferred but the model accommodates it
+**Implementation:**
+- `worldId` field on Fact and Entity
+- Store methods filter by worldId
+- Lexicon maintains separate term sets per world
 
 #### Persistence (Deferred)
 
@@ -60,83 +155,67 @@ These are added as top-level modules when implemented, not pre-created.
 
 ---
 
-### 14.3 Folder Structure
+### 14.5 Folder Structure
 
 ```
 src/
 ├── world-state/                      # THE WORLD - core data model
 │   │
 │   ├── fact/                         # Facts: the atomic unit
-│   │   ├── fact.ts                   # Fact type definition
-│   │   └── fact-store.ts             # Store and query facts
+│   │   ├── fact.ts                   # ✅ Fact type definition
+│   │   ├── fact-store.ts             # ✅ Store and query facts
+│   │   └── fact-store.test.ts        # ✅ 4 tests
 │   │
-│   ├── entity/                       # Entities: derived from facts
-│   │   ├── entity.ts                 # Entity type definition
-│   │   └── entity-view.ts            # Compute entity from facts
+│   ├── entity/                       # Entities: first-class objects
+│   │   ├── entity.ts                 # ✅ Entity type definition
+│   │   ├── entity-store.ts           # ✅ Store and query entities
+│   │   ├── entity-store.test.ts      # ✅ 9 tests
+│   │   ├── entity-view.ts            # ✅ Compute entities from facts
+│   │   └── entity-view.test.ts       # ✅ 5 tests
 │   │
 │   ├── lexicon/                      # Vocabulary: what belongs here
-│   │   ├── lexicon.ts                # Lexicon type definition
-│   │   └── lexicon-entry.ts          # Individual entries
+│   │   ├── lexicon.ts                # ✅ Lexicon store
+│   │   └── lexicon.test.ts           # ✅ 5 tests
 │   │
-│   └── containment/                  # Hierarchy: part-of relationships
-│       └── containment.ts            # Containment graph
+│   └── containment/                  # 🔜 Hierarchy: part-of relationships
+│       └── (not yet implemented)
 │
-├── validation/                       # CONSTRAINTS - checking consistency
-│   │
-│   ├── rule.ts                       # Rule interface (pluggable)
-│   ├── violation.ts                  # Violation type
-│   ├── validator.ts                  # Runs rules, collects violations
-│   │
-│   └── rules/                        # Individual rules (extensible)
-│       ├── entity-exists.ts          # "Does this entity exist?"
-│       └── world-boundary.ts         # "Does this belong in the world?"
+├── validation/                       # 🔜 CONSTRAINTS - checking consistency
+│   └── (Phase 3)
 │
-├── import/                           # IMPORT - getting data in
-│   │
-│   ├── importer.ts                   # Importer interface (pluggable)
-│   ├── import-result.ts              # Result type
-│   │
-│   └── adapters/                     # Source-specific (extensible)
-│       └── sillytavern/
-│           ├── sillytavern-importer.ts
-│           └── sillytavern-parser.ts
+├── import/                           # 🔜 IMPORT - getting data in
+│   └── (Phase 2)
 │
-├── prompt-analysis/                  # ANALYSIS - understanding input
-│   │
-│   ├── extractor.ts                  # Extractor interface (pluggable)
-│   ├── extracted-reference.ts        # What was found in prompt
-│   │
-│   └── strategies/                   # Extraction strategies (swappable)
-│       └── keyword-extractor.ts      # Simple keyword matching
+├── prompt-analysis/                  # 🔜 ANALYSIS - understanding input
+│   └── (Phase 3)
 │
-├── api/                              # API - external interface
-│   └── check-prompt.ts               # Main entry: prompt → violations
+├── api/                              # 🔜 API - external interface
+│   └── (Phase 4)
 │
 └── example/                          # Test data
-    └── Excelsia/                     # SillyTavern lorebook files
+    └── Excelsia/                     # ✅ 11 SillyTavern lorebook files
 ```
 
-**Extension points:**
-- `validation/rules/` - add new validation rules
-- `import/adapters/` - add new import sources
-- `prompt-analysis/strategies/` - swap extraction strategies
-- Top-level folders for Timeline, Geography, Calendar systems when built
+**Legend:** ✅ Complete | 🔜 Not yet implemented
 
 ---
 
-### 14.4 Four Phases
+### 14.6 Four Phases
 
-#### Phase 1: Data Model
+#### Phase 1: Data Model (In Progress)
 
 Core types that everything else builds on.
 
-**Deliverables:**
-- `Fact` type with subject, property, value, worldId
-- `FactStore` for storing and querying facts
-- `Entity` type and `EntityView` for computing entity state
-- `Lexicon` and `LexiconEntry` types
-- `Containment` for hierarchy relationships
-- Basic queries (get entity, get facts about X)
+**Completed:**
+- ✅ `Fact` type with subject, property, value, worldId
+- ✅ `FactStore` for storing and querying facts
+- ✅ `Entity` type with id, name, aliases, group, worldId
+- ✅ `EntityStore` for storing and querying entities
+- ✅ `getEntities()` for computing entity list from facts
+- ✅ `Lexicon` for tracking valid terms per world
+
+**Remaining:**
+- 🔜 `Containment` for hierarchy relationships (may defer)
 
 #### Phase 2: Import
 
@@ -146,9 +225,9 @@ Get SillyTavern data into the system.
 - `Importer` interface for pluggable import sources
 - `SillyTavernImporter` implementation
 - Parse lorebook JSON structure
-- Extract entities from entry names/keywords
-- Build containment from groups
-- Seed lexicon from content
+- Create Entity from each entry (key → aliases, comment → name, group → group)
+- Add all key[] values to Lexicon
+- Store raw content for future parsing
 
 #### Phase 3: Constraint Checking
 
@@ -175,7 +254,33 @@ Connect to actual usage.
 
 ---
 
-### 14.5 Deferred (Full Architecture)
+### 14.7 Testing Strategy
+
+This project follows strict TDD with ZOMBIES methodology:
+
+- **Z**ero - Empty/null/zero inputs
+- **O**ne - Single item behavior
+- **M**any - Multiple items, collections
+- **B**oundary - Edge cases, limits
+- **I**nterface - Is the API ergonomic?
+- **E**xceptions - Error cases
+- **S**imple - Happy path scenarios
+
+**Workflow:**
+1. Identify what behavior needs testing
+2. Apply ZOMBIES to enumerate test cases
+3. Capture planned tests with `test.todo("description")`
+4. Implement ONE test at a time: `test.todo` → `test` → pass → refactor
+
+**Commands:**
+```bash
+bun test          # Run all tests
+bun run check     # Lint + format (auto-fix)
+```
+
+---
+
+### 14.8 Deferred (Full Architecture)
 
 These are documented in the architecture but not in MVP scope:
 
@@ -228,7 +333,7 @@ These are documented in the architecture but not in MVP scope:
 
 ---
 
-### 14.6 Test Data
+### 14.9 Test Data
 
 The `src/example/Excelsia/` folder contains 11 SillyTavern lorebook JSON files:
 
@@ -238,18 +343,22 @@ The `src/example/Excelsia/` folder contains 11 SillyTavern lorebook JSON files:
 
 This provides rich test data for validation.
 
+**Key entities for MVP test:**
+- Sunnaria (kingdom) - has King, Queen, Princess but NO Prince
+- Princess Aradia - the "Did you mean?" suggestion
+
 ---
 
-### 14.7 Definition of Done
+### 14.10 Definition of Done
 
 MVP is complete when:
 
-1. ✓ Excelsia lorebooks are imported into the system
-2. ✓ Entities are queryable (who is in Sunnaria's royal family?)
-3. ✓ World lexicon is seeded from content
-4. ✓ Prompts can be analyzed for entity/concept mentions
-5. ✓ The "prince snorkeling" test passes with correct violations
-6. ✓ All tests pass (`bun test`)
-7. ✓ Code passes lint/format (`bun run check`)
+1. ☐ Excelsia lorebooks are imported into the system
+2. ☐ Entities are queryable (who is in Sunnaria's royal family?)
+3. ☐ World lexicon is seeded from content
+4. ☐ Prompts can be analyzed for entity/concept mentions
+5. ☐ The "prince snorkeling" test passes with correct violations
+6. ☐ All tests pass (`bun test`)
+7. ☐ Code passes lint/format (`bun run check`)
 
 ---
