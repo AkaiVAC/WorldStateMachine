@@ -29,12 +29,17 @@ This tests:
 | `Fact` | `world-state/fact/fact.ts` | - | ✅ Type only |
 | `FactStore` | `world-state/fact/fact-store.ts` | 4 | ✅ Complete |
 | `Entity` | `world-state/entity/entity.ts` | - | ✅ Type only |
-| `EntityStore` | `world-state/entity/entity-store.ts` | 9 | ✅ Complete |
+| `EntityStore` | `world-state/entity/entity-store.ts` | 10 | ✅ Complete |
 | `getEntities()` | `world-state/entity/entity-view.ts` | 5 | ✅ Complete |
 | `Lexicon` | `world-state/lexicon/lexicon.ts` | 5 | ✅ Complete |
 | `importSillyTavernLorebook` | `import/silly-tavern-importer.ts` | 8 | ✅ Complete |
+| `OpenRouter` | `llm/openrouter.ts` | 5 | ✅ Complete |
+| `Validator` | `validation/validator.ts` | 5 | ✅ Complete |
+| `EntityExistsRule` | `validation/entity-exists-rule.ts` | 6 | ✅ Complete |
+| `WorldBoundaryRule` | `validation/world-boundary-rule.ts` | 5 | ✅ Complete |
+| Integration tests | `integration.test.ts` | 7 | ✅ Complete |
 
-**Total: 31 tests passing**
+**Total: 60 tests passing**
 
 #### Data Model Summary
 
@@ -87,6 +92,31 @@ importSillyTavernLorebook(filePath: string, worldId: string): Promise<ImportResu
 - Skips entries missing both key and comment (with reason in `skipped`)
 - Throws on file not found or invalid JSON
 
+#### Validation API
+
+**Rule** - Interface for pluggable validation rules:
+```typescript
+type Rule = {
+  check: (prompt: string) => Promise<Violation[]>;
+};
+```
+
+**Violation** - Describes a constraint failure:
+```typescript
+type Violation = {
+  type: string;
+  term: string;
+  message: string;
+  suggestion?: string;
+};
+```
+
+**Key Design Decisions:**
+- Rules capture dependencies via closures (EntityStore, Lexicon, LLM client)
+- EntityExistsRule uses title word detection (prince, king, queen, etc.) + capitalization heuristics
+- WorldBoundaryRule delegates semantic judgment to LLM (OpenRouter)
+- LLM is configurable - default model: `xiaomi/mimo-v2-flash:free`
+
 #### Deferred
 
 - **Containment** - Hierarchy relationships (part-of, located-in)
@@ -95,7 +125,7 @@ importSillyTavernLorebook(filePath: string, worldId: string): Promise<ImportResu
 
 #### Next Steps
 
-1. **Constraint Checking (Phase 3)** - Validate prompts against world state
+1. **Phase 4: Integration** - Clean API for external consumers, CLI
 
 ---
 
@@ -191,7 +221,7 @@ src/
 │   ├── entity/                       # Entities: first-class objects
 │   │   ├── entity.ts                 # ✅ Entity type definition
 │   │   ├── entity-store.ts           # ✅ Store and query entities
-│   │   ├── entity-store.test.ts      # ✅ 9 tests
+│   │   ├── entity-store.test.ts      # ✅ 10 tests
 │   │   ├── entity-view.ts            # ✅ Compute entities from facts
 │   │   └── entity-view.test.ts       # ✅ 5 tests
 │   │
@@ -207,14 +237,23 @@ src/
 │   ├── silly-tavern-importer.test.ts # ✅ 8 tests
 │   └── __fixtures__/                 # ✅ Test fixture files
 │
-├── validation/                       # 🔜 CONSTRAINTS - checking consistency
-│   └── (Phase 3)
+├── llm/                              # LLM - external AI integration
+│   ├── openrouter.ts                 # ✅ OpenRouter API client
+│   └── openrouter.test.ts            # ✅ 5 tests
 │
-├── prompt-analysis/                  # 🔜 ANALYSIS - understanding input
-│   └── (Phase 3)
+├── validation/                       # CONSTRAINTS - checking consistency
+│   ├── validator.ts                  # ✅ Rule runner
+│   ├── validator.test.ts             # ✅ 5 tests
+│   ├── entity-exists-rule.ts         # ✅ Unknown entity detection
+│   ├── entity-exists-rule.test.ts    # ✅ 6 tests
+│   ├── world-boundary-rule.ts        # ✅ Anachronism detection (LLM)
+│   └── world-boundary-rule.test.ts   # ✅ 5 tests
 │
 ├── api/                              # 🔜 API - external interface
 │   └── (Phase 4)
+│
+├── integration.test.ts               # ✅ MVP integration tests (7 tests)
+├── validate-prompt.ts                # ✅ CLI validation script
 │
 └── example/                          # Test data
     └── Excelsia/                     # ✅ 11 SillyTavern lorebook files
@@ -251,19 +290,18 @@ Get SillyTavern data into the system.
 - ✅ Track skipped entries with reasons
 - ✅ Error handling for file not found / invalid JSON
 
-#### Phase 3: Constraint Checking
+#### Phase 3: Constraint Checking ✅
 
 The core value: catch world-inconsistent input.
 
 **Deliverables:**
-- `Rule` interface for pluggable validation rules
-- `Violation` type for constraint failures
-- `Validator` to run rules and collect violations
-- `EntityExists` rule - flags unknown entities
-- `WorldBoundary` rule - flags out-of-place concepts
-- `Extractor` interface for prompt analysis
-- `KeywordExtractor` implementation
-- The "prince/snorkeling" test passes
+- ✅ `Rule` interface for pluggable validation rules
+- ✅ `Violation` type for constraint failures
+- ✅ `Validator` to run rules and collect violations
+- ✅ `EntityExistsRule` - flags unknown entities with suggestions
+- ✅ `WorldBoundaryRule` - flags out-of-place concepts (LLM-powered)
+- ✅ `OpenRouter` client for LLM integration
+- ✅ The "prince/snorkeling" test passes
 
 #### Phase 4: Integration
 
@@ -378,9 +416,11 @@ MVP is complete when:
 1. ☑ Excelsia lorebooks can be imported into the system
 2. ☑ Entities are queryable (who is in Sunnaria's royal family?)
 3. ☑ World lexicon is seeded from import
-4. ☐ Prompts can be analyzed for entity/concept mentions
-5. ☐ The "prince snorkeling" test passes with correct violations
-6. ☑ All tests pass (`bun test`) - 31 tests
+4. ☑ Prompts can be analyzed for entity/concept mentions
+5. ☑ The "prince snorkeling" test passes with correct violations
+6. ☑ All tests pass (`bun test`) - 60 tests
 7. ☑ Code passes lint/format (`bun run check`)
+
+**MVP COMPLETE** ✅
 
 ---
