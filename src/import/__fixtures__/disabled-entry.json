@@ -1,0 +1,12 @@
+{
+	"entries": {
+		"0": {
+			"uid": 0,
+			"key": ["disabled_thing"],
+			"comment": "Disabled Entry",
+			"content": "This should be skipped.",
+			"group": "Test",
+			"disable": true
+		}
+	}
+}

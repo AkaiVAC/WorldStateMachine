@@ -1,0 +1,25 @@
+{
+	"entries": {
+		"1": {
+			"uid": 1,
+			"key": ["Alaric", "King Alaric"],
+			"comment": "King Alaric of Sunnaria",
+			"group": "Characters",
+			"disable": false
+		},
+		"2": {
+			"uid": 2,
+			"key": ["Elara", "Queen Elara"],
+			"comment": "Queen Elara of Sunnaria",
+			"group": "Characters",
+			"disable": false
+		},
+		"3": {
+			"uid": 3,
+			"key": ["Aradia", "Princess Aradia"],
+			"comment": "Princess Aradia of Sunnaria",
+			"group": "Characters",
+			"disable": false
+		}
+	}
+}

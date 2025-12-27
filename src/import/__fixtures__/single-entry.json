@@ -1,0 +1,13 @@
+{
+	"entries": {
+		"1": {
+			"uid": 1,
+			"key": ["Alaric", "King Alaric"],
+			"keysecondary": [],
+			"comment": "King Alaric of Sunnaria",
+			"content": "King Alaric rules Sunnaria.",
+			"group": "Characters",
+			"disable": false
+		}
+	}
+}
