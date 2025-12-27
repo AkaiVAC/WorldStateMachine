@@ -5,6 +5,7 @@ export type EntityStore = {
 	getById: (id: string) => Entity | undefined;
 	getByName: (worldId: string, name: string) => Entity | undefined;
 	getByGroup: (worldId: string, group: string) => Entity[];
+	getAllByWorld: (worldId: string) => Entity[];
 };
 
 export const createEntityStore = (): EntityStore => {
@@ -32,6 +33,9 @@ export const createEntityStore = (): EntityStore => {
 		},
 		getByGroup: (worldId, group) => {
 			return entities.filter((e) => e.worldId === worldId && e.group === group);
+		},
+		getAllByWorld: (worldId) => {
+			return entities.filter((e) => e.worldId === worldId);
 		},
 	};
 };

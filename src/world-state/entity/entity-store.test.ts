@@ -159,4 +159,35 @@ describe("EntityStore", () => {
 		expect(store.getByName("excelsia", "PRINCESS ARADIA")?.id).toBe("aradia-1");
 		expect(store.getByName("excelsia", "aradia")?.id).toBe("aradia-1");
 	});
+
+	test("getAllByWorld returns all entities for a world", () => {
+		const store = createEntityStore();
+		store.add({
+			id: "aradia-1",
+			name: "Aradia",
+			aliases: [],
+			group: "Characters",
+			worldId: "excelsia",
+		});
+		store.add({
+			id: "sunnaria-1",
+			name: "Sunnaria",
+			aliases: [],
+			group: "Kingdoms",
+			worldId: "excelsia",
+		});
+		store.add({
+			id: "other-1",
+			name: "Other",
+			aliases: [],
+			group: "Characters",
+			worldId: "other-world",
+		});
+
+		const entities = store.getAllByWorld("excelsia");
+
+		expect(entities).toHaveLength(2);
+		expect(entities.map((e) => e.name)).toContain("Aradia");
+		expect(entities.map((e) => e.name)).toContain("Sunnaria");
+	});
 });

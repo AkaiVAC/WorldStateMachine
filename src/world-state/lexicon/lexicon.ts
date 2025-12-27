@@ -1,4 +1,4 @@
-type Lexicon = {
+export type Lexicon = {
 	addTerm: (worldId: string, term: string) => void;
 	hasTerm: (worldId: string, term: string) => boolean;
 };
