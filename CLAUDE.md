@@ -13,6 +13,49 @@ Run tests: `bun test`
 
 ---
 
+## Testing Strategy
+
+### ZOMBIES
+
+Use ZOMBIES to determine what tests to write BEFORE implementation:
+
+- **Z**ero - Empty/null/zero inputs
+- **O**ne - Single item behavior
+- **M**any - Multiple items, collections
+- **B**oundary - Edge cases, limits
+- **I**nterface - Is the API ergonomic?
+- **E**xceptions - Error cases
+- **S**imple - Happy path scenarios
+
+### What to Test
+
+- **Test behavior, not implementation.** If a test just verifies a function returns what you pass in, it's useless.
+- **Value objects (types with no behavior) don't need tests.** The type system handles that.
+- **Test things that USE data, not the data itself.** A `Fact` type needs no tests; a `FactStore` that queries facts does.
+
+### What NOT to Test
+
+- Factory functions that just copy properties
+- Type definitions
+- Simple data transformations that TypeScript already validates
+
+### Test Workflow
+
+1. Identify what behavior needs testing
+2. Apply ZOMBIES to enumerate test cases
+3. Capture planned tests with `test.todo("description")`
+4. Implement ONE test at a time: `test.todo` → `test` → pass → refactor
+5. Refactor tests for readability as the suite grows
+
+### Test Readability
+
+- Tests are documentation. Keep them readable.
+- Extract helpers if setup becomes repetitive (after 3+ similar setups)
+- Use descriptive test names that explain the scenario
+- Refactor tests alongside production code
+
+---
+
 ## Code Style
 
 ### TypeScript Conventions
