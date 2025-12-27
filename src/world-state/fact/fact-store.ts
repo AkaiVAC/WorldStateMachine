@@ -1,8 +1,9 @@
 import type { Fact } from "./fact";
 
-type FactStore = {
+export type FactStore = {
 	add: (fact: Fact) => void;
 	getBySubject: (subject: string) => Fact[];
+	getAll: () => Fact[];
 };
 
 export const createFactStore = (): FactStore => {
@@ -14,6 +15,9 @@ export const createFactStore = (): FactStore => {
 		},
 		getBySubject: (subject) => {
 			return facts.filter((f) => f.subject === subject);
+		},
+		getAll: () => {
+			return [...facts];
 		},
 	};
 };
