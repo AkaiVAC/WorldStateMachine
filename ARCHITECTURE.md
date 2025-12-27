@@ -10,40 +10,58 @@ This document captures the architectural decisions for building a world state ma
 
 | Section | File | Description |
 |---------|------|-------------|
-| 1. Problem Statement | [01-problem.md](architecture/01-problem.md) | Core and secondary problems we're solving |
+| 1. Problem Statement | [01-problem.md](architecture/01-problem.md) | Core problem: constraining LLM generation |
 | 2. Timeline-Centric | [02-timeline-centric.md](architecture/02-timeline-centric.md) | Facts, temporal bounds, consistency checking |
-| 3. Effects | [03-effects.md](architecture/03-effects.md) | Effects as data, propagation, "sentence changes the world" |
+| 3. Effects | [03-effects.md](architecture/03-effects.md) | Effects as data, sticky vs cascading propagation |
 | 4. Containment | [04-containment.md](architecture/04-containment.md) | Geographic hierarchy, environmental properties |
 | 5. World vs Scene State | [05-world-scene-state.md](architecture/05-world-scene-state.md) | Persistent vs ephemeral, staging model |
-| 6. Storage Format | [06-storage-format.md](architecture/06-storage-format.md) | Store verbose, render compact |
+| 6. Storage Format | [06-storage-format.md](architecture/06-storage-format.md) | Store verbose, render compact, prose preservation |
 | 7. Entity Tiers | [07-entity-tiers.md](architecture/07-entity-tiers.md) | Lead, supporting, role, ambient |
-| 8. Epistemic State | [08-epistemic-state.md](architecture/08-epistemic-state.md) | Who knows what, visibility levels, secrets |
+| 8. Epistemic State | [08-epistemic-state.md](architecture/08-epistemic-state.md) | Who knows what, always query (no cache) |
 | 9. Scene Execution | [09-scene-execution.md](architecture/09-scene-execution.md) | POV-driven, multi-agent, ambient generation |
 | 10. Import Pipeline | [10-import-pipeline.md](architecture/10-import-pipeline.md) | NLP, inference tiers, human review |
 | 11. Query Pipeline | [11-query-pipeline.md](architecture/11-query-pipeline.md) | Deterministic retrieval, focus-based priority |
 | 12. Prior Art | [12-prior-art.md](architecture/12-prior-art.md) | Temporal knowledge graphs, event sourcing |
 | 13. Open Questions | [13-open-questions.md](architecture/13-open-questions.md) | Resolved and still open |
 | 14. MVP Scope | [14-mvp-scope.md](architecture/14-mvp-scope.md) | What to build first, file structure |
+| 15. Calendar & Time | [15-calendar-time-system.md](architecture/15-calendar-time-system.md) | Time granularity, calendar systems, temporal fidelity |
+| 16. Map & Spatial | [16-map-spatial-system.md](architecture/16-map-spatial-system.md) | 2D maps, routes, travel physics, weather systems |
+| 17. Constraints & Validation | [17-constraint-validation-system.md](architecture/17-constraint-validation-system.md) | Generic constraint framework, validation pipeline |
 
 ---
 
+## Three Pillars
+
+The system rests on three foundational pillars that work together to constrain LLM generation:
+
+1. **Timeline** (§2, §6, §8) - Events with epistemic state, facts with temporal bounds
+2. **Map** (§4, §16) - 2D geography, routes, travel physics, weather systems
+3. **Calendar** (§15) - Full temporal granularity (epochs → years → days → minutes)
+
+These pillars feed into a **constraint package** that ensures LLM output is world-consistent.
+
 ## Key Architectural Decisions (Summary)
 
-1. **Timeline is the database** - Entities are derived views from facts with temporal bounds
-2. **Effects are data, not inference** - Captured at write time with LLM-assisted generation and author selection
-3. **Containment provides proximity** - Geographic hierarchy handles "nearby" relationships automatically
-4. **Store everything, tier for retrieval** - Lead/supporting/role/ambient priorities
-5. **Store verbose, render compact** - Internal structure for queries, token-efficient format for LLM
-6. **Environmental data is first-class** - Climate, weather, terrain, flora, fauna enable consistency and recall
-7. **Scenes are commit units** - Facts go through staging before entering canonical timeline (git for world state)
-8. **Partial inference** - Structural relationships auto-accept, semantic implications ask first, causal never inferred
-9. **Flags for contradictions, not variations** - Author's prose is source of truth
-10. **World-boundary consistency** - Catches real-world references via World Lexicon
-11. **Validation timing is configurable** - Lightweight real-time, full at commit
-12. **Epistemic state is character-scoped** - Retrieval filters by what each character knows
-13. **Effect propagation with author control** - System suggests, author (or dice) decides, effects become facts
-14. **Scene execution supports isolation** - POV-driven for most scenes, multi-agent for secret-heavy scenes
-15. **Alive world through constrained randomness** - Ambient generation adds flavor within timeline constraints
+1. **Primary use case: Constrain LLM generation** - System builds constraint packages that prevent impossible/inconsistent prose
+2. **Timeline is the database** - Entities are derived views from facts with temporal bounds
+3. **Events are source of truth** - Facts are materialized views from events; original prose preserved alongside extracted data
+4. **Map is first-class** - 2D geography with coordinates, routes, terrain, weather—not just metadata
+5. **Calendar provides temporal fidelity** - Full granularity (epoch → era → year → season → month → day → hour → minute)
+6. **Effects: sticky vs cascading** - Computable effects at query-time (sticky), narrative effects at write-time (cascading)
+7. **Epistemic state via events, always query** - Never cache knowledge state; compute fresh from participation + visibility
+8. **Generic constraint framework** - Extensible validation rules, not hardcoded physics
+9. **Containment provides proximity** - Geographic hierarchy handles "nearby" relationships automatically
+10. **Store everything, tier for retrieval** - Lead/supporting/role/ambient priorities
+11. **Store verbose, render compact** - Internal structure for queries, token-efficient format for LLM
+12. **Environmental data is first-class** - Climate, weather, terrain, flora, fauna enable consistency and recall
+13. **Scenes are commit units** - Facts go through staging before entering canonical timeline (git for world state)
+14. **Partial inference** - Structural relationships auto-accept, semantic implications ask first, causal never inferred
+15. **Flags for contradictions, not variations** - Author's prose is source of truth
+16. **World-boundary consistency** - Catches real-world references via World Lexicon
+17. **Validation timing is configurable** - Lightweight real-time, full at commit, pre/post generation
+18. **Scene execution supports isolation** - POV-driven for most scenes, multi-agent for secret-heavy scenes
+19. **Alive world through constrained randomness** - Ambient generation adds flavor within timeline constraints
+20. **Profile-driven optimization** - Brute force + basic indexing first, optimize bottlenecks after measurement
 
 ---
 
