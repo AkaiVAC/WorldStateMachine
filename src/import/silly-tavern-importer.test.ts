@@ -1,14 +1,13 @@
 import { describe, expect, test } from "bun:test";
-import { join } from "node:path";
 import { importSillyTavernLorebook } from "./silly-tavern-importer";
 
-const fixturesDir = join(import.meta.dir, "__fixtures__");
+const fixturesDir = `${import.meta.dir}/__fixtures__`;
 
 describe("importSillyTavernLorebook", () => {
 	describe("Zero", () => {
 		test("empty entries object returns empty results", async () => {
 			const result = await importSillyTavernLorebook(
-				join(fixturesDir, "empty-entries.json"),
+				`${fixturesDir}/empty-entries.json`,
 				"test-world",
 			);
 
@@ -21,7 +20,7 @@ describe("importSillyTavernLorebook", () => {
 	describe("One", () => {
 		test("single entry creates one entity and lexicon terms", async () => {
 			const result = await importSillyTavernLorebook(
-				join(fixturesDir, "single-entry.json"),
+				`${fixturesDir}/single-entry.json`,
 				"test-world",
 			);
 
@@ -41,7 +40,7 @@ describe("importSillyTavernLorebook", () => {
 	describe("Boundary", () => {
 		test("entry with empty keys uses comment as alias and empty group", async () => {
 			const result = await importSillyTavernLorebook(
-				join(fixturesDir, "empty-keys.json"),
+				`${fixturesDir}/empty-keys.json`,
 				"test-world",
 			);
 
@@ -55,7 +54,7 @@ describe("importSillyTavernLorebook", () => {
 
 		test("entry with disable true is skipped", async () => {
 			const result = await importSillyTavernLorebook(
-				join(fixturesDir, "disabled-entry.json"),
+				`${fixturesDir}/disabled-entry.json`,
 				"test-world",
 			);
 
@@ -68,7 +67,7 @@ describe("importSillyTavernLorebook", () => {
 	describe("Many", () => {
 		test("multiple entries create multiple entities", async () => {
 			const result = await importSillyTavernLorebook(
-				join(fixturesDir, "multiple-entries.json"),
+				`${fixturesDir}/multiple-entries.json`,
 				"test-world",
 			);
 
@@ -93,7 +92,7 @@ describe("importSillyTavernLorebook", () => {
 		test("file not found throws error", async () => {
 			await expect(
 				importSillyTavernLorebook(
-					join(fixturesDir, "nonexistent.json"),
+					`${fixturesDir}/nonexistent.json`,
 					"test-world",
 				),
 			).rejects.toThrow();
@@ -102,7 +101,7 @@ describe("importSillyTavernLorebook", () => {
 		test("invalid JSON throws error", async () => {
 			await expect(
 				importSillyTavernLorebook(
-					join(fixturesDir, "invalid.txt"),
+					`${fixturesDir}/invalid.txt`,
 					"test-world",
 				),
 			).rejects.toThrow();
@@ -110,7 +109,7 @@ describe("importSillyTavernLorebook", () => {
 
 		test("entry missing both key and comment is skipped with reason", async () => {
 			const result = await importSillyTavernLorebook(
-				join(fixturesDir, "missing-fields.json"),
+				`${fixturesDir}/missing-fields.json`,
 				"test-world",
 			);
 

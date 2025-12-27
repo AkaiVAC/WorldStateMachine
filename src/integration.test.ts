@@ -1,16 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { join } from "node:path";
 import { importSillyTavernLorebook } from "./import/silly-tavern-importer";
+import { createEntityExistsRule } from "./validation/entity-exists-rule";
+import { validate } from "./validation/validator";
+import { createWorldBoundaryRule } from "./validation/world-boundary-rule";
 import { createEntityStore } from "./world-state/entity/entity-store";
 import { createLexicon } from "./world-state/lexicon/lexicon";
 
-const examplesDir = join(import.meta.dir, "example", "Excelsia");
+const examplesDir = `${import.meta.dir}/example/Excelsia`;
 const worldId = "excelsia";
 
 describe("Integration: Import → Store → Query", () => {
 	test("imports Excelsia Characters and populates stores", async () => {
 		const result = await importSillyTavernLorebook(
-			join(examplesDir, "Excelsia - Characters.json"),
+			`${examplesDir}/Excelsia - Characters.json`,
 			worldId,
 		);
 
@@ -43,7 +45,7 @@ describe("Integration: Import → Store → Query", () => {
 
 	test("Sunnarian royal family members are queryable", async () => {
 		const result = await importSillyTavernLorebook(
-			join(examplesDir, "Excelsia - Characters.json"),
+			`${examplesDir}/Excelsia - Characters.json`,
 			worldId,
 		);
 
@@ -70,7 +72,7 @@ describe("Integration: Import → Store → Query", () => {
 
 	test("disabled entries are not imported", async () => {
 		const result = await importSillyTavernLorebook(
-			join(examplesDir, "Excelsia - Characters.json"),
+			`${examplesDir}/Excelsia - Characters.json`,
 			worldId,
 		);
 
@@ -88,7 +90,7 @@ describe("Integration: Import → Store → Query", () => {
 
 	test("lexicon is case-insensitive", async () => {
 		const result = await importSillyTavernLorebook(
-			join(examplesDir, "Excelsia - Characters.json"),
+			`${examplesDir}/Excelsia - Characters.json`,
 			worldId,
 		);
 
@@ -102,5 +104,113 @@ describe("Integration: Import → Store → Query", () => {
 		expect(lexicon.hasTerm(worldId, "Alaric")).toBe(true);
 
 		expect(lexicon.hasTerm(worldId, "snorkeling")).toBe(false);
+	});
+});
+
+describe("MVP: Prince Snorkeling Test", () => {
+	test("flags 'prince' as unknown entity with suggestion", async () => {
+		const result = await importSillyTavernLorebook(
+			`${examplesDir}/Excelsia - Characters.json`,
+			worldId,
+		);
+
+		const entityStore = createEntityStore();
+		for (const entity of result.entities) {
+			entityStore.add(entity);
+		}
+
+		const rule = createEntityExistsRule(entityStore, worldId);
+		const violations = await rule.check(
+			"I enter the Sunnarian Royal Gardens and find the prince snorkeling.",
+		);
+
+		const princeViolation = violations.find((v) => v.term === "prince");
+		expect(princeViolation).toBeDefined();
+		expect(princeViolation?.type).toBe("unknown-entity");
+		expect(princeViolation?.suggestion).toContain("Princess");
+	});
+
+	test("flags 'snorkeling' as world-boundary violation", async () => {
+		const result = await importSillyTavernLorebook(
+			`${examplesDir}/Excelsia - Characters.json`,
+			worldId,
+		);
+
+		const entityStore = createEntityStore();
+		const lexicon = createLexicon();
+
+		for (const entity of result.entities) {
+			entityStore.add(entity);
+		}
+		for (const term of result.lexiconTerms) {
+			lexicon.addTerm(worldId, term);
+		}
+
+		const mockAsk = (prompt: string) => {
+			if (prompt.includes("snorkeling")) return Promise.resolve("NO");
+			return Promise.resolve("YES");
+		};
+
+		const rule = createWorldBoundaryRule({
+			askFn: mockAsk,
+			entityStore,
+			lexicon,
+			worldId,
+			worldSetting: "medieval fantasy",
+		});
+
+		const violations = await rule.check(
+			"I enter the Sunnarian Royal Gardens and find the prince snorkeling.",
+		);
+
+		const snorkelingViolation = violations.find((v) => v.term === "snorkeling");
+		expect(snorkelingViolation).toBeDefined();
+		expect(snorkelingViolation?.type).toBe("world-boundary");
+	});
+
+	test("full validation catches both violations", async () => {
+		const result = await importSillyTavernLorebook(
+			`${examplesDir}/Excelsia - Characters.json`,
+			worldId,
+		);
+
+		const entityStore = createEntityStore();
+		const lexicon = createLexicon();
+
+		for (const entity of result.entities) {
+			entityStore.add(entity);
+		}
+		for (const term of result.lexiconTerms) {
+			lexicon.addTerm(worldId, term);
+		}
+
+		const mockAsk = (prompt: string) => {
+			if (prompt.includes("snorkeling")) return Promise.resolve("NO");
+			return Promise.resolve("YES");
+		};
+
+		const entityRule = createEntityExistsRule(entityStore, worldId);
+		const worldBoundaryRule = createWorldBoundaryRule({
+			askFn: mockAsk,
+			entityStore,
+			lexicon,
+			worldId,
+			worldSetting: "medieval fantasy",
+		});
+
+		const prompt =
+			"I enter the Sunnarian Royal Gardens and find the prince snorkeling.";
+		const violations = await validate(prompt, [entityRule, worldBoundaryRule]);
+
+		expect(violations.length).toBeGreaterThanOrEqual(2);
+
+		const princeViolation = violations.find((v) => v.term === "prince");
+		const snorkelingViolation = violations.find((v) => v.term === "snorkeling");
+
+		expect(princeViolation).toBeDefined();
+		expect(snorkelingViolation).toBeDefined();
+
+		expect(princeViolation?.suggestion).toContain("Princess");
+		expect(snorkelingViolation?.type).toBe("world-boundary");
 	});
 });
