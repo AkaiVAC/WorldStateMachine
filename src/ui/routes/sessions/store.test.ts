@@ -35,8 +35,8 @@ describe("Sessions Store", () => {
 			const sessions = await listSessions(testSessionsDir);
 
 			expect(sessions).toHaveLength(1);
-			expect(sessions[0].id).toBe(session.id);
-			expect(sessions[0].name).toBe("Test Session");
+			expect(sessions[0]?.id).toBe(session.id);
+			expect(sessions[0]?.name).toBe("Test Session");
 		});
 
 		test("returns multiple sessions sorted by updatedAt", async () => {
@@ -124,7 +124,7 @@ describe("Sessions Store", () => {
 			});
 
 			expect(updated?.history).toHaveLength(2);
-			expect(updated?.history[0].content).toBe("Hello");
+			expect(updated?.history?.[0]?.content).toBe("Hello");
 		});
 
 		test("updates session name", async () => {
@@ -152,7 +152,8 @@ describe("Sessions Store", () => {
 				name: "Updated Name",
 			});
 
-			expect(updated?.updatedAt > session.updatedAt).toBe(true);
+			expect(updated).not.toBeNull();
+			expect(updated!.updatedAt > session.updatedAt).toBe(true);
 		});
 
 		test("returns null for non-existent session", async () => {

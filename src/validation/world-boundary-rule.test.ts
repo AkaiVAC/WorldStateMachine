@@ -38,7 +38,7 @@ describe("WorldBoundaryRule", () => {
 		const violations = await rule.check("I went snorkeling.");
 
 		expect(violations).toHaveLength(1);
-		expect(violations[0].term).toBe("snorkeling");
-		expect(violations[0].type).toBe("world-boundary");
+		expect(violations[0]?.term).toBe("snorkeling");
+		expect(violations[0]?.type).toBe("world-boundary");
 	});
 });
