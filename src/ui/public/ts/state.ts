@@ -14,7 +14,7 @@ export type ChatMessage = {
 export type InjectedEntry = {
 	id: string;
 	name: string;
-	reason: "auto" | "manual";
+	reason: "auto" | "manual" | "entity";
 	matchedKeyword?: string;
 };
 

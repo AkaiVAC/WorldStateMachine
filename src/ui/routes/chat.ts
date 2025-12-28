@@ -1,9 +1,12 @@
-import { type ChatMessage, chat } from "../../llm/openrouter";
+import { createPromptAnalyzer } from "../../analysis/prompt-analyzer";
+import { ask, type ChatMessage, chat } from "../../llm/openrouter";
+import { matchEntitiesFuzzy } from "../../retrieval/entity-matcher";
 import { matchEntries } from "../../retrieval/keyword-matcher";
 import type { LorebookEntry } from "../../retrieval/lorebook-entry";
 import { getLorebookEntries } from "./lorebook";
 
 const DEFAULT_MODEL = "anthropic/claude-sonnet-4";
+const ENTITY_EXTRACTION_MODEL = "xiaomi/mimo-v2-flash:free";
 
 type ChatRequest = {
 	message: string;
@@ -17,7 +20,7 @@ type ChatRequest = {
 type InjectedEntry = {
 	id: string;
 	name: string;
-	reason: "auto" | "manual";
+	reason: "auto" | "manual" | "entity";
 	matchedKeyword?: string;
 };
 
@@ -31,6 +34,11 @@ const WORLD_CONTEXT = `You are roleplaying in Excelsia, a medieval fantasy world
 Stay in character. Respond as the characters would, using their knowledge and personality.
 Do not break character or reference the real world.`;
 
+const analyzer = createPromptAnalyzer({
+	askFn: (prompt) => ask(prompt, { model: ENTITY_EXTRACTION_MODEL }),
+	worldSetting: "medieval fantasy",
+});
+
 export const chatHandler = async (req: Request): Promise<Response> => {
 	const body = (await req.json()) as ChatRequest;
 	const {
@@ -42,16 +50,32 @@ export const chatHandler = async (req: Request): Promise<Response> => {
 	} = body;
 
 	const allEntries = await getLorebookEntries();
-
-	const autoMatched = matchEntries(message, allEntries);
-	const autoMatchedIds = new Set(autoMatched.map((m) => m.entry.id));
 	const excludeSet = new Set(excludeEntries);
-
+	const injectedIds = new Set<string>();
 	const injectedEntries: InjectedEntry[] = [];
 	const entriesToInject: LorebookEntry[] = [];
 
-	for (const match of autoMatched) {
+	const { entityReferences } = await analyzer.analyze(message);
+	const entityMatches = matchEntitiesFuzzy(entityReferences, allEntries);
+
+	for (const match of entityMatches) {
 		if (!excludeSet.has(match.entry.id)) {
+			injectedIds.add(match.entry.id);
+			entriesToInject.push(match.entry);
+			injectedEntries.push({
+				id: match.entry.id,
+				name: match.entry.name,
+				reason: "entity",
+				matchedKeyword: match.matchedTerm,
+			});
+		}
+	}
+
+	const keywordMatches = matchEntries(message, allEntries);
+
+	for (const match of keywordMatches) {
+		if (!excludeSet.has(match.entry.id) && !injectedIds.has(match.entry.id)) {
+			injectedIds.add(match.entry.id);
 			entriesToInject.push(match.entry);
 			injectedEntries.push({
 				id: match.entry.id,
@@ -63,9 +87,10 @@ export const chatHandler = async (req: Request): Promise<Response> => {
 	}
 
 	for (const entryId of manualEntries) {
-		if (!autoMatchedIds.has(entryId)) {
+		if (!injectedIds.has(entryId)) {
 			const entry = allEntries.find((e) => e.id === entryId);
 			if (entry) {
+				injectedIds.add(entry.id);
 				entriesToInject.push(entry);
 				injectedEntries.push({
 					id: entry.id,
