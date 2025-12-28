@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lorebook Chat</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles/index.css">
 </head>
 <body>
     <div id="app">
@@ -15,8 +15,13 @@
         <main id="chat-area">
             <div id="messages"></div>
             <form id="chat-form">
-                <textarea id="message-input" placeholder="Type your message..." rows="3"></textarea>
-                <button type="submit">Send</button>
+                <div class="chat-input-row">
+                    <textarea id="message-input" placeholder="Type your message..." rows="3"></textarea>
+                </div>
+                <div class="chat-actions">
+                    <select id="model-select"></select>
+                    <button type="submit">Send</button>
+                </div>
             </form>
         </main>
         <aside id="debug-panel">
@@ -31,6 +36,6 @@
             </details>
         </aside>
     </div>
-    <script src="app.js"></script>
+    <script type="module" src="ts/main.ts"></script>
 </body>
 </html>
