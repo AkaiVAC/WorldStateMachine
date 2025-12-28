@@ -3,10 +3,13 @@ import { matchEntries } from "../../retrieval/keyword-matcher";
 import type { LorebookEntry } from "../../retrieval/lorebook-entry";
 import { getLorebookEntries } from "./lorebook";
 
+const DEFAULT_MODEL = "anthropic/claude-sonnet-4";
+
 type ChatRequest = {
 	message: string;
 	history: Array<{ role: "user" | "assistant"; content: string }>;
 	character?: string;
+	model?: string;
 	manualEntries?: string[];
 	excludeEntries?: string[];
 };
@@ -30,7 +33,13 @@ Do not break character or reference the real world.`;
 
 export const chatHandler = async (req: Request): Promise<Response> => {
 	const body = (await req.json()) as ChatRequest;
-	const { message, history, manualEntries = [], excludeEntries = [] } = body;
+	const {
+		message,
+		history,
+		model = DEFAULT_MODEL,
+		manualEntries = [],
+		excludeEntries = [],
+	} = body;
 
 	const allEntries = await getLorebookEntries();
 
@@ -83,9 +92,7 @@ export const chatHandler = async (req: Request): Promise<Response> => {
 		{ role: "user", content: message },
 	];
 
-	const response = await chat(messages, {
-		model: "anthropic/claude-sonnet-4",
-	});
+	const response = await chat(messages, { model });
 
 	const chatResponse: ChatResponse = {
 		response,
