@@ -39,7 +39,10 @@ describe("PromptAnalyzer", () => {
 		test("extracts single anachronism", async () => {
 			const mockAsk = () =>
 				Promise.resolve(
-					JSON.stringify({ entityReferences: [], anachronisms: ["smartphone"] }),
+					JSON.stringify({
+						entityReferences: [],
+						anachronisms: ["smartphone"],
+					}),
 				);
 			const analyzer = createPromptAnalyzer({
 				askFn: mockAsk,

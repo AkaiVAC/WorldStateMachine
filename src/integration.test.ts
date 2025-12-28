@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
+import type { PromptAnalyzer } from "./analysis/prompt-analyzer";
 import { importSillyTavernLorebook } from "./import/silly-tavern-importer";
 import { createEntityExistsRule } from "./validation/entity-exists-rule";
 import { validate } from "./validation/validator";
 import { createWorldBoundaryRule } from "./validation/world-boundary-rule";
 import { createEntityStore } from "./world-state/entity/entity-store";
 import { createLexicon } from "./world-state/lexicon/lexicon";
-import type { PromptAnalyzer } from "./analysis/prompt-analyzer";
 
 const examplesDir = `${import.meta.dir}/example/Excelsia`;
 const worldId = "excelsia";

@@ -100,10 +100,7 @@ describe("importSillyTavernLorebook", () => {
 
 		test("invalid JSON throws error", async () => {
 			await expect(
-				importSillyTavernLorebook(
-					`${fixturesDir}/invalid.txt`,
-					"test-world",
-				),
+				importSillyTavernLorebook(`${fixturesDir}/invalid.txt`, "test-world"),
 			).rejects.toThrow();
 		});
 
