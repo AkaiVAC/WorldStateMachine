@@ -6,7 +6,8 @@
 		"test": "bun test",
 		"check": "biome check --write .",
 		"lint": "biome lint .",
-		"format": "biome format --write ."
+		"format": "biome format --write .",
+		"ui": "bun run src/ui/main.ts"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.10",
