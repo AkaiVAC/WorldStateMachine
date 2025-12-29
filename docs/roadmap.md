@@ -1,7 +1,7 @@
 # Roadmap: From Current to Vision
 
 **Last updated:** 2025-12-29
-**Current position:** M2 complete, starting M3
+**Current position:** M3 complete, ready for M4
 **Estimated timeline:** 5-7 months to full vision
 **Proof-of-concept target:** M6 (epistemic state + multi-agent)
 
@@ -28,8 +28,8 @@
 |---|-----------|-------|--------|--------|
 | 1 | Basic Validation | Entity checking, world boundary | 3-4 weeks | ✅ DONE |
 | 2 | Relationship Graph | Entity relationships, graph traversal | 2-3 weeks | ✅ DONE |
-| 3 | Timeline Foundation | Chapter-based chronology | 1-2 weeks | 🎯 NEXT |
-| 4 | Events | Source of truth, participation tracking | 2-3 weeks | 🔜 |
+| 3 | Timeline Foundation | Chapter-based chronology | 1-2 weeks | ✅ DONE |
+| 4 | Events | Source of truth, participation tracking | 2-3 weeks | 🎯 NEXT |
 | 5 | Epistemic State | POV-filtered knowledge | 3-4 weeks | 🔜 ⭐ |
 | 6 | Multi-Agent Orchestration | Separate contexts, secrets | 2-3 weeks | 🔜 ⭐ |
 | 7 | Basic Geography | Containment, proximity | 2 weeks | 🔜 |
@@ -88,7 +88,7 @@
 
 ---
 
-### M3: Timeline Foundation 🎯 NEXT
+### M3: Timeline Foundation ✅ DONE
 
 **Estimated effort:** 1-2 weeks
 
@@ -527,13 +527,13 @@ M1 ✅
 
 ## Next Steps
 
-**Immediate:** Start M3 (Timeline Foundation)
+**Immediate:** Start M4 (Events)
 
-1. Add `validFrom` and `validTo` fields to `Fact` type
-2. Update `FactStore` with temporal queries (`getFactsAt`)
+1. Design `Event` type with participants, location, visibility
+2. Create `EventStore` with queries by time/participant/location
 3. Apply ZOMBIES, write `test.todo()` cases
 4. Implement one test at a time
-5. Test with chapter-based chronology scenarios
+5. Wire events to generate facts with temporal bounds
 
 **See also:**
 - `vision.md` - What we're building toward
