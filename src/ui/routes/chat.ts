@@ -3,7 +3,13 @@ import { ask, type ChatMessage, chat } from "../../llm/openrouter";
 import { matchEntitiesFuzzy } from "../../retrieval/entity-matcher";
 import { matchEntries } from "../../retrieval/keyword-matcher";
 import type { LorebookEntry } from "../../retrieval/lorebook-entry";
-import { getLorebookEntries } from "./lorebook";
+import { createRelationshipRetrieval } from "../../retrieval/relationship-retrieval";
+import { createGraphTraversal } from "../../world-state/relationship/graph-traversal";
+import {
+	getLorebookEntries,
+	getRelationshipStore,
+	getWorldSummary,
+} from "./lorebook";
 
 const DEFAULT_MODEL = "anthropic/claude-sonnet-4";
 const ENTITY_EXTRACTION_MODEL = "xiaomi/mimo-v2-flash:free";
@@ -20,7 +26,7 @@ type ChatRequest = {
 type InjectedEntry = {
 	id: string;
 	name: string;
-	reason: "auto" | "manual" | "entity";
+	reason: "auto" | "manual" | "entity" | "related";
 	matchedKeyword?: string;
 };
 
@@ -101,13 +107,39 @@ export const chatHandler = async (req: Request): Promise<Response> => {
 		}
 	}
 
+	const relationshipStore = getRelationshipStore();
+	const graphTraversal = createGraphTraversal();
+	const relationshipRetrieval = createRelationshipRetrieval(
+		relationshipStore,
+		graphTraversal,
+		allEntries,
+	);
+
+	const relatedEntries = relationshipRetrieval.expandViaRelationships(
+		Array.from(injectedIds),
+		{ maxDepth: 2 },
+	);
+
+	for (const entry of relatedEntries) {
+		if (!excludeSet.has(entry.id) && !injectedIds.has(entry.id)) {
+			injectedIds.add(entry.id);
+			entriesToInject.push(entry);
+			injectedEntries.push({
+				id: entry.id,
+				name: entry.name,
+				reason: "related",
+			});
+		}
+	}
+
 	const lorebookContext = entriesToInject
 		.map((e) => `[${e.name}]\n${e.content}`)
 		.join("\n\n");
 
+	const worldSummary = getWorldSummary();
 	const systemPrompt = lorebookContext
-		? `${WORLD_CONTEXT}\n\n--- LOREBOOK ---\n${lorebookContext}`
-		: WORLD_CONTEXT;
+		? `${WORLD_CONTEXT}\n\n${worldSummary}\n\n--- LOREBOOK ---\n${lorebookContext}`
+		: `${WORLD_CONTEXT}\n\n${worldSummary}`;
 
 	const messages: ChatMessage[] = [
 		{ role: "system", content: systemPrompt },
