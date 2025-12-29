@@ -1,5 +1,4 @@
 import { join } from "node:path";
-import type { CreateSessionInput, UpdateSessionInput } from "./types";
 import {
 	createSession,
 	deleteSession,
@@ -7,6 +6,7 @@ import {
 	listSessions,
 	updateSession,
 } from "./store";
+import type { CreateSessionInput, UpdateSessionInput } from "./types";
 
 const getSessionsDir = (): string => {
 	return join(import.meta.dir, "../../../data/sessions");

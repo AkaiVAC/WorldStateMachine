@@ -94,10 +94,7 @@ describe("E2E: Context Retrieval with Relationship Graph", () => {
 			{ maxDepth: 2 },
 		);
 
-		const allContextIds = [
-			...matchedIds,
-			...relatedEntries.map((e) => e.id),
-		];
+		const allContextIds = [...matchedIds, ...relatedEntries.map((e) => e.id)];
 
 		expect(allContextIds).toContain("sunnaria");
 		expect(allContextIds).toContain("aradia");
@@ -161,10 +158,7 @@ describe("E2E: Context Retrieval with Relationship Graph", () => {
 			maxDepth: 2,
 		});
 
-		const allContextIds = [
-			...matchedIds,
-			...relatedEntries.map((e) => e.id),
-		];
+		const allContextIds = [...matchedIds, ...relatedEntries.map((e) => e.id)];
 
 		expect(allContextIds).toContain("sunnaria");
 		expect(allContextIds).toContain("palace");

@@ -20,9 +20,7 @@ describe("RelationshipRetrieval", () => {
 	test("returns empty array when no relationships exist", () => {
 		const store = createRelationshipStore();
 		const traversal = createGraphTraversal();
-		const entries: LorebookEntry[] = [
-			createMockEntry("entity-1", "Entity 1"),
-		];
+		const entries: LorebookEntry[] = [createMockEntry("entity-1", "Entity 1")];
 
 		const retrieval = createRelationshipRetrieval(store, traversal, entries);
 		const result = retrieval.expandViaRelationships(["entity-1"]);
@@ -47,7 +45,9 @@ describe("RelationshipRetrieval", () => {
 		];
 
 		const retrieval = createRelationshipRetrieval(store, traversal, entries);
-		const result = retrieval.expandViaRelationships(["aradia"], { maxDepth: 1 });
+		const result = retrieval.expandViaRelationships(["aradia"], {
+			maxDepth: 1,
+		});
 
 		expect(result).toHaveLength(1);
 		expect(result[0]?.id).toBe("alaric");
@@ -77,7 +77,9 @@ describe("RelationshipRetrieval", () => {
 		];
 
 		const retrieval = createRelationshipRetrieval(store, traversal, entries);
-		const result = retrieval.expandViaRelationships(["aradia"], { maxDepth: 2 });
+		const result = retrieval.expandViaRelationships(["aradia"], {
+			maxDepth: 2,
+		});
 
 		expect(result).toHaveLength(2);
 		expect(result.map((e) => e.id)).toContain("alaric");

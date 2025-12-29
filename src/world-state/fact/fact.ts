@@ -3,4 +3,6 @@ export type Fact = {
 	subject: string;
 	property: string;
 	value: string | number | boolean;
+	validFrom?: number;
+	validTo?: number;
 };
