@@ -159,11 +159,12 @@
 - ✅ Fact generation from events
 - ✅ Prose storage
 
-### Relationship Graph ✅ M2 COMPLETE
+### Relationship Graph ✅ M2 COMPLETE + INTEGRATED
 - ✅ Relationships between entities (flexible typed relationships)
 - ✅ Graph traversal for context retrieval (BFS with depth/type/direction filters)
 - ✅ "Sunnarian Princess" → Aradia resolution via graph
-- 🔜 Integration with context retrieval pipeline (next step)
+- ✅ Integrated into chat context retrieval pipeline
+- ✅ World summary prevents kingdom invention
 
 ### Geography System
 - ❌ Containment hierarchy (X is in Y)
@@ -201,22 +202,15 @@
 
 ## Current Status (From Testing)
 
-**M4 Complete:** Event system working
+**M4 Complete + Graph Integrated:** Event system and context retrieval working together
 
 **What works now:**
 - ✅ "Sunnarian" → Entity extraction → Fuzzy match → Sunnaria kingdom entry injected
-- ✅ Relationship graph can connect "Sunnaria" → Royal Family → "Princess Aradia"
-- ✅ Graph traversal supports multi-hop queries with depth/type/direction filters
+- ✅ Graph traversal expands matches: Sunnaria → Alaric, Aradia, Elara
+- ✅ World summary in system prompt prevents kingdom invention
 - ✅ Events with participants, locations, visibility levels
 - ✅ Fact generation from events with temporal bounds
-
-**Next integration needed:**
-- 🔜 Wire graph traversal into context retrieval pipeline
-- 🔜 Use relationships to enhance entity matching ("Sunnarian Princess" → finds Aradia)
-- 🔜 Epistemic state: POV-filtered knowledge based on event participation
-
-**Remaining issues:**
-- ❌ LLM still invents kingdoms not in lorebook (need broader context injection)
+- ✅ Related entries marked as "related" in injected entries
 
 **Next milestone:** M5 - Epistemic State (POV-filtered knowledge, "what does X know?")
 

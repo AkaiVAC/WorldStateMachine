@@ -155,3 +155,49 @@ Drakemoor, Verdania, Aetheria, Solmere, Pyrathi
 1. Relationship graph traversal: Sunnaria → royalty → Aradia
 2. Context-aware matching: "Sunnarian Princess" should fetch Aradia
 3. Inject more kingdom entries to prevent invention
+
+---
+
+## Update: Graph Traversal + World Summary Integrated
+
+### Date: 2025-12-29
+
+### What Was Implemented
+
+1. **Relationship Graph Integration**
+   - Created `src/example/Excelsia/relationships.ts` with hardcoded relationships for Excelsia
+   - Family relationships: daughter-of, spouse-of, member-of
+   - Political relationships: rules, works-for
+   - Geographic relationships: borders
+   - Wired `createRelationshipRetrieval` into chat handler
+
+2. **World Summary Context**
+   - Added explicit kingdom list to system prompt:
+     > "The continent of Excelsia contains exactly these kingdoms: Sunnaria, Lunaria, Ilaria, Limaria, Lindward, Stuttgart, Aeldrin, Ironforge, Zyronia. Do not invent or reference any other kingdoms."
+
+3. **Chat Handler Updates**
+   - After entity+keyword matching, expand via relationship graph (maxDepth: 2)
+   - Related entries marked with `reason: "related"` in injectedEntries
+   - World summary always included in system prompt
+
+### Expected Improvement
+
+| Prompt | Before | After |
+|--------|--------|-------|
+| "Sunnarian Princess" | Sunnaria injected | Sunnaria + Alaric + Aradia (via graph) |
+| Any prompt | Kingdoms invented | Only valid kingdoms used (world summary) |
+
+### Files Changed
+
+- `src/example/Excelsia/relationships.ts` - Hardcoded relationships
+- `src/ui/routes/lorebook.ts` - Added `getRelationshipStore()`, `getWorldSummary()`
+- `src/ui/routes/chat.ts` - Integrated relationship retrieval and world summary
+
+### Testing Needed
+
+Manual testing recommended with prompts like:
+- "The Sunnarian Court Princess Comedy"
+- "A ball at the Lunarian palace"
+- "Princess Aradia meets Princess Isabella"
+
+Should now see related entries expanded via graph and no invented kingdoms.
