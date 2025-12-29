@@ -5,7 +5,7 @@
 **Read these docs to understand the project:**
 
 1. **[docs/vision.md](docs/vision.md)** - Complete constraint engine vision (what we're building)
-2. **[docs/current.md](docs/current.md)** - Current implementation status (M2 complete, 157 tests)
+2. **[docs/current.md](docs/current.md)** - Current implementation status (M3 complete, 168 tests)
 3. **[docs/roadmap.md](docs/roadmap.md)** - M1-M11 milestones (proof-of-concept at M6)
 4. **[docs/decisions.md](docs/decisions.md)** - Design rationale and principles
 
@@ -135,9 +135,9 @@ This is a collaboration. Discuss approaches, explain reasoning, consider alterna
 
 **Last updated:** 2025-12-29
 
-- **M2 complete** - Relationship graph with traversal working
-- **157 tests passing**
+- **M3 complete** - Timeline foundation with temporal bounds on facts
+- **168 tests passing**
 - **Chat UI** with lorebook context injection
-- **Next:** M3 (Timeline Foundation) - see [docs/roadmap.md](docs/roadmap.md)
+- **Next:** M4 (Events) - see [docs/roadmap.md](docs/roadmap.md)
 
 **For details:** See the Essential Context section above

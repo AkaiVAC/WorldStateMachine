@@ -1,8 +1,8 @@
 # Current Implementation State
 
 **Last updated:** 2025-12-29
-**Test status:** 157 tests passing
-**Current milestone:** M2 complete, ready for M3
+**Test status:** 168 tests passing
+**Current milestone:** M3 complete, ready for M4
 
 ---
 
@@ -204,9 +204,9 @@
 
 **Remaining issues:**
 - ❌ LLM still invents kingdoms not in lorebook (need broader context injection)
-- ❌ No temporal bounds yet (M3: Timeline Foundation)
+- ✅ Temporal bounds on facts (M3 complete)
 
-**Next milestone:** M3 - Timeline Foundation (chapter-based chronology)
+**Next milestone:** M4 - Events (participation tracking, fact generation)
 
 ---
 
@@ -283,7 +283,7 @@ See `CLAUDE.md` for full development guidelines.
 - Missing timeline (M3), epistemic state (M5), multi-agent (M6), maps (M7-M9)
 - Chat UI exists but context injection needs graph integration
 
-**Next step:** M3 (Timeline Foundation) - see `roadmap.md`
+**Next step:** M4 (Events) - see `roadmap.md`
 
 ---
 
@@ -292,7 +292,6 @@ See `CLAUDE.md` for full development guidelines.
 1. **Relationship graph not integrated** - Graph traversal works but needs wiring to context retrieval
 2. **LLM invents kingdoms** - Need broader context injection or negative examples
 3. **No fact extraction from LLM output** - Loop isn't closed (generate → extract → commit)
-4. **No temporal bounds** - Facts don't track validFrom/validTo yet (M3)
 
 ---
 
@@ -315,18 +314,18 @@ See `CLAUDE.md` for full development guidelines.
 
 ## Summary
 
-**M2 is complete.** Relationship graph system implemented with 26 tests covering:
-- Typed relationships between entities (flexible string types)
-- Bidirectional queries (from/to/both)
-- BFS graph traversal with depth/type/direction filters
-- Circular relationship handling
-- Integration tests proving "Sunnaria" → "Aradia" resolution
+**M3 is complete.** Timeline foundation implemented with temporal bounds on facts:
+- `validFrom` and `validTo` optional fields on Fact type
+- `getFactsAt(timestamp)` query for point-in-time fact retrieval
+- Half-open interval semantics: `[validFrom, validTo)`
+- Facts without bounds are always valid
+- 11 new temporal query tests
 
-**What works:** Basic validation, context injection (keyword + entity extraction), relationship graphs, chat UI.
+**What works:** Basic validation, context injection (keyword + entity extraction), relationship graphs, temporal facts, chat UI.
 
-**What's missing:** Timeline (M3), epistemic state (M5), multi-agent (M6), maps (M7-M9).
+**What's missing:** Events (M4), epistemic state (M5), multi-agent (M6), maps (M7-M9).
 
-**Next:** M3 - Timeline Foundation (chapter-based chronology, temporal bounds on facts)
+**Next:** M4 - Events (participation tracking, fact generation from events)
 
 **Timeline to proof-of-concept (M6):** ~2-3 months remaining
 **Timeline to full vision:** ~5-6 months remaining
