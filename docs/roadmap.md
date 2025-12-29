@@ -536,6 +536,6 @@ M1 ✅
 5. Integrate with context retrieval
 
 **See also:**
-- `VISION.md` - What we're building toward
-- `CURRENT.md` - Where we are now
+- `vision.md` - What we're building toward
+- `current.md` - Where we are now
 - `DECISIONS.md` - Why we made key design choices
