@@ -1,8 +1,8 @@
 # Current Implementation State
 
 **Last updated:** 2025-12-29
-**Test status:** 168 tests passing
-**Current milestone:** M3 complete, ready for M4
+**Test status:** 198 tests passing
+**Current milestone:** M4 complete, ready for M5
 
 ---
 
@@ -42,6 +42,14 @@
 - Filter by direction (from/to/both)
 - Circular relationship handling (no infinite loops)
 - 10 tests passing
+
+**Event Store** (`event/`)
+- Store events with id, timestamp, title, location, participants, visibility
+- Query by participant, timestamp, location, visibility
+- Fact generation from events (outcomes → facts with validFrom)
+- Visibility levels: private, restricted, public
+- Prose storage for original narrative
+- 30 tests passing
 
 ### Import
 **Location:** `src/import/`
@@ -139,12 +147,17 @@
 
 ## What's Missing (From Vision) ❌
 
-### Timeline System
-- ❌ Temporal bounds (validFrom/validTo) on facts
-- ❌ Events as source of truth
-- ❌ Chapter-based chronology
+### Timeline System ✅ M3 COMPLETE
+- ✅ Temporal bounds (validFrom/validTo) on facts
+- ✅ Temporal queries ("what was true at timestamp 5?")
 - ❌ Transaction time (undo/audit)
-- ❌ Temporal queries ("what was true at Chapter 5?")
+
+### Events ✅ M4 COMPLETE
+- ✅ Events as source of truth
+- ✅ Participation tracking (query by participant)
+- ✅ Visibility levels (private/restricted/public)
+- ✅ Fact generation from events
+- ✅ Prose storage
 
 ### Relationship Graph ✅ M2 COMPLETE
 - ✅ Relationships between entities (flexible typed relationships)
@@ -160,8 +173,6 @@
 - ❌ Terrain and weather
 
 ### Epistemic State
-- ❌ Event participation tracking
-- ❌ Visibility levels (private/court/public)
 - ❌ POV-filtered context
 - ❌ Knowledge isolation ("what does character X know?")
 
@@ -190,23 +201,24 @@
 
 ## Current Status (From Testing)
 
-**M2 Complete:** Relationship graph system working
+**M4 Complete:** Event system working
 
 **What works now:**
 - ✅ "Sunnarian" → Entity extraction → Fuzzy match → Sunnaria kingdom entry injected
 - ✅ Relationship graph can connect "Sunnaria" → Royal Family → "Princess Aradia"
 - ✅ Graph traversal supports multi-hop queries with depth/type/direction filters
+- ✅ Events with participants, locations, visibility levels
+- ✅ Fact generation from events with temporal bounds
 
 **Next integration needed:**
 - 🔜 Wire graph traversal into context retrieval pipeline
 - 🔜 Use relationships to enhance entity matching ("Sunnarian Princess" → finds Aradia)
-- 🔜 Containment queries for spatial context
+- 🔜 Epistemic state: POV-filtered knowledge based on event participation
 
 **Remaining issues:**
 - ❌ LLM still invents kingdoms not in lorebook (need broader context injection)
-- ✅ Temporal bounds on facts (M3 complete)
 
-**Next milestone:** M4 - Events (participation tracking, fact generation)
+**Next milestone:** M5 - Epistemic State (POV-filtered knowledge, "what does X know?")
 
 ---
 
@@ -215,10 +227,11 @@
 ```
 src/
 ├── world-state/          # Core data model
-│   ├── fact/             # Facts: subject/property/value (NO temporal bounds yet)
+│   ├── fact/             # Facts: subject/property/value with temporal bounds
 │   ├── entity/           # Entities: id/name/aliases/group
 │   ├── lexicon/          # World vocabulary tracking
-│   └── relationship/     # M2: Typed relationships and graph traversal
+│   ├── relationship/     # M2: Typed relationships and graph traversal
+│   └── event/            # M4: Events with participants, visibility, outcomes
 │
 ├── import/               # Getting data in
 │   └── silly-tavern-importer.ts
@@ -301,6 +314,7 @@ See `CLAUDE.md` for full development guidelines.
 |--------|-------|--------|
 | World State (fact/entity/lexicon) | 24 | ✅ |
 | World State (relationship) | 26 | ✅ M2 |
+| World State (event) | 30 | ✅ M4 |
 | Import (SillyTavern) | 8 | ✅ |
 | Validation (validator/rules) | 16 | ✅ |
 | LLM (OpenRouter) | 5 | ✅ |
@@ -308,27 +322,24 @@ See `CLAUDE.md` for full development guidelines.
 | Analysis (prompt analyzer) | 8 | ✅ |
 | UI (server/routes/frontend) | 50 | ✅ |
 | Integration | 7 | ✅ |
-| **Total** | **157** | **All passing** |
+| **Total** | **198** | **All passing** |
 
 ---
 
 ## Summary
 
-**M3 is complete.** Timeline foundation implemented with temporal bounds on facts:
-- `validFrom` and `validTo` optional fields on Fact type
-- `getFactsAt(timestamp)` query for point-in-time fact retrieval
-- Half-open interval semantics: `[validFrom, validTo)`
-- Facts without bounds are always valid
-- 11 new temporal query tests
+**M4 is complete.** Event system implemented:
+- Event type with id, timestamp, title, location, participants, visibility, outcomes, prose
+- EventStore with queries by participant, timestamp, location, visibility
+- Fact generation from events (outcomes → facts with validFrom from event timestamp)
+- Visibility levels: private, restricted, public
+- 30 new event tests
 
-**What works:** Basic validation, context injection (keyword + entity extraction), relationship graphs, temporal facts, chat UI.
+**What works:** Basic validation, context injection (keyword + entity extraction), relationship graphs, temporal facts, events, chat UI.
 
-**What's missing:** Events (M4), epistemic state (M5), multi-agent (M6), maps (M7-M9).
+**What's missing:** Epistemic state (M5), multi-agent (M6), maps (M7-M9).
 
-**Next:** M4 - Events (participation tracking, fact generation from events)
-
-**Timeline to proof-of-concept (M6):** ~2-3 months remaining
-**Timeline to full vision:** ~5-6 months remaining
+**Next:** M5 - Epistemic State (POV-filtered knowledge based on event participation)
 
 ---
 
