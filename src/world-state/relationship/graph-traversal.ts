@@ -20,11 +20,7 @@ export const createGraphTraversal = (): GraphTraversal => {
 		startId: string,
 		options: TraverseOptions = {},
 	): string[] => {
-		const {
-			maxDepth = 1,
-			relationshipTypes,
-			direction = "both",
-		} = options;
+		const { maxDepth = 1, relationshipTypes, direction = "both" } = options;
 
 		const visited = new Set<string>();
 		const result = new Set<string>();

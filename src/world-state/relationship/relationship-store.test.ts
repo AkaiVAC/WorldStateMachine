@@ -12,7 +12,6 @@ describe("RelationshipStore", () => {
 			expect(store.getTo("any-id")).toEqual([]);
 			expect(store.getByType("any-type")).toEqual([]);
 		});
-
 	});
 
 	describe("One - single item behavior", () => {

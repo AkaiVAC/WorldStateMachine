@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import type { LorebookEntry } from "./lorebook-entry";
 import { matchEntitiesFuzzy } from "./entity-matcher";
+import type { LorebookEntry } from "./lorebook-entry";
 
 const createEntry = (
 	id: string,
@@ -17,8 +17,16 @@ const createEntry = (
 describe("matchEntitiesFuzzy", () => {
 	const entries: LorebookEntry[] = [
 		createEntry("1", "Sunnaria", ["Sunnaria", "Kingdom of Sunnaria"]),
-		createEntry("2", "Princess Aradia", ["Aradia", "Princess Aradia", "Sunnarian princess"]),
-		createEntry("3", "King Alaric", ["Alaric", "King Alaric", "Sunnarian king"]),
+		createEntry("2", "Princess Aradia", [
+			"Aradia",
+			"Princess Aradia",
+			"Sunnarian princess",
+		]),
+		createEntry("3", "King Alaric", [
+			"Alaric",
+			"King Alaric",
+			"Sunnarian king",
+		]),
 		createEntry("4", "Lunaria", ["Lunaria", "Kingdom of Lunaria"]),
 	];
 
@@ -82,7 +90,10 @@ describe("matchEntitiesFuzzy", () => {
 		});
 
 		test("deduplicates when same entry matches multiple terms", () => {
-			const matches = matchEntitiesFuzzy(["Sunnaria", "Kingdom of Sunnaria"], entries);
+			const matches = matchEntitiesFuzzy(
+				["Sunnaria", "Kingdom of Sunnaria"],
+				entries,
+			);
 			expect(matches).toHaveLength(1);
 		});
 	});

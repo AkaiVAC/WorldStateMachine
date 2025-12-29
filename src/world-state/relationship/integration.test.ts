@@ -106,13 +106,9 @@ describe("M2 Integration: Sunnarian Princess → Aradia", () => {
 		const partsOfSunnaria = store.getTo("sunnaria");
 		expect(partsOfSunnaria).toHaveLength(3);
 
-		const connectedToGardens = traversal.findConnected(
-			store,
-			"royal-gardens",
-			{
-				maxDepth: 2,
-			},
-		);
+		const connectedToGardens = traversal.findConnected(store, "royal-gardens", {
+			maxDepth: 2,
+		});
 
 		expect(connectedToGardens).toContain("sunnaria");
 		expect(connectedToGardens).toContain("palace");
