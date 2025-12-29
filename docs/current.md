@@ -1,8 +1,8 @@
 # Current Implementation State
 
 **Last updated:** 2025-12-29
-**Test status:** 114 tests passing, 1 test with error (missing 'marked' package)
-**Current milestone:** M1 complete, starting M2
+**Test status:** 140 tests passing, 1 test with error (missing 'marked' package)
+**Current milestone:** M2 complete, ready for M3
 
 ---
 
@@ -28,6 +28,20 @@
 - Track valid terms per world (case-insensitive)
 - World boundary validation support
 - 5 tests passing
+
+**Relationship Store** (`relationship/`)
+- Store typed relationships between entities (flexible string types)
+- Bidirectional queries (from/to/both directions)
+- Query by relationship type
+- Multi-world support
+- 12 tests passing
+
+**Graph Traversal** (`relationship/`)
+- BFS traversal with configurable max depth
+- Filter by relationship types
+- Filter by direction (from/to/both)
+- Circular relationship handling (no infinite loops)
+- 10 tests passing
 
 ### Import
 **Location:** `src/import/`
@@ -132,10 +146,11 @@
 - ❌ Transaction time (undo/audit)
 - ❌ Temporal queries ("what was true at Chapter 5?")
 
-### Relationship Graph
-- ❌ Relationships between entities (daughter-of, rules, etc.)
-- ❌ Graph traversal for context retrieval
-- ❌ "Sunnarian Princess" → Aradia resolution
+### Relationship Graph ✅ M2 COMPLETE
+- ✅ Relationships between entities (flexible typed relationships)
+- ✅ Graph traversal for context retrieval (BFS with depth/type/direction filters)
+- ✅ "Sunnarian Princess" → Aradia resolution via graph
+- 🔜 Integration with context retrieval pipeline (next step)
 
 ### Geography System
 - ❌ Containment hierarchy (X is in Y)
@@ -173,21 +188,25 @@
 
 ---
 
-## Current Problem (From Testing)
+## Current Status (From Testing)
 
-**Test case:** "The Sunnarian Court Princess Comedy"
+**M2 Complete:** Relationship graph system working
 
-**What works:**
+**What works now:**
 - ✅ "Sunnarian" → Entity extraction → Fuzzy match → Sunnaria kingdom entry injected
+- ✅ Relationship graph can connect "Sunnaria" → Royal Family → "Princess Aradia"
+- ✅ Graph traversal supports multi-hop queries with depth/type/direction filters
 
-**What doesn't work:**
-- ❌ "Princess" alone doesn't match "Princess Aradia" (too generic)
-- ❌ LLM still invents kingdoms not in lorebook (Drakmoor, Valenhall)
-- ❌ No relationship graph to connect "Sunnarian" + "Princess" → Aradia
+**Next integration needed:**
+- 🔜 Wire graph traversal into context retrieval pipeline
+- 🔜 Use relationships to enhance entity matching ("Sunnarian Princess" → finds Aradia)
+- 🔜 Containment queries for spatial context
 
-**Root cause:** Need relationship graph traversal (Milestone 2)
+**Remaining issues:**
+- ❌ LLM still invents kingdoms not in lorebook (need broader context injection)
+- ❌ No temporal bounds yet (M3: Timeline Foundation)
 
-**Analysis:** See `notes/context-injection-analysis.md`
+**Next milestone:** M3 - Timeline Foundation (chapter-based chronology)
 
 ---
 
@@ -198,7 +217,8 @@ src/
 ├── world-state/          # Core data model
 │   ├── fact/             # Facts: subject/property/value (NO temporal bounds yet)
 │   ├── entity/           # Entities: id/name/aliases/group
-│   └── lexicon/          # World vocabulary tracking
+│   ├── lexicon/          # World vocabulary tracking
+│   └── relationship/     # M2: Typed relationships and graph traversal
 │
 ├── import/               # Getting data in
 │   └── silly-tavern-importer.ts
@@ -258,21 +278,22 @@ See `CLAUDE.md` for full development guidelines.
 
 ## Gap Analysis
 
-**From M1 (current) to Vision:**
-- M1 provides basic validation and context injection
-- Missing all advanced features (timeline, relationships, epistemic, maps)
-- Chat UI exists but context injection is basic (keyword matching only)
+**From M2 (current) to Vision:**
+- M1+M2 provide basic validation, context injection, and relationship graphs
+- Missing timeline (M3), epistemic state (M5), multi-agent (M6), maps (M7-M9)
+- Chat UI exists but context injection needs graph integration
 
-**Next step:** M2 (Relationship Graph) - see `roadmap.md`
+**Next step:** M3 (Timeline Foundation) - see `roadmap.md`
 
 ---
 
 ## Known Issues
 
-1. **Missing 'marked' package** - 1 test error in markdown rendering
-2. **Entity extraction doesn't handle relationships** - "Sunnarian Princess" doesn't combine to find Aradia
+1. **Missing 'marked' package** - 1 test error in markdown rendering (environmental)
+2. **Relationship graph not integrated** - Graph traversal works but needs wiring to context retrieval
 3. **LLM invents kingdoms** - Need broader context injection or negative examples
 4. **No fact extraction from LLM output** - Loop isn't closed (generate → extract → commit)
+5. **No temporal bounds** - Facts don't track validFrom/validTo yet (M3)
 
 ---
 
@@ -281,6 +302,7 @@ See `CLAUDE.md` for full development guidelines.
 | Module | Tests | Status |
 |--------|-------|--------|
 | World State (fact/entity/lexicon) | 24 | ✅ |
+| World State (relationship) | 26 | ✅ M2 |
 | Import (SillyTavern) | 8 | ✅ |
 | Validation (validator/rules) | 16 | ✅ |
 | LLM (OpenRouter) | 5 | ✅ |
@@ -288,19 +310,27 @@ See `CLAUDE.md` for full development guidelines.
 | Analysis (prompt analyzer) | 8 | ✅ |
 | UI (server/routes/frontend) | 33 | ✅ (1 error) |
 | Integration | 7 | ✅ |
-| **Total** | **114** | **113 pass, 1 error** |
+| **Total** | **140** | **139 pass, 1 error** |
 
 ---
 
 ## Summary
 
-**M1 is complete.** Basic validation works. Context injection works (keyword + entity extraction). Chat UI works.
+**M2 is complete.** Relationship graph system implemented with 26 tests covering:
+- Typed relationships between entities (flexible string types)
+- Bidirectional queries (from/to/both)
+- BFS graph traversal with depth/type/direction filters
+- Circular relationship handling
+- Integration tests proving "Sunnaria" → "Aradia" resolution
 
-**But:** The system is still far from the vision. No timeline, no relationships, no epistemic state, no maps, no multi-agent.
+**What works:** Basic validation, context injection (keyword + entity extraction), relationship graphs, chat UI.
 
-**Next:** M2 - Relationship Graph (see `roadmap.md`)
+**What's missing:** Timeline (M3), epistemic state (M5), multi-agent (M6), maps (M7-M9).
 
-**Timeline to vision:** ~5-7 months of development (see `roadmap.md` for milestones)
+**Next:** M3 - Timeline Foundation (chapter-based chronology, temporal bounds on facts)
+
+**Timeline to proof-of-concept (M6):** ~2-3 months remaining
+**Timeline to full vision:** ~5-6 months remaining
 
 ---
 
