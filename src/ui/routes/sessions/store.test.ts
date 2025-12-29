@@ -153,7 +153,9 @@ describe("Sessions Store", () => {
 			});
 
 			expect(updated).not.toBeNull();
-			expect(updated!.updatedAt > session.updatedAt).toBe(true);
+			if (updated) {
+				expect(updated.updatedAt > session.updatedAt).toBe(true);
+			}
 		});
 
 		test("returns null for non-existent session", async () => {

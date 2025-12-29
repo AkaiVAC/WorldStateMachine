@@ -45,7 +45,8 @@ describe("OpenRouter client", () => {
 
 		await ask("test prompt", { fetchFn });
 
-		const parsed = JSON.parse(capture.body!);
+		expect(capture.body).toBeDefined();
+		const parsed = JSON.parse(capture.body ?? "{}");
 		expect(parsed.model).toBe("xiaomi/mimo-v2-flash:free");
 	});
 
@@ -58,7 +59,8 @@ describe("OpenRouter client", () => {
 
 		await ask("test prompt", { model: "openai/gpt-4o-mini", fetchFn });
 
-		const parsed = JSON.parse(capture.body!);
+		expect(capture.body).toBeDefined();
+		const parsed = JSON.parse(capture.body ?? "{}");
 		expect(parsed.model).toBe("openai/gpt-4o-mini");
 	});
 

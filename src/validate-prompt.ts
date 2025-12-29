@@ -78,12 +78,12 @@ Princess Aradia was livestreaming her coronation rehearsal on TikTok.`;
 console.log("🏰 Lorebook Manager - MVP Validation Test\n");
 console.log("Testing with real LLM (OpenRouter)...");
 
-console.log("\n" + "=".repeat(50));
+console.log(`\n${"=".repeat(50)}`);
 console.log("TEST 1: MVP Prompt (prince snorkeling)");
 console.log("=".repeat(50));
 await validatePrompt(mvpPrompt);
 
-console.log("\n" + "=".repeat(50));
+console.log(`\n${"=".repeat(50)}`);
 console.log("TEST 2: Complex Prompt (many anachronisms)");
 console.log("=".repeat(50));
 await validatePrompt(complexPrompt);
