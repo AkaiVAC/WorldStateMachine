@@ -118,6 +118,13 @@ This is a collaboration. Discuss approaches, explain reasoning, consider alterna
 
 ## Current State
 
-- Project scaffolded (Bun + TypeScript + Biome)
-- Architecture documented in ARCHITECTURE.md
-- Ready to begin implementation
+**Last updated:** 2025-12-29
+
+- **M1 complete** - Basic validation and context injection working
+- **114 tests passing** (113 pass, 1 error)
+- **Chat UI** with lorebook context injection
+- **Next:** M2 (Relationship Graph) - see ROADMAP.md
+
+**For current implementation status:** See CURRENT.md
+**For full vision:** See VISION.md
+**For implementation path:** See ROADMAP.md

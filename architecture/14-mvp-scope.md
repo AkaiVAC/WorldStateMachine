@@ -22,24 +22,44 @@ This tests:
 
 ### 14.2 Current Progress
 
-#### Completed Components
+**Last updated:** 2025-12-29
+
+#### Completed Components (Beyond MVP)
 
 | Component | File | Tests | Status |
 |-----------|------|-------|--------|
+| **World State** | | | |
 | `Fact` | `world-state/fact/fact.ts` | - | ✅ Type only |
 | `FactStore` | `world-state/fact/fact-store.ts` | 4 | ✅ Complete |
 | `Entity` | `world-state/entity/entity.ts` | - | ✅ Type only |
 | `EntityStore` | `world-state/entity/entity-store.ts` | 10 | ✅ Complete |
 | `getEntities()` | `world-state/entity/entity-view.ts` | 5 | ✅ Complete |
 | `Lexicon` | `world-state/lexicon/lexicon.ts` | 5 | ✅ Complete |
+| **Import** | | | |
 | `importSillyTavernLorebook` | `import/silly-tavern-importer.ts` | 8 | ✅ Complete |
+| **LLM Integration** | | | |
 | `OpenRouter` | `llm/openrouter.ts` | 5 | ✅ Complete |
+| **Validation** | | | |
 | `Validator` | `validation/validator.ts` | 5 | ✅ Complete |
 | `EntityExistsRule` | `validation/entity-exists-rule.ts` | 6 | ✅ Complete |
 | `WorldBoundaryRule` | `validation/world-boundary-rule.ts` | 5 | ✅ Complete |
+| **Retrieval (NEW)** | | | |
+| `KeywordMatcher` | `retrieval/keyword-matcher.ts` | 5 | ✅ Complete |
+| `EntityMatcher` | `retrieval/entity-matcher.ts` | 8 | ✅ Complete |
+| `LorebookLoader` | `retrieval/lorebook-loader.ts` | - | ✅ Complete |
+| **Analysis (NEW)** | | | |
+| `PromptAnalyzer` | `analysis/prompt-analyzer.ts` | 8 | ✅ Complete |
+| **UI (NEW)** | | | |
+| Server & Routes | `ui/server/`, `ui/routes/` | 20 | ✅ Complete |
+| Frontend Components | `ui/public/` | 13 | ✅ Complete (1 error) |
+| **Integration** | | | |
 | Integration tests | `integration.test.ts` | 7 | ✅ Complete |
 
-**Total: 60 tests passing**
+**Total: 114 tests passing (113 pass, 1 error - missing 'marked' package)**
+
+**Current Status:** M1 complete. Chat UI working with context injection (keyword + entity extraction + fuzzy matching).
+
+**See also:** [CURRENT.md](../CURRENT.md) for detailed current state.
 
 #### Data Model Summary
 
