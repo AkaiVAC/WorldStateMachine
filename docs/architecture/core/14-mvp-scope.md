@@ -59,7 +59,7 @@ This tests:
 
 **Current Status:** M1 complete. Chat UI working with context injection (keyword + entity extraction + fuzzy matching).
 
-**See also:** [CURRENT.md](../CURRENT.md) for detailed current state.
+**See also:** [current.md](../../current.md) for detailed current state.
 
 #### Data Model Summary
 

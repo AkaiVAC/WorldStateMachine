@@ -187,7 +187,7 @@
 
 **Root cause:** Need relationship graph traversal (Milestone 2)
 
-**Analysis:** See `docs/context-injection-analysis.md`
+**Analysis:** See `notes/context-injection-analysis.md`
 
 ---
 
@@ -263,7 +263,7 @@ See `CLAUDE.md` for full development guidelines.
 - Missing all advanced features (timeline, relationships, epistemic, maps)
 - Chat UI exists but context injection is basic (keyword matching only)
 
-**Next step:** M2 (Relationship Graph) - see `ROADMAP.md`
+**Next step:** M2 (Relationship Graph) - see `roadmap.md`
 
 ---
 
@@ -298,14 +298,14 @@ See `CLAUDE.md` for full development guidelines.
 
 **But:** The system is still far from the vision. No timeline, no relationships, no epistemic state, no maps, no multi-agent.
 
-**Next:** M2 - Relationship Graph (see `ROADMAP.md`)
+**Next:** M2 - Relationship Graph (see `roadmap.md`)
 
-**Timeline to vision:** ~5-7 months of development (see `ROADMAP.md` for milestones)
+**Timeline to vision:** ~5-7 months of development (see `roadmap.md` for milestones)
 
 ---
 
 **See also:**
-- `VISION.md` - The full picture
-- `ROADMAP.md` - Step-by-step path from here to vision
+- `vision.md` - The full picture
+- `roadmap.md` - Step-by-step path from here to vision
 - `DECISIONS.md` - Why we made key design choices
-- `docs/context-injection-analysis.md` - Latest testing/analysis
+- `notes/context-injection-analysis.md` - Latest testing/analysis

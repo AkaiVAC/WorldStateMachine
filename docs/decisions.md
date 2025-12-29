@@ -561,7 +561,7 @@ const createEntityStore = () => {
 ---
 
 **See also:**
-- `VISION.md` - What we're building
-- `CURRENT.md` - Where we are
-- `ROADMAP.md` - How we get there
+- `vision.md` - What we're building
+- `current.md` - Where we are
+- `roadmap.md` - How we get there
 - `architecture/` - Detailed design docs

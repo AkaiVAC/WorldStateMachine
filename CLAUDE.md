@@ -1,5 +1,20 @@
 # Lorebook Manager
 
+## Essential Context for Each Session
+
+**Read these docs to understand the project:**
+
+1. **[docs/vision.md](docs/vision.md)** - Complete constraint engine vision (what we're building)
+2. **[docs/current.md](docs/current.md)** - Current implementation status (M1 complete, 114 tests)
+3. **[docs/roadmap.md](docs/roadmap.md)** - M1-M11 milestones (proof-of-concept at M6)
+4. **[docs/decisions.md](docs/decisions.md)** - Design rationale and principles
+
+**Additional context:**
+- **[docs/README.md](docs/README.md)** - Architecture overview and index
+- **[docs/notes/context-injection-analysis.md](docs/notes/context-injection-analysis.md)** - Latest research and testing
+
+---
+
 ## Hard Rules
 
 1. **TDD is mandatory.** Failing test first → minimum code to pass → refactor. No exceptions.
@@ -123,8 +138,6 @@ This is a collaboration. Discuss approaches, explain reasoning, consider alterna
 - **M1 complete** - Basic validation and context injection working
 - **114 tests passing** (113 pass, 1 error)
 - **Chat UI** with lorebook context injection
-- **Next:** M2 (Relationship Graph) - see ROADMAP.md
+- **Next:** M2 (Relationship Graph) - see [docs/roadmap.md](docs/roadmap.md)
 
-**For current implementation status:** See CURRENT.md
-**For full vision:** See VISION.md
-**For implementation path:** See ROADMAP.md
+**For details:** See the Essential Context section above

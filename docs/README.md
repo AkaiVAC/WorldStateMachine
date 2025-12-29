@@ -12,12 +12,12 @@ This repository contains the architecture and implementation for a constraint en
 
 **New to this project?** Start here:
 
-1. **[VISION.md](VISION.md)** - What we're building (the full constraint engine)
-2. **[CURRENT.md](CURRENT.md)** - Where we are now (M1 complete, 114 tests)
-3. **[ROADMAP.md](ROADMAP.md)** - How we get there (M1-M11 milestones)
-4. **[DECISIONS.md](DECISIONS.md)** - Why we made key design choices
+1. **[VISION.md](vision.md)** - What we're building (the full constraint engine)
+2. **[CURRENT.md](current.md)** - Where we are now (M1 complete, 114 tests)
+3. **[ROADMAP.md](roadmap.md)** - How we get there (M1-M11 milestones)
+4. **[DECISIONS.md](decisions.md)** - Why we made key design choices
 
-**Development guidelines:** See [CLAUDE.md](CLAUDE.md) for TDD workflow, code style, testing strategy.
+**Development guidelines:** See [CLAUDE.md](../CLAUDE.md) for TDD workflow, code style, testing strategy.
 
 ---
 
@@ -28,7 +28,7 @@ This repository contains the architecture and implementation for a constraint en
 **Timeline to vision:** 5-7 months
 **Proof-of-concept target:** M6 (epistemic state + multi-agent orchestration) - 2.5-4 months
 
-See **[CURRENT.md](CURRENT.md)** for detailed implementation status.
+See **[CURRENT.md](current.md)** for detailed implementation status.
 
 ---
 
@@ -42,7 +42,7 @@ The system rests on three foundational pillars that work together to constrain L
 
 These pillars feed into a **constraint package** that ensures LLM output is world-consistent.
 
-See **[VISION.md](VISION.md)** for how these pillars work together.
+See **[VISION.md](vision.md)** for how these pillars work together.
 
 ---
 
@@ -69,7 +69,7 @@ See **[VISION.md](VISION.md)** for how these pillars work together.
 19. **Alive world through constrained randomness** - Ambient generation adds flavor within timeline constraints
 20. **Profile-driven optimization** - Brute force + basic indexing first, optimize bottlenecks after measurement
 
-See **[DECISIONS.md](DECISIONS.md)** for rationale behind key decisions.
+See **[DECISIONS.md](decisions.md)** for rationale behind key decisions.
 
 ---
 
@@ -183,27 +183,27 @@ src/
 
 The `architecture/` folder contains detailed design documents for all system components.
 
-**Note:** Many of these describe **future systems** not yet implemented. See **[CURRENT.md](CURRENT.md)** for what actually works now.
+**Note:** Many of these describe **future systems** not yet implemented. See **[CURRENT.md](current.md)** for what actually works now.
 
 | Section | File | Description | Status |
 |---------|------|-------------|--------|
-| 1. Problem Statement | [01-problem.md](architecture/01-problem.md) | Core problem: constraining LLM generation | 📖 Reference |
-| 2. Timeline-Centric | [02-timeline-centric.md](architecture/02-timeline-centric.md) | Facts, temporal bounds, consistency checking | 🟡 Partial (facts yes, temporal no) |
-| 3. Effects | [03-effects.md](architecture/03-effects.md) | Effects as data, sticky vs cascading propagation | 🔜 Future |
-| 4. Containment | [04-containment.md](architecture/04-containment.md) | Geographic hierarchy, environmental properties | 🔜 Future |
-| 5. World vs Scene State | [05-world-scene-state.md](architecture/05-world-scene-state.md) | Persistent vs ephemeral, staging model | 🔜 Future |
-| 6. Storage Format | [06-storage-format.md](architecture/06-storage-format.md) | Store verbose, render compact, prose preservation | 🟡 Partial |
-| 7. Entity Tiers | [07-entity-tiers.md](architecture/07-entity-tiers.md) | Lead, supporting, role, ambient | 🔜 Future |
-| 8. Epistemic State | [08-epistemic-state.md](architecture/08-epistemic-state.md) | Who knows what, always query (no cache) | 🔜 Future |
-| 9. Scene Execution | [09-scene-execution.md](architecture/09-scene-execution.md) | POV-driven, multi-agent, ambient generation | 🔜 Future |
-| 10. Import Pipeline | [10-import-pipeline.md](architecture/10-import-pipeline.md) | NLP, inference tiers, human review | 🟡 Partial (SillyTavern only) |
-| 11. Query Pipeline | [11-query-pipeline.md](architecture/11-query-pipeline.md) | Deterministic retrieval, focus-based priority | 🟡 Partial (basic retrieval) |
-| 12. Prior Art | [12-prior-art.md](architecture/12-prior-art.md) | Temporal knowledge graphs, event sourcing | 📖 Reference |
-| 13. Open Questions | [13-open-questions.md](architecture/13-open-questions.md) | Resolved and still open | 📖 Reference |
-| 14. MVP Scope | [14-mvp-scope.md](architecture/14-mvp-scope.md) | Initial implementation scope | ✅ Complete (needs update) |
-| 15. Calendar & Time | [15-calendar-time-system.md](architecture/15-calendar-time-system.md) | Time granularity, calendar systems, temporal fidelity | 🔜 Future |
-| 16. Map & Spatial | [16-map-spatial-system.md](architecture/16-map-spatial-system.md) | 2D maps, routes, travel physics, weather systems | 🔜 Future |
-| 17. Constraints & Validation | [17-constraint-validation-system.md](architecture/17-constraint-validation-system.md) | Generic constraint framework, validation pipeline | 🟡 Partial |
+| 1. Problem Statement | [01-problem.md](architecture/core/01-problem.md) | Core problem: constraining LLM generation | 📖 Reference |
+| 2. Timeline-Centric | [02-timeline-centric.md](architecture/core/02-timeline-centric.md) | Facts, temporal bounds, consistency checking | 🟡 Partial (facts yes, temporal no) |
+| 3. Effects | [03-effects.md](architecture/core/03-effects.md) | Effects as data, sticky vs cascading propagation | 🔜 Future |
+| 4. Containment | [04-containment.md](architecture/core/04-containment.md) | Geographic hierarchy, environmental properties | 🔜 Future |
+| 5. World vs Scene State | [05-world-scene-state.md](architecture/core/05-world-scene-state.md) | Persistent vs ephemeral, staging model | 🔜 Future |
+| 6. Storage Format | [06-storage-format.md](architecture/core/06-storage-format.md) | Store verbose, render compact, prose preservation | 🟡 Partial |
+| 7. Entity Tiers | [07-entity-tiers.md](architecture/core/07-entity-tiers.md) | Lead, supporting, role, ambient | 🔜 Future |
+| 8. Epistemic State | [08-epistemic-state.md](architecture/core/08-epistemic-state.md) | Who knows what, always query (no cache) | 🔜 Future |
+| 9. Scene Execution | [09-scene-execution.md](architecture/core/09-scene-execution.md) | POV-driven, multi-agent, ambient generation | 🔜 Future |
+| 10. Import Pipeline | [10-import-pipeline.md](architecture/core/10-import-pipeline.md) | NLP, inference tiers, human review | 🟡 Partial (SillyTavern only) |
+| 11. Query Pipeline | [11-query-pipeline.md](architecture/core/11-query-pipeline.md) | Deterministic retrieval, focus-based priority | 🟡 Partial (basic retrieval) |
+| 12. Prior Art | [12-prior-art.md](architecture/core/12-prior-art.md) | Temporal knowledge graphs, event sourcing | 📖 Reference |
+| 13. Open Questions | [13-open-questions.md](architecture/core/13-open-questions.md) | Resolved and still open | 📖 Reference |
+| 14. MVP Scope | [14-mvp-scope.md](architecture/core/14-mvp-scope.md) | Initial implementation scope | ✅ Complete (needs update) |
+| 15. Calendar & Time | [15-calendar-time-system.md](architecture/core/15-calendar-time-system.md) | Time granularity, calendar systems, temporal fidelity | 🔜 Future |
+| 16. Map & Spatial | [16-map-spatial-system.md](architecture/core/16-map-spatial-system.md) | 2D maps, routes, travel physics, weather systems | 🔜 Future |
+| 17. Constraints & Validation | [17-constraint-validation-system.md](architecture/core/17-constraint-validation-system.md) | Generic constraint framework, validation pipeline | 🟡 Partial |
 
 **Legend:**
 - ✅ Complete and implemented
@@ -215,9 +215,9 @@ The `architecture/` folder contains detailed design documents for all system com
 
 ## See Also
 
-- **[VISION.md](VISION.md)** - Complete vision for the constraint engine
-- **[CURRENT.md](CURRENT.md)** - Current implementation status (what actually works)
-- **[ROADMAP.md](ROADMAP.md)** - Milestone-by-milestone path from current to vision
-- **[DECISIONS.md](DECISIONS.md)** - Rationale behind key design decisions
-- **[CLAUDE.md](CLAUDE.md)** - Development workflow, TDD, code style
-- **[docs/context-injection-analysis.md](docs/context-injection-analysis.md)** - Latest testing and analysis
+- **[VISION.md](vision.md)** - Complete vision for the constraint engine
+- **[CURRENT.md](current.md)** - Current implementation status (what actually works)
+- **[ROADMAP.md](roadmap.md)** - Milestone-by-milestone path from current to vision
+- **[DECISIONS.md](decisions.md)** - Rationale behind key design decisions
+- **[CLAUDE.md](../CLAUDE.md)** - Development workflow, TDD, code style
+- **[notes/context-injection-analysis.md](notes/context-injection-analysis.md)** - Latest testing and analysis
