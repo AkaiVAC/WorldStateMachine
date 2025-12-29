@@ -1,7 +1,7 @@
 # Current Implementation State
 
 **Last updated:** 2025-12-29
-**Test status:** 140 tests passing, 1 test with error (missing 'marked' package)
+**Test status:** 157 tests passing
 **Current milestone:** M2 complete, ready for M3
 
 ---
@@ -289,11 +289,10 @@ See `CLAUDE.md` for full development guidelines.
 
 ## Known Issues
 
-1. **Missing 'marked' package** - 1 test error in markdown rendering (environmental)
-2. **Relationship graph not integrated** - Graph traversal works but needs wiring to context retrieval
-3. **LLM invents kingdoms** - Need broader context injection or negative examples
-4. **No fact extraction from LLM output** - Loop isn't closed (generate → extract → commit)
-5. **No temporal bounds** - Facts don't track validFrom/validTo yet (M3)
+1. **Relationship graph not integrated** - Graph traversal works but needs wiring to context retrieval
+2. **LLM invents kingdoms** - Need broader context injection or negative examples
+3. **No fact extraction from LLM output** - Loop isn't closed (generate → extract → commit)
+4. **No temporal bounds** - Facts don't track validFrom/validTo yet (M3)
 
 ---
 
@@ -308,9 +307,9 @@ See `CLAUDE.md` for full development guidelines.
 | LLM (OpenRouter) | 5 | ✅ |
 | Retrieval (keyword/entity/lorebook) | 13 | ✅ |
 | Analysis (prompt analyzer) | 8 | ✅ |
-| UI (server/routes/frontend) | 33 | ✅ (1 error) |
+| UI (server/routes/frontend) | 50 | ✅ |
 | Integration | 7 | ✅ |
-| **Total** | **140** | **139 pass, 1 error** |
+| **Total** | **157** | **All passing** |
 
 ---
 
