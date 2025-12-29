@@ -1,7 +1,7 @@
 # Roadmap: From Current to Vision
 
 **Last updated:** 2025-12-29
-**Current position:** M3 complete, ready for M4
+**Current position:** M4 complete, ready for M5
 **Estimated timeline:** 5-7 months to full vision
 **Proof-of-concept target:** M6 (epistemic state + multi-agent)
 
@@ -29,8 +29,8 @@
 | 1 | Basic Validation | Entity checking, world boundary | 3-4 weeks | ✅ DONE |
 | 2 | Relationship Graph | Entity relationships, graph traversal | 2-3 weeks | ✅ DONE |
 | 3 | Timeline Foundation | Chapter-based chronology | 1-2 weeks | ✅ DONE |
-| 4 | Events | Source of truth, participation tracking | 2-3 weeks | 🎯 NEXT |
-| 5 | Epistemic State | POV-filtered knowledge | 3-4 weeks | 🔜 ⭐ |
+| 4 | Events | Source of truth, participation tracking | 2-3 weeks | ✅ DONE |
+| 5 | Epistemic State | POV-filtered knowledge | 3-4 weeks | 🎯 NEXT ⭐ |
 | 6 | Multi-Agent Orchestration | Separate contexts, secrets | 2-3 weeks | 🔜 ⭐ |
 | 7 | Basic Geography | Containment, proximity | 2 weeks | 🔜 |
 | 8 | Travel Validation | Routes, travel time | 1-2 weeks | 🔜 |
@@ -124,55 +124,39 @@
 
 ---
 
-### M4: Events as Source of Truth
+### M4: Events as Source of Truth ✅ DONE
 
 **Estimated effort:** 2-3 weeks
 
 **Goal:** Track events that generate facts, record participation, preserve original prose.
 
-**What to build:**
-- `Event` type: timestamp, participants, location, visibility, outcomes (facts)
-- `EventStore` with queries by time, participant, location
-- Original prose storage (prose → event → facts)
-- Fact generation from events
-- Participation tracking
+**What was built:**
+- `Event` type: id, worldId, timestamp, title, location, participants, visibility, outcomes, prose
+- `EventStore` with queries by participant, timestamp, location, visibility
+- Fact generation from events (`getFactsFromEvent`)
+- Visibility levels: private, restricted, public
+- 30 tests passing
 
 **Deliverables:**
 - `src/world-state/event/event.ts` - Event type
-- `src/world-state/event/event-store.ts` - Store and query
-- `src/world-state/event/event-store.test.ts` - Tests
-- Integration: Events generate facts
+- `src/world-state/event/event-store.ts` - Store, query, and fact generation
+- `src/world-state/event/event-store.test.ts` - 30 tests
+- `src/world-state/event/index.ts` - Exports
 
 **Event structure:**
 ```typescript
 type Event = {
   id: string;
   worldId: string;
-  timestamp: string;          // "Chapter 5"
+  timestamp: number;          // numeric timestamp
   title: string;              // "Secret War Council"
-  location: string;           // Entity ID for location
+  location?: string;          // Entity ID for location
   participants: string[];     // Entity IDs
-  hiddenParticipants: string[]; // Observers not known to others
-  visibility: Visibility;     // "private" | "court" | "public" | group name
-  concealedFrom: string[];    // Entity IDs who shouldn't know
-  reveals: string[];          // Event IDs revealed during this event
-  outcomes: Fact[];           // Facts extracted from this event
-  prose: string;              // Original prose
+  visibility: Visibility;     // "private" | "restricted" | "public"
+  outcomes?: Fact[];          // Facts extracted from this event
+  prose?: string;             // Original prose
 };
 ```
-
-**Test cases:**
-- Create event with participants
-- Query events by participant
-- Query events at specific timestamp
-- Event generates facts with correct temporal bounds
-- Visibility levels (private, court, public)
-
-**Success criteria:**
-- Event: "Coronation of King Alaric" (Chapter 1, public)
-- Participants: [Alaric, High Priest, Court]
-- Outcomes: [{subject: "Alaric", property: "title", value: "King", validFrom: "Chapter 1"}]
-- Query: "What events was Alaric in?" → includes Coronation
 
 **Enables:** Epistemic state (who was at which events)
 

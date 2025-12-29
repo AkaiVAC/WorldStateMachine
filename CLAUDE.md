@@ -135,9 +135,9 @@ This is a collaboration. Discuss approaches, explain reasoning, consider alterna
 
 **Last updated:** 2025-12-29
 
-- **M3 complete** - Timeline foundation with temporal bounds on facts
-- **168 tests passing**
+- **M4 complete** - Events with participants, visibility, fact generation
+- **198 tests passing**
 - **Chat UI** with lorebook context injection
-- **Next:** M4 (Events) - see [docs/roadmap.md](docs/roadmap.md)
+- **Next:** M5 (Epistemic State) - see [docs/roadmap.md](docs/roadmap.md)
 
 **For details:** See the Essential Context section above
