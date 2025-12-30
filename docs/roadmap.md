@@ -1,9 +1,58 @@
 # Roadmap: From Current to Vision
 
-**Last updated:** 2025-12-29
+**Last updated:** 2025-12-30
 **Current position:** M4 complete, ready for M5
 **Estimated timeline:** 5-7 months to full vision
 **Proof-of-concept target:** M6 (epistemic state + multi-agent)
+
+---
+
+## Architectural Foundation: Fact-Based Runtime Model
+
+**Key Insight (2025-12-30):** The lorebook is an *import format*, not the runtime model.
+
+### The Problem with Keyword Matching
+
+Lorebook entries are prose blobs matched by keywords. This causes:
+- **Name collisions**: "Elara" the student triggers Queen Elara's entry
+- **No disambiguation**: Can't distinguish entities with same name
+- **No structure**: Prose isn't queryable
+- **No temporal awareness**: Static text, no "when" information
+
+### The Solution: Entity IDs + Structured Facts
+
+```
+LOREBOOK (Import)              RUNTIME MODEL
+┌─────────────────┐            ┌─────────────────────────────────────┐
+│ Prose blob with │   ──ETL──► │ Entity: elara-sunnaria-queen        │
+│ keywords        │            │   displayName: "Elara"              │
+│ "Queen Elara    │            │   facts:                            │
+│  rules with..." │            │     - { attr: "title", val: "Queen" }│
+└─────────────────┘            │     - { attr: "spouse", val: "alaric" }│
+                               │   relationships:                     │
+                               │     - { type: "rules", to: "sunnaria" }│
+                               └─────────────────────────────────────┘
+```
+
+**Benefits:**
+1. **No collisions**: Different entities have different IDs
+2. **Structured queries**: "What facts does entity X know?"
+3. **Temporal bounds**: Facts have validFrom/validTo
+4. **True epistemic isolation**: Knowledge is per-entity-ID, not per-keyword
+
+**Implications for Retrieval:**
+- OLD: "Elara" in text → keyword search → inject matching prose
+- NEW: Entity ID in scene → query facts for that entity → construct context
+
+**Implications for Scene Setup:**
+- Entities in a scene are identified by ID (or unambiguous reference)
+- New entities (not in lorebook) get fresh IDs
+- The LLM/author maintains entity→ID bindings within a session
+
+**This enables M5 (Epistemic State):**
+- `getKnowledge(entityId, timestamp)` → facts this entity knows
+- No ambiguity about "which Elara"
+- Clean foundation for multi-agent (M6)
 
 ---
 
@@ -166,12 +215,33 @@ type Event = {
 
 ### M5: Epistemic State ⭐ FIRST BIG WIN
 
-**Estimated effort:** 3-4 weeks
+**Estimated effort:** 4-5 weeks
 
-**Goal:** Track what each character knows based on event participation and visibility. Enable POV-filtered context retrieval.
+**Goal:** Track what each character knows based on event participation and visibility. Enable POV-filtered context retrieval. **Requires Fact-based runtime model.**
+
+**Prerequisite: Lorebook → Entity/Fact ETL**
+
+Before epistemic queries work, we need structured data:
+
+1. **Entity extraction from lorebook**
+   - Parse lorebook entries
+   - Identify entities (characters, locations, factions)
+   - Assign unique entity IDs
+   - Extract `displayName` as an attribute
+
+2. **Fact extraction from prose**
+   - Parse lorebook content into structured facts
+   - `{ subject: entityId, attribute: "title", value: "Queen" }`
+   - Attach temporal bounds where inferrable
+
+3. **Relationship extraction**
+   - Identify relationships from prose ("wife of", "rules", "located in")
+   - Store as structured relationships with entity IDs
 
 **What to build:**
-- Knowledge queries: `getKnowledge(characterId, timestamp)` → events + facts they know
+- **Lorebook ETL pipeline**: `lorebookToEntities(lorebook) → Entity[]`
+- **Fact extraction**: `extractFacts(entity, prose) → Fact[]`
+- Knowledge queries: `getKnowledge(entityId, timestamp)` → events + facts they know
 - Participation-based knowledge (if you were there, you know)
 - Visibility-based knowledge (public events, court events, group events)
 - `reveals` mechanism (learning about past events)
@@ -179,6 +249,9 @@ type Event = {
 - POV-filtered context retrieval
 
 **Deliverables:**
+- `src/import/lorebook-etl.ts` - Lorebook → Entity/Fact extraction
+- `src/import/lorebook-etl.test.ts` - ETL tests
+- `src/world-state/entity/entity.ts` - Entity type with ID
 - `src/world-state/epistemic/knowledge-query.ts` - Knowledge retrieval
 - `src/world-state/epistemic/knowledge-query.test.ts` - Tests
 - `src/retrieval/pov-filter.ts` - POV-filtered context for LLM
