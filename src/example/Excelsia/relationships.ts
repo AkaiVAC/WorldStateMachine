@@ -62,17 +62,3 @@ export const excelsiaRelationships: Relationship[] = [
 	{ worldId: "excelsia", from: "33", type: "works-for", to: "31" }, // Ria works for Elara
 	{ worldId: "excelsia", from: "33", type: "member-of", to: "1" }, // Ria member of Sunnaria
 ];
-
-export const excelsiaKingdoms = [
-	"Sunnaria",
-	"Lunaria",
-	"Ilaria",
-	"Limaria",
-	"Lindward",
-	"Stuttgart",
-	"Aeldrin",
-	"Ironforge",
-	"Zyronia",
-];
-
-export const worldSummary = `The continent of Excelsia contains exactly these kingdoms: ${excelsiaKingdoms.join(", ")}. Do not invent or reference any other kingdoms.`;

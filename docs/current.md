@@ -1,7 +1,7 @@
 # Current Implementation State
 
-**Last updated:** 2025-12-29
-**Test status:** 198 tests passing
+**Last updated:** 2025-12-30
+**Test status:** 204 tests passing
 **Current milestone:** M4 complete, ready for M5
 
 ---
@@ -296,8 +296,8 @@ See `CLAUDE.md` for full development guidelines.
 
 ## Known Issues
 
-1. **Relationship graph not integrated** - Graph traversal works but needs wiring to context retrieval
-2. **LLM invents kingdoms** - Need broader context injection or negative examples
+1. ~~**Relationship graph not integrated**~~ - ✅ Fixed: Graph traversal wired into context retrieval
+2. ~~**LLM invents kingdoms**~~ - ✅ Fixed: `constant` entries (world overview) always injected
 3. **No fact extraction from LLM output** - Loop isn't closed (generate → extract → commit)
 
 ---
@@ -312,24 +312,26 @@ See `CLAUDE.md` for full development guidelines.
 | Import (SillyTavern) | 8 | ✅ |
 | Validation (validator/rules) | 16 | ✅ |
 | LLM (OpenRouter) | 5 | ✅ |
-| Retrieval (keyword/entity/lorebook) | 13 | ✅ |
+| Retrieval (keyword/entity/E2E) | 19 | ✅ |
 | Analysis (prompt analyzer) | 8 | ✅ |
 | UI (server/routes/frontend) | 50 | ✅ |
 | Integration | 7 | ✅ |
-| **Total** | **198** | **All passing** |
+| **Total** | **204** | **All passing** |
 
 ---
 
 ## Summary
 
-**M4 is complete.** Event system implemented:
+**M4 is complete.** Event system and context retrieval fully integrated:
 - Event type with id, timestamp, title, location, participants, visibility, outcomes, prose
 - EventStore with queries by participant, timestamp, location, visibility
 - Fact generation from events (outcomes → facts with validFrom from event timestamp)
 - Visibility levels: private, restricted, public
-- 30 new event tests
+- Graph traversal expansion integrated into chat context pipeline
+- `constant` lorebook entries (like world overview) always injected
+- 6 new E2E tests for complex story scenarios (diplomatic meetings, trade, multi-kingdom)
 
-**What works:** Basic validation, context injection (keyword + entity extraction), relationship graphs, temporal facts, events, chat UI.
+**What works:** Basic validation, context injection (keyword + entity + graph expansion), relationship graphs, temporal facts, events, constant entries, chat UI.
 
 **What's missing:** Epistemic state (M5), multi-agent (M6), maps (M7-M9).
 

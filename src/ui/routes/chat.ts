@@ -5,11 +5,7 @@ import { matchEntries } from "../../retrieval/keyword-matcher";
 import type { LorebookEntry } from "../../retrieval/lorebook-entry";
 import { createRelationshipRetrieval } from "../../retrieval/relationship-retrieval";
 import { createGraphTraversal } from "../../world-state/relationship/graph-traversal";
-import {
-	getLorebookEntries,
-	getRelationshipStore,
-	getWorldSummary,
-} from "./lorebook";
+import { getLorebookEntries, getRelationshipStore } from "./lorebook";
 
 const DEFAULT_MODEL = "anthropic/claude-sonnet-4";
 const ENTITY_EXTRACTION_MODEL = "xiaomi/mimo-v2-flash:free";
@@ -26,7 +22,7 @@ type ChatRequest = {
 type InjectedEntry = {
 	id: string;
 	name: string;
-	reason: "auto" | "manual" | "entity" | "related";
+	reason: "constant" | "entity" | "auto" | "manual" | "related";
 	matchedKeyword?: string;
 };
 
@@ -60,6 +56,18 @@ export const chatHandler = async (req: Request): Promise<Response> => {
 	const injectedIds = new Set<string>();
 	const injectedEntries: InjectedEntry[] = [];
 	const entriesToInject: LorebookEntry[] = [];
+
+	for (const entry of allEntries) {
+		if (entry.constant && !excludeSet.has(entry.id)) {
+			injectedIds.add(entry.id);
+			entriesToInject.push(entry);
+			injectedEntries.push({
+				id: entry.id,
+				name: entry.name,
+				reason: "constant",
+			});
+		}
+	}
 
 	const { entityReferences } = await analyzer.analyze(message);
 	const entityMatches = matchEntitiesFuzzy(entityReferences, allEntries);
@@ -136,10 +144,9 @@ export const chatHandler = async (req: Request): Promise<Response> => {
 		.map((e) => `[${e.name}]\n${e.content}`)
 		.join("\n\n");
 
-	const worldSummary = getWorldSummary();
 	const systemPrompt = lorebookContext
-		? `${WORLD_CONTEXT}\n\n${worldSummary}\n\n--- LOREBOOK ---\n${lorebookContext}`
-		: `${WORLD_CONTEXT}\n\n${worldSummary}`;
+		? `${WORLD_CONTEXT}\n\n--- LOREBOOK ---\n${lorebookContext}`
+		: WORLD_CONTEXT;
 
 	const messages: ChatMessage[] = [
 		{ role: "system", content: systemPrompt },

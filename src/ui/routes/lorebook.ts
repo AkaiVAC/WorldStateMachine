@@ -1,8 +1,5 @@
 import { join } from "node:path";
-import {
-	excelsiaRelationships,
-	worldSummary,
-} from "../../example/Excelsia/relationships";
+import { excelsiaRelationships } from "../../example/Excelsia/relationships";
 import type { LorebookEntry } from "../../retrieval/lorebook-entry";
 import { loadLorebooksFromDir } from "../../retrieval/lorebook-loader";
 import type { RelationshipStore } from "../../world-state/relationship/relationship-store";
@@ -35,8 +32,6 @@ export const getRelationshipStore = (): RelationshipStore => {
 	}
 	return cachedRelationshipStore;
 };
-
-export const getWorldSummary = (): string => worldSummary;
 
 export const lorebookHandler = async (): Promise<Response> => {
 	const entries = await getLorebookEntries();
