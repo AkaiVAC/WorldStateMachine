@@ -176,6 +176,7 @@
 ### Epistemic State
 - ❌ POV-filtered context
 - ❌ Knowledge isolation ("what does character X know?")
+- ❌ Lorebook → Entity/Fact ETL (prerequisite for epistemic isolation)
 
 ### Multi-Agent Orchestration
 - ❌ Separate context per character
@@ -299,6 +300,29 @@ See `CLAUDE.md` for full development guidelines.
 1. ~~**Relationship graph not integrated**~~ - ✅ Fixed: Graph traversal wired into context retrieval
 2. ~~**LLM invents kingdoms**~~ - ✅ Fixed: `constant` entries (world overview) always injected
 3. **No fact extraction from LLM output** - Loop isn't closed (generate → extract → commit)
+4. ~~**Name collisions in keyword matching**~~ - ✅ Resolved by design: Entity IDs replace keyword matching (see below)
+
+---
+
+## Architectural Insight (2025-12-30)
+
+**Key realization:** The lorebook is an *import format*, not the runtime model.
+
+**Problem:** Keyword matching "Elara" can't distinguish Queen Elara from a student named Elara. Secondary keys, corroborating evidence, and other patches are brittle - they fundamentally can't solve disambiguation when two entities with the same name appear in the same scene.
+
+**Solution:** Transform lorebook into structured data:
+- **Entities** with unique IDs (not names)
+- **Facts** with subject=entityId (structured, queryable, temporal)
+- **Relationships** linking entity IDs
+
+**Implications for M5:**
+- M5 now includes lorebook ETL as prerequisite
+- `getKnowledge(entityId, timestamp)` queries by ID, not name
+- Scene setup binds display names to entity IDs
+- New characters get fresh IDs (no collision with existing entities)
+- True epistemic isolation becomes possible
+
+**See:** `roadmap.md` (Architectural Foundation section), `decisions.md` (Lorebook Is Import Format)
 
 ---
 

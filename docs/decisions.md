@@ -1,12 +1,55 @@
 # Design Decisions
 
-**Last updated:** 2025-12-29
+**Last updated:** 2025-12-30
 
 This document captures the "why" behind key architectural decisions.
 
 ---
 
 ## Core Philosophy
+
+### Lorebook Is Import Format, Not Runtime Model
+
+**Decision:** Lorebook entries are imported and transformed into structured Entities, Facts, and Relationships. Runtime queries use entity IDs, not keyword matching.
+
+**Why:**
+- **Name collisions**: Keyword matching "Elara" can't distinguish Queen Elara from a student named Elara
+- **No disambiguation**: Prose blobs searched by strings have no identity concept
+- **No structure**: Can't query "what title does entity X have?"
+- **No temporal awareness**: Lorebook entries are static text
+
+**Design:**
+```
+LOREBOOK (Import)              →  RUNTIME MODEL
+┌─────────────────────────┐       ┌──────────────────────────────────────┐
+│ "Queen Elara of         │       │ Entity: elara-sunnaria-queen         │
+│  Sunnaria rules         │  ETL  │   displayName: "Elara"               │
+│  alongside King Alaric" │  ──►  │   facts:                             │
+│                         │       │     - {attr: "title", val: "Queen"}  │
+│  keys: ["Elara",        │       │     - {attr: "spouse", val: "alaric"}│
+│         "Queen Elara"]  │       │   relationships:                     │
+└─────────────────────────┘       │     - {type: "rules", to: "sunnaria"}│
+                                  └──────────────────────────────────────┘
+```
+
+**Benefits:**
+1. **No collisions**: Different entities have different IDs regardless of name
+2. **Structured queries**: `getFacts(entityId)` returns structured data
+3. **Temporal bounds**: Facts have validFrom/validTo
+4. **True epistemic isolation**: Knowledge is per-entity-ID
+
+**Implications:**
+- Retrieval works by entity ID, not keyword search
+- Scene setup binds names to entity IDs (or creates new entities)
+- The LLM/author maintains bindings within a session
+- displayName is just an attribute, not the identity
+
+**Alternative considered:** Fix keyword matching (secondary keys, corroborating evidence)
+- Rejected: Fundamentally can't disambiguate two entities with same name in same scene
+
+**Source:** Discussion on 2025-12-30 about "Elara problem" - student vs Queen with same name
+
+---
 
 ### The LLM Is Not the State Keeper
 
@@ -548,6 +591,7 @@ const createEntityStore = () => {
 
 | Decision | Rationale |
 |----------|-----------|
+| Lorebook is import format | Entity IDs solve name disambiguation |
 | Timeline is database | Handle temporal state elegantly |
 | Events → Facts | Preserve context, enable epistemic state |
 | Store verbose, render compact | Different goals (query vs tokens) |
