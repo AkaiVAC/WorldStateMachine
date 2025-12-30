@@ -7,6 +7,7 @@ type RawLorebookEntry = {
 	content?: string;
 	group?: string;
 	disable?: boolean;
+	constant?: boolean;
 };
 
 type RawLorebookData = {
@@ -39,6 +40,7 @@ export const loadLorebook = async (
 			keys,
 			content: raw.content ?? "",
 			group: raw.group ?? "",
+			constant: raw.constant ?? false,
 		});
 	}
 

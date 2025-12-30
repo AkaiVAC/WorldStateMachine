@@ -509,15 +509,39 @@ M1 ✅
 
 ---
 
+## Future Features (Post-M11)
+
+### Anticipatory Context Injection
+
+**Problem:** If a scene is *leading toward* a topic (e.g., trade negotiations about tariffs) without explicitly mentioning it, how can we preemptively inject relevant context?
+
+**Potential approaches:**
+
+1. **Scene Classification**
+   - LLM analyzes conversation trajectory: "This looks like a diplomatic scene building toward trade discussion"
+   - Pre-inject trade/economic entries before they're explicitly mentioned
+
+2. **Topic Momentum Tracking**
+   - Track topic mentions across conversation history
+   - When a topic gains momentum (multiple related mentions), anticipate and inject
+
+3. **Narrative Arc Templates**
+   - Define common story beats: "Diplomatic meeting" → likely leads to treaties, trade, alliances
+   - Pre-inject related context based on scene type
+
+**Status:** Deferred. Requires conversation history analysis and scene classification. Consider after M6.
+
+---
+
 ## Next Steps
 
-**Immediate:** Start M4 (Events)
+**Immediate:** Start M5 (Epistemic State)
 
-1. Design `Event` type with participants, location, visibility
-2. Create `EventStore` with queries by time/participant/location
-3. Apply ZOMBIES, write `test.todo()` cases
-4. Implement one test at a time
-5. Wire events to generate facts with temporal bounds
+1. Design `getKnowledge(characterId, timestamp)` query interface
+2. Implement participation-based knowledge (if you were there, you know)
+3. Implement visibility-based knowledge (public vs private events)
+4. Apply ZOMBIES, write `test.todo()` cases
+5. Create POV-filtered context retrieval
 
 **See also:**
 - `vision.md` - What we're building toward

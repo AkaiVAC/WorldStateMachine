@@ -4,4 +4,5 @@ export type LorebookEntry = {
 	keys: string[];
 	content: string;
 	group: string;
+	constant?: boolean;
 };
