@@ -51,6 +51,137 @@ LOREBOOK (Import)              →  RUNTIME MODEL
 
 ---
 
+### World State as RPG Stats (Not Prose)
+
+**Decision:** All entities (characters, kingdoms, economies, weather systems) have queryable numeric attributes. Abstract concepts like "Sunnarian Economy" or "Continental Trade" are entities with facts, not just prose.
+
+**Why:**
+- **Deterministic state**: Grain tariff is exactly 0.15, not "approximately 15%" that LLM might misremember
+- **No hardcoded schemas**: Facts are arbitrary key-value pairs - works for fantasy kingdoms, sci-fi colonies, horror scenarios
+- **Trackable change**: Every numeric value is a "knob" that can be turned and tracked over time
+- **Outlier detection**: All entities in a category have same attributes, outliers are notable (story beats)
+
+**Design:**
+```
+Character (concrete entity):
+  { subject: "aradia-princess", property: "age", value: 20 }
+  { subject: "aradia-princess", property: "height", value: 170 }
+  { subject: "aradia-princess", property: "combat.skill", value: 4.5 }  // 0-10 scale
+
+Kingdom (concrete entity):
+  { subject: "sunnaria-kingdom", property: "population", value: 7000000 }
+  { subject: "sunnaria-kingdom", property: "borders-count", value: 6 }
+  { subject: "sunnaria-kingdom", property: "military-strength", value: 6.5 }
+
+Economy (abstract entity):
+  { subject: "sunnaria-economy", property: "grain-tariff", value: 0.15 }
+  { subject: "sunnaria-economy", property: "trade-volume", value: 8500 }
+  { subject: "sunnaria-economy", property: "gold-reserves", value: 45000 }
+
+Weather (environmental entity):
+  { subject: "sunnaria-weather", property: "condition", value: "drought" }
+  { subject: "sunnaria-weather", property: "severity", value: 7.5 }
+```
+
+**Benefits:**
+1. **Genre-agnostic**: No hardcoded kingdom schema - facts adapt to any world
+2. **Comprehensive extraction**: ETL extracts EVERY measurable attribute, including inferred values
+3. **Consistent entities**: All kingdoms have same set of attributes (population, military-strength, etc.)
+4. **Story significance**: Outliers are meaningful (Sunnaria has 6 borders vs avg of 3)
+
+**ETL Implications:**
+- High-quality LLM required for extraction
+- Must infer missing values from qualitative prose ("thriving economy" → trade-volume: 8500)
+- Must identify common schema across entity categories (all kingdoms get same attributes)
+
+**Alternative considered:** Keep systems/economies as prose, only extract facts for characters
+- Rejected: Can't track economic changes deterministically, LLM will hallucinate tariff rates
+
+**Source:** Discussion on 2025-12-31 about world state management
+
+---
+
+### Tool-Calling Over Context-Stuffing
+
+**Decision:** LLMs query facts via tools rather than receiving massive pre-built context packages.
+
+**Why:**
+- **No hallucination**: LLM can't make up grain-tariff value because it must QUERY it
+- **Scalable**: Large worlds don't require stuffing 500KB of context into every request
+- **On-demand**: Only fetch facts relevant to current scene
+- **Deterministic**: Facts are source of truth, not LLM memory
+
+**Design:**
+```
+OLD APPROACH (Context-Stuffing):
+┌─────────────────────────────────────────┐
+│ Context (500KB):                        │
+│ - All lorebook entries for scene        │
+│ - Character descriptions                │
+│ - Kingdom details                       │
+│ - Economic state                        │
+│ - etc.                                  │
+└─────────────────────────────────────────┘
+         ↓
+      LLM generates
+         ↓
+   (might misremember facts)
+
+NEW APPROACH (Tool-Calling):
+┌─────────────────────────────────────────┐
+│ Minimal Context (50KB):                 │
+│ - Scene setup (who, where, when)       │
+│ - Entity ID list (just IDs, not facts) │
+│ - World fundamentals                    │
+│ - Available tools                       │
+└─────────────────────────────────────────┘
+         ↓
+      LLM thinks: "Need economic context"
+         ↓
+      LLM calls: getFacts("sunnaria-economy")
+         ↓
+      Tool returns: {grain-tariff: 0.15, ...} (2KB)
+         ↓
+      LLM generates using EXACT values
+```
+
+**Tools provided:**
+```typescript
+getFacts(entityId, timestamp?)
+  → Returns all facts for entity at given time
+
+getKnowledge(characterId, timestamp)
+  → Returns what this character knows (epistemic filtering)
+
+getRelationships(entityId, types?)
+  → Returns relationships for entity
+
+searchEntities(query)
+  → Discovery tool for finding relevant entities
+```
+
+**Enforcement:**
+- System prompt: "MUST call tools before generating numeric values"
+- Structured output / function calling to force tool usage
+- Validation rejects outputs that don't use tools
+
+**Benefits:**
+1. **Deterministic facts**: LLM queries exact values, can't hallucinate
+2. **Smaller context**: ~100KB total (minimal context + tool responses) vs 500KB
+3. **True epistemic isolation**: getKnowledge() filters facts, LLM literally doesn't see secret info
+
+**Challenges:**
+- LLM must reliably call tools (prompt engineering + function calling)
+- Validation needed to ensure tool usage
+- Scene setup must provide relevant entity IDs
+
+**Alternative considered:** Pre-build full context package like current system
+- Rejected: Doesn't scale, LLM can still misremember values, no epistemic guarantee
+
+**Source:** Discussion on 2025-12-31 about deterministic state management
+
+---
+
 ### The LLM Is Not the State Keeper
 
 **Decision:** External world state (Timeline, Map, Calendar) maintains consistency. The LLM just generates language.
@@ -62,11 +193,11 @@ LOREBOOK (Import)              →  RUNTIME MODEL
 
 **Instead:**
 - State is deterministic (Timeline, Map, Calendar)
-- Constraint package is pre-computed (not LLM reasoning)
-- LLM generates prose that fits pre-built constraints
+- LLM queries state via tools (see "Tool-Calling Over Context-Stuffing")
+- LLM generates prose that fits queried constraints
 - Validation catches mistakes
 
-**Trade-off:** More complexity (build a state engine), but reliable consistency.
+**Trade-off:** More complexity (build a state engine + tool infrastructure), but reliable consistency.
 
 ---
 
