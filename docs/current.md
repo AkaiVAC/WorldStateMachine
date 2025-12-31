@@ -1,8 +1,8 @@
 # Current Implementation State
 
-**Last updated:** 2025-12-30
+**Last updated:** 2025-12-31
 **Test status:** 204 tests passing
-**Current milestone:** M4 complete, ready for M5
+**Current milestone:** M4 complete, M5 architecture redesigned
 
 ---
 
@@ -359,7 +359,21 @@ See `CLAUDE.md` for full development guidelines.
 
 **What's missing:** Epistemic state (M5), multi-agent (M6), maps (M7-M9).
 
-**Next:** M5 - Epistemic State (POV-filtered knowledge based on event participation)
+**Next:** M5 - Epistemic State + Tool-Calling Architecture (major architectural shift)
+
+**Architectural Pivot (2025-12-31):**
+
+The M5 design has been significantly expanded based on insights about world state management:
+
+1. **World State as RPG Stats:** All entities (characters, kingdoms, economies, weather) have queryable numeric attributes. No hardcoded schemas - facts are arbitrary key-value pairs that adapt to any world.
+
+2. **Tool-Calling Over Context-Stuffing:** LLMs query facts via tools rather than receiving massive context packages. This ensures deterministic values (grain-tariff is exactly 0.15, not "approximately 15%") and prevents hallucination.
+
+3. **Hybrid Persistence:** SQLite for runtime queries + JSON snapshots for human-readable backups. Fast, scalable, inspectable.
+
+4. **Comprehensive ETL:** Extract ALL measurable attributes from lorebook prose, including inferred values. "Thriving economy" → trade-volume: 8500. All entities in a category get same schema.
+
+See updated roadmap.md M5 section for complete design.
 
 ---
 

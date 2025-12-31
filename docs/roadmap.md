@@ -213,68 +213,351 @@ type Event = {
 
 ---
 
-### M5: Epistemic State ⭐ FIRST BIG WIN
+### M5: Epistemic State + Tool-Calling Architecture ⭐ FIRST BIG WIN
 
-**Estimated effort:** 4-5 weeks
+**Estimated effort:** 5-6 weeks
 
-**Goal:** Track what each character knows based on event participation and visibility. Enable POV-filtered context retrieval. **Requires Fact-based runtime model.**
+**Goal:** Track what each character knows based on event participation and visibility. Enable tool-calling LLM architecture with deterministic facts. Transform lorebooks into comprehensive structured data.
 
-**Prerequisite: Lorebook → Entity/Fact ETL**
+**Architectural Shift:** Moving from context-stuffing to tool-calling (see decisions.md: "Tool-Calling Over Context-Stuffing")
 
-Before epistemic queries work, we need structured data:
+---
 
-1. **Entity extraction from lorebook**
-   - Parse lorebook entries
-   - Identify entities (characters, locations, factions)
-   - Assign unique entity IDs
-   - Extract `displayName` as an attribute
+#### Part 1: Hybrid Persistence Layer (SQLite + JSON)
 
-2. **Fact extraction from prose**
-   - Parse lorebook content into structured facts
-   - `{ subject: entityId, attribute: "title", value: "Queen" }`
-   - Attach temporal bounds where inferrable
+**Files to create:**
+- `src/world-state/persistence/sqlite-store.ts` - SQLite database operations
+- `src/world-state/persistence/json-snapshot.ts` - JSON export/import
+- `src/world-state/persistence/persistence.test.ts` - Tests
 
-3. **Relationship extraction**
-   - Identify relationships from prose ("wife of", "rules", "located in")
-   - Store as structured relationships with entity IDs
+**Schema:**
+```sql
+-- Single database per world: worlds/excelsia/excelsia.db
+CREATE TABLE entities (
+  id TEXT PRIMARY KEY,
+  worldId TEXT NOT NULL,
+  name TEXT NOT NULL,
+  category TEXT,  -- character, kingdom, economy, weather, etc.
+  aliases TEXT    -- JSON array
+);
 
-**What to build:**
-- **Lorebook ETL pipeline**: `lorebookToEntities(lorebook) → Entity[]`
-- **Fact extraction**: `extractFacts(entity, prose) → Fact[]`
-- Knowledge queries: `getKnowledge(entityId, timestamp)` → events + facts they know
-- Participation-based knowledge (if you were there, you know)
-- Visibility-based knowledge (public events, court events, group events)
-- `reveals` mechanism (learning about past events)
-- `concealedFrom` mechanism (explicitly hiding from someone)
-- POV-filtered context retrieval
+CREATE TABLE facts (
+  id TEXT PRIMARY KEY,
+  worldId TEXT NOT NULL,
+  subject TEXT NOT NULL,  -- entity ID
+  property TEXT NOT NULL,
+  value TEXT NOT NULL,    -- JSON for complex values
+  validFrom INTEGER,
+  validTo INTEGER,
+  causedBy TEXT           -- entity ID that caused this fact
+);
+
+CREATE TABLE relationships (
+  id TEXT PRIMARY KEY,
+  worldId TEXT NOT NULL,
+  fromEntity TEXT NOT NULL,
+  type TEXT NOT NULL,
+  toEntity TEXT NOT NULL,
+  validFrom INTEGER,
+  validTo INTEGER
+);
+
+CREATE TABLE events (
+  id TEXT PRIMARY KEY,
+  worldId TEXT NOT NULL,
+  timestamp INTEGER NOT NULL,
+  title TEXT,
+  location TEXT,          -- entity ID
+  participants TEXT,      -- JSON array of entity IDs
+  visibility TEXT,        -- private/restricted/public
+  outcomes TEXT,          -- JSON array of facts
+  prose TEXT
+);
+```
+
+**File structure:**
+```
+worlds/
+  excelsia/
+    excelsia.db              # SQLite runtime database
+    source/                  # Original lorebook files (read-only)
+      characters.json
+      kingdoms.json
+      ...
+    snapshots/               # Human-readable backups
+      snapshot-2025-12-31.json
+```
+
+---
+
+#### Part 2: Comprehensive Lorebook ETL
+
+**Files to create:**
+- `src/import/lorebook-etl.ts` - Main ETL pipeline
+- `src/import/entity-categorizer.ts` - Classify entity types
+- `src/import/fact-extractor.ts` - Extract ALL facts from prose
+- `src/import/relationship-extractor.ts` - Extract relationships
+- `src/import/schema-analyzer.ts` - Identify common attributes across categories
+- `src/import/lorebook-etl.test.ts` - Tests
+
+**ETL Pipeline:**
+```
+PASS 1: Entity Categorization
+  → Parse all lorebook entries
+  → LLM classifies each: character, kingdom, economy, magic-system, etc.
+  → Generate entity IDs: "aradia-princess", "sunnaria-kingdom", "sunnaria-economy"
+  → Result: Entity registry with categories
+
+PASS 2: Schema Discovery
+  → Group entities by category (all kingdoms, all characters, etc.)
+  → Identify common attributes across category
+  → Example: All kingdoms have [population, borders-count, military-strength, ...]
+  → Result: Schema templates per category
+
+PASS 3: Comprehensive Fact Extraction (per entity)
+  → For each entity, extract ALL measurable attributes
+  → Use schema from Pass 2 as guide
+  → Infer missing values from qualitative prose:
+    - "thriving economy" → trade-volume: 8500
+    - "defense-focused" → military-strength: 6.5/10
+  → Extract both explicit and implicit facts
+  → Result: Complete fact set per entity
+
+PASS 4: Relationship Extraction
+  → Identify relationships in prose
+  → Use entity registry for name→ID resolution
+  → Extract: daughter-of, rules, borders, allied-with, etc.
+  → Result: Relationship graph
+
+PASS 5: Store in SQLite + Create JSON Snapshot
+  → Insert all entities, facts, relationships into SQLite
+  → Generate JSON snapshot for human inspection
+  → Preserve original prose in metadata
+```
+
+**Entity Categories (auto-detected):**
+- `character` - Concrete persons (Aradia, Alaric, Elara)
+- `kingdom` - Concrete places (Sunnaria, Lunaria)
+- `economy` - Abstract systems (Sunnarian Economy, Continental Trade)
+- `weather` - Environmental state (Sunnaria Weather)
+- `magic-system` - Abstract concepts (Circle 1, Circle 2)
+- `race` - Categories (Humans, Elves)
+- `faction` - Groups (Merchant Guild, Military Order)
+- `constant` - World fundamentals (always in context)
+
+**LLM Requirements:**
+- High-quality model for comprehensive extraction (Opus-tier recommended)
+- Must infer missing numeric values from context
+- Must maintain consistency across similar entities
+
+---
+
+#### Part 3: Tool-Calling Infrastructure
+
+**Files to create:**
+- `src/tools/world-tools.ts` - Tool definitions for LLMs
+- `src/tools/fact-query.ts` - getFacts implementation
+- `src/tools/knowledge-query.ts` - getKnowledge implementation
+- `src/tools/relationship-query.ts` - getRelationships implementation
+- `src/tools/entity-search.ts` - searchEntities implementation
+- `src/tools/tools.test.ts` - Tests
+
+**Tools API:**
+```typescript
+// Tool 1: Query all facts for an entity
+getFacts(entityId: string, timestamp?: number): FactMap
+  → Returns: { property: value } map for all facts
+  → Example: { "grain-tariff": 0.15, "trade-volume": 8500, ... }
+
+// Tool 2: Epistemic query - what does character know?
+getKnowledge(characterId: string, timestamp: number): Knowledge
+  → Returns: { events, facts, entities } character is aware of
+  → Filters by event participation and visibility
+
+// Tool 3: Relationship query
+getRelationships(entityId: string, types?: string[]): Relationship[]
+  → Returns: All relationships for entity
+  → Optional filter by relationship type
+
+// Tool 4: Entity discovery
+searchEntities(query: string): EntitySummary[]
+  → Fuzzy search across entity names/categories
+  → Returns: ID list with brief descriptions
+```
+
+**Enforcement Strategy:**
+- System prompt with strict tool usage requirements
+- Function calling / structured output mode
+- Validation rejects outputs without tool calls
+- Lightweight LLM wrapper that enforces tool protocol
+
+---
+
+#### Part 4: Epistemic State Queries
+
+**Files to create:**
+- `src/world-state/epistemic/knowledge-query.ts` - Core epistemic logic
+- `src/world-state/epistemic/knowledge-query.test.ts` - Tests
+
+**Algorithm:**
+```typescript
+getKnowledge(characterId: string, timestamp: number) {
+  // 1. Events character participated in
+  const participatedEvents = eventStore.getByParticipant(characterId)
+    .filter(e => e.timestamp <= timestamp);
+
+  // 2. Public events (everyone knows)
+  const publicEvents = eventStore.getByVisibility("public")
+    .filter(e => e.timestamp <= timestamp);
+
+  // 3. Revealed events (told about it)
+  const revealedEvents = findReveals(characterId, timestamp);
+
+  // 4. Combine (minus concealed events)
+  const knownEvents = [...participatedEvents, ...publicEvents, ...revealedEvents]
+    .filter(e => !isConcealedFrom(e, characterId));
+
+  // 5. Extract facts and entity IDs from known events
+  const knownFacts = knownEvents.flatMap(e => getFactsFromEvent(e));
+  const knownEntities = extractEntityIds(knownEvents);
+
+  return { events: knownEvents, facts: knownFacts, entities: knownEntities };
+}
+```
+
+---
+
+#### Part 5: Scene Generation with Tools
+
+**Files to create:**
+- `src/scene/tool-calling-generator.ts` - LLM wrapper with tool enforcement
+- `src/scene/scene-setup.ts` - Scene configuration
+- `src/scene/validation.ts` - Output validation
+- `src/scene/scene.test.ts` - Tests
+
+**Scene Flow:**
+```typescript
+1. Scene Setup (human or LLM-assisted)
+   → participants: ["aradia-princess", "alaric-king"]
+   → location: "sunnaria-throne-room"
+   → timestamp: Chapter 5, Scene 3
+   → povCharacter: "aradia-princess" (optional)
+
+2. Build Minimal Context
+   → Scene setup details
+   → Entity ID list (relevant entities for this scene)
+   → World fundamentals (kingdoms, magic rules)
+   → Available tools
+
+3. LLM Generation (with tool calling)
+   → LLM must call getFacts/getKnowledge before generating
+   → Tools return deterministic values
+   → LLM generates prose using exact facts
+
+4. Validation
+   → Structural: Valid output format?
+   → Fact consistency: Contradicts existing facts?
+   → World boundary: Invalid entities/concepts?
+   → Epistemic: Character knows information they shouldn't?
+
+5. Extract New Facts from Output
+   → Parse prose for new facts/events
+   → Store with timestamp in SQLite
+
+6. User Response
+   → Parse user message for facts/events
+   → Update world state
+   → Continue loop
+```
+
+---
 
 **Deliverables:**
-- `src/import/lorebook-etl.ts` - Lorebook → Entity/Fact extraction
-- `src/import/lorebook-etl.test.ts` - ETL tests
-- `src/world-state/entity/entity.ts` - Entity type with ID
-- `src/world-state/epistemic/knowledge-query.ts` - Knowledge retrieval
-- `src/world-state/epistemic/knowledge-query.test.ts` - Tests
-- `src/retrieval/pov-filter.ts` - POV-filtered context for LLM
-- `src/retrieval/pov-filter.test.ts` - Tests
 
-**Test cases:**
+**Persistence:**
+- SQLite schema + operations
+- JSON snapshot export/import
+- Migration utilities
+
+**ETL:**
+- Multi-pass extraction pipeline
+- Entity categorization (LLM-powered)
+- Schema discovery across categories
+- Comprehensive fact extraction (including inferred values)
+- Relationship extraction
+
+**Tools:**
+- getFacts, getKnowledge, getRelationships, searchEntities
+- Tool enforcement wrapper
+- Validation pipeline
+
+**Epistemic:**
+- Knowledge query algorithm
+- Participation + visibility filtering
+- Reveal/conceal mechanisms
+
+**Scene Generation:**
+- Tool-calling LLM integration
+- Scene setup utilities
+- Output validation
+- Fact extraction from generated prose
+
+---
+
+**Test Cases:**
+
+**ETL:**
+- Extract Aradia → ALL attributes (age, height, personality, combat-skill, etc.)
+- Extract Sunnaria → ALL attributes (population, borders, military-strength, trade-volume, etc.)
+- All 9 kingdoms have same schema (consistent attributes)
+- Abstract entities (economy, weather) extracted as entities with facts
+
+**Persistence:**
+- Save/load world to SQLite
+- JSON snapshot matches database
+- Query performance acceptable (<100ms for fact queries)
+
+**Epistemic:**
 - Character participated in event → knows about it
 - Character didn't participate, event is public → knows about it
 - Character didn't participate, event is private → doesn't know
-- Event reveals prior event → character learns about past
-- Event concealed-from character → doesn't know even if public
+- getKnowledge filters correctly
 
-**Success criteria:**
-- Event 1: "Secret War Council" (Chapter 5, private, participants: [King, General])
-- Event 2: "Ball" (Chapter 5, public)
-- Query: "What does Princess Aradia know at Chapter 6?"
-  - ✅ Includes Ball (public)
-  - ❌ Doesn't include War Council (private, she wasn't there)
-- Generate scene from Aradia's POV → LLM context doesn't include War Council
+**Tool-Calling:**
+- LLM calls getFacts before generating economic data
+- LLM calls getKnowledge before writing character dialogue
+- Tool returns match database exactly (deterministic)
 
-**Enables:** Multi-agent orchestration, realistic roleplay
+---
 
-**Detailed design:** See `architecture/core/08-epistemic-state.md`
+**Success Criteria:**
+
+1. **Excelsia ETL Complete:**
+   - All 106 lorebook entries → entities in SQLite
+   - ~500-1000 facts extracted (comprehensive)
+   - Relationship graph populated
+   - JSON snapshot readable and accurate
+
+2. **Epistemic Isolation Works:**
+   - Create private event (Secret War Council)
+   - Query Aradia's knowledge → doesn't include it
+   - Query King's knowledge → includes it
+   - Tool calls respect epistemic boundaries
+
+3. **Tool-Calling Generation Works:**
+   - Scene: Aradia considers raising tariffs
+   - LLM calls getFacts("sunnaria-economy")
+   - Tool returns grain-tariff: 0.15 (exact value)
+   - LLM generates prose using 0.15, not hallucinated value
+
+4. **Round-Trip Works:**
+   - Generate scene → extract new facts → store in DB
+   - Next scene queries updated facts
+   - Changes persist across sessions (SQLite)
+
+**Enables:** Multi-agent orchestration (M6), deterministic world state, true epistemic isolation
+
+**Detailed design:** See `architecture/core/08-epistemic-state.md` and decisions.md
 
 ---
 
