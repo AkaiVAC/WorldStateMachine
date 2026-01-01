@@ -1,122 +1,165 @@
 # Current Implementation State
 
 **Last updated:** 2026-01-01
-**Test status:** 192 tests passing (cleaned up redundant tests)
-**Current milestone:** M4 complete, Extension Architecture designed
+**Test status:** ✅ 230 tests passing
+**Current milestone:** M4 complete, Extension Architecture Phases 1 & 2 complete
 
-**🚨 NEXT SESSION: See [NEXT_SESSION.md](NEXT_SESSION.md) for complete extension architecture plan**
+**📦 Architecture:** Plugin-first extension system with path aliases
+
+**🚧 Next:** Phase 3 - Runtime boot system ([NEXT_SESSION.md](NEXT_SESSION.md))
+
+---
+
+## Extension System ✅
+
+**Location:** `src/extension-system/`, `extensions/core/`
+
+The project now uses a **plugin-first architecture** where all functionality (including core) is an extension.
+
+### Extension System Core
+- ✅ **Extension registry** with dependency validation
+- ✅ **Extension loader** with TS + JSON config support
+- ✅ **Lifecycle hook system** with execution control
+- ✅ **Auto-discovery** from `extensions/` directory
+- ✅ **Circular dependency detection**
+- ✅ **Path aliases** (`@core/*`, `@ext/*`)
+- 33 tests passing
+
+### Core Types
+**Location:** `src/core-types/`
+- Fundamental contracts: Event, Fact, Entity, Relationship
+- Used by all extensions via `@core/*` imports
+
+### Current Structure
+```
+src/
+├── core-types/         # Fundamental types
+├── extension-system/   # Plugin infrastructure
+└── example/           # Excelsia test data
+
+extensions/
+└── core/              # All current functionality
+    ├── store-timeline/
+    ├── load-world-data/
+    ├── validate-consistency/
+    ├── build-scene-context/
+    ├── send-scene-context/
+    └── provide-ui/
+```
 
 ---
 
 ## What Works Right Now ✅
 
-### World State Foundation
-**Location:** `src/world-state/`
+### Timeline Storage (Core Extension)
+**Location:** `extensions/core/store-timeline/`
 
-**Fact Store** (`fact/`)
+**Fact Store** (`memory-fact-store/`)
 - Store and query facts (subject/property/value)
-- **NO temporal bounds yet** (validFrom/validTo not implemented)
-- Multi-world support (worldId on each fact)
-- 4 tests passing
-
-**Entity Store** (`entity/`)
-- Store entities with id/name/aliases/group
-- Lookup by id, name, or alias (case-insensitive)
-- Entity view: compute entity list from facts
+- Temporal queries (validFrom/validTo)
 - Multi-world support
 - 15 tests passing
 
-**Lexicon** (`lexicon/`)
+**Entity Store** (`memory-entity-store/`)
+- Store entities with id/name/aliases/group
+- Lookup by id, name, or alias (case-insensitive)
+- Multi-world support
+- 10 tests passing
+
+**Lexicon** (`memory-lexicon/`)
 - Track valid terms per world (case-insensitive)
 - World boundary validation support
-- 5 tests passing
+- 4 tests passing
 
-**Relationship Store** (`relationship/`)
-- Store typed relationships between entities (flexible string types)
+**Relationship Store** (`memory-relationship-store/`)
+- Store typed relationships between entities
 - Bidirectional queries (from/to/both directions)
 - Query by relationship type
 - Multi-world support
-- 12 tests passing
+- 8 tests passing
 
-**Graph Traversal** (`relationship/`)
+**Graph Traversal** (`memory-relationship-store/`)
 - BFS traversal with configurable max depth
 - Filter by relationship types
 - Filter by direction (from/to/both)
-- Circular relationship handling (no infinite loops)
+- Circular relationship handling
 - 10 tests passing
 
-**Event Store** (`event/`)
-- Store events with id, timestamp, title, location, participants, visibility
+**Event Store** (`memory-event-store/`)
+- Store events with participants, visibility, outcomes
 - Query by participant, timestamp, location, visibility
-- Fact generation from events (outcomes → facts with validFrom)
+- Fact generation from events
 - Visibility levels: private, restricted, public
-- Prose storage for original narrative
 - 30 tests passing
 
-### Import
-**Location:** `src/import/`
+### Data Loading (Core Extension)
+**Location:** `extensions/core/load-world-data/`
 
-**SillyTavern Importer**
+**SillyTavern Loader** (`from-sillytavern/`)
 - Parse SillyTavern lorebook JSON
-- Create entities from entries (comment → name, keys → aliases, group → group)
+- Create entities from entries
 - Generate UUIDs for entity IDs
 - Add keys to lexicon
-- Skip disabled entries
-- Track skipped entries with reasons
+- Track skipped entries
 - 8 tests passing
 
-### Validation
-**Location:** `src/validation/`
+### Consistency Validation (Core Extension)
+**Location:** `extensions/core/validate-consistency/`
 
-**Validator Framework**
+**Validation Framework** (`validation-framework/`)
 - Generic rule interface (pluggable)
 - Run multiple rules, collect violations
 - 5 tests passing
 
-**Entity Exists Rule**
-- Detect unknown entities using title words + capitalization heuristics
-- Fuzzy matching for suggestions ("Did you mean Princess Aradia?")
+**Entity Exists Check** (`check-entity-exists/`)
+- Detect unknown entities with fuzzy matching
+- Suggestions for similar entities
 - 6 tests passing
 
-**World Boundary Rule**
-- LLM-powered detection of out-of-world concepts
-- Flags anachronisms and real-world bleeding
+**World Boundary Check** (`check-world-boundary/`)
+- LLM-powered anachronism detection
+- Flags out-of-world concepts
 - 5 tests passing
 
-### LLM Integration
-**Location:** `src/llm/`
+### Scene Context Building (Core Extension)
+**Location:** `extensions/core/build-scene-context/`
 
-**OpenRouter Client**
-- API client for OpenRouter
-- Configurable model (default: `xiaomi/mimo-v2-flash:free`)
-- Used by World Boundary Rule and Entity Extraction
-- 5 tests passing
-
-### Context Injection & Retrieval
-**Location:** `src/retrieval/`, `src/analysis/`
-
-**Keyword Matcher** (`retrieval/`)
+**Keyword Matcher** (`match-keywords/`)
 - Match lorebook entries by keywords
 - Case-insensitive matching
 - Automatic trigger detection
 - 5 tests passing
 
-**Entity Matcher** (`retrieval/`)
-- Fuzzy matching of extracted entities to lorebook entries
+**Entity Matcher** (`match-entities/`)
+- Fuzzy matching to lorebook entries
 - String similarity scoring
 - 8 tests passing
 
-**Prompt Analyzer** (`analysis/`)
-- LLM-powered entity extraction from user prompts
+**Prompt Analyzer** (`analyze-prompt/`)
+- LLM-powered entity extraction
 - Extracts entities/locations/concepts
 - 8 tests passing
 
-**Lorebook Loader** (`retrieval/`)
-- Load and manage lorebook entries
-- Integration point for context injection
+**Relationship Expander** (`expand-relationships/`)
+- Graph-based context expansion
+- Relationship traversal
+- 7 tests passing
 
-### Chat UI
-**Location:** `src/ui/`
+**Lorebook Loader**
+- Load and manage lorebook entries
+- Integration with context building
+
+### LLM Sending (Core Extension)
+**Location:** `extensions/core/send-scene-context/`
+
+**OpenRouter Client** (`to-llm/`)
+- API client for OpenRouter
+- Configurable models
+- Used by validators and analyzers
+- 5 tests passing
+
+### Dev Chat UI (Core Extension)
+**Location:** `extensions/core/provide-ui/dev-chat/`
 
 **Server** (`server/`)
 - HTTP server with routing
@@ -125,7 +168,7 @@
 - 8 tests passing
 
 **Routes** (`routes/`)
-- `/chat` - Chat interface
+- `/chat` - Chat interface with context injection
 - `/models` - Model selection
 - `/lorebook` - Lorebook management
 - `/sessions` - Session CRUD
@@ -135,14 +178,13 @@
 - Chat messages component
 - Lorebook list component
 - Markdown rendering
-- DOM utilities
-- 13 tests passing (1 error: missing 'marked' package)
+- 13 tests passing
 
 ### Integration
-**Location:** `src/`
+**Location:** `src/integration.test.ts`
 
-**Integration Tests**
-- Full pipeline testing (import → validation → context injection)
+**Full Pipeline Tests**
+- Import → Validation → Context Injection
 - 7 tests passing
 
 ---
