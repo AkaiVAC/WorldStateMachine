@@ -1,4 +1,4 @@
-import type { Fact, Event } from "../../core-types";
+import type { Event, Fact } from "../../core-types";
 
 export type SceneContext = {
 	worldId: string;

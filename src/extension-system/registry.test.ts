@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { createExtensionRegistry } from "./registry";
 import { defineExtension } from "./define-extension";
+import { createExtensionRegistry } from "./registry";
 
 describe("Extension Registry", () => {
 	test("registers and retrieves extension", () => {
@@ -104,7 +104,7 @@ describe("Extension Registry", () => {
 
 		const errors = registry.validate();
 		expect(errors.length).toBeGreaterThan(0);
-		expect(errors[0].type).toBe("circular-dependency");
+		expect(errors[0]!.type).toBe("circular-dependency");
 	});
 
 	test("detects complex circular dependencies", () => {

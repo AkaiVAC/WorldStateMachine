@@ -25,20 +25,32 @@ export type HookHandler = (ctx: HookContext) => Promise<void> | void;
 export type HookManager = {
 	register: (hook: Hook, handler: HookHandler, extensionName: string) => void;
 	execute: (hook: Hook, context: HookContext) => Promise<HookContext>;
-	getHandlers: (hook: Hook) => Array<{ handler: HookHandler; extension: string }>;
+	getHandlers: (
+		hook: Hook,
+	) => Array<{ handler: HookHandler; extension: string }>;
 };
 
 export const createHookManager = (): HookManager => {
-	const handlers = new Map<Hook, Array<{ handler: HookHandler; extension: string }>>();
+	const handlers = new Map<
+		Hook,
+		Array<{ handler: HookHandler; extension: string }>
+	>();
 
-	const register = (hook: Hook, handler: HookHandler, extensionName: string): void => {
+	const register = (
+		hook: Hook,
+		handler: HookHandler,
+		extensionName: string,
+	): void => {
 		if (!handlers.has(hook)) {
 			handlers.set(hook, []);
 		}
 		handlers.get(hook)?.push({ handler, extension: extensionName });
 	};
 
-	const execute = async (hook: Hook, context: HookContext): Promise<HookContext> => {
+	const execute = async (
+		hook: Hook,
+		context: HookContext,
+	): Promise<HookContext> => {
 		const hookHandlers = handlers.get(hook) || [];
 
 		for (const { handler } of hookHandlers) {
@@ -51,7 +63,9 @@ export const createHookManager = (): HookManager => {
 		return context;
 	};
 
-	const getHandlers = (hook: Hook): Array<{ handler: HookHandler; extension: string }> => {
+	const getHandlers = (
+		hook: Hook,
+	): Array<{ handler: HookHandler; extension: string }> => {
 		return handlers.get(hook) || [];
 	};
 
