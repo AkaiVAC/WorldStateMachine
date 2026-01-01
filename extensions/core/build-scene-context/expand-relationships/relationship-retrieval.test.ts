@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { createGraphTraversal } from "../world-state/relationship/graph-traversal";
-import { createRelationshipStore } from "../world-state/relationship/relationship-store";
-import type { LorebookEntry } from "./lorebook-entry";
+import { createGraphTraversal } from "../../store-timeline/memory-relationship-store/graph-traversal";
+import { createRelationshipStore } from "../../store-timeline/memory-relationship-store/relationship-store";
+import type { LorebookEntry } from "../lorebook-entry";
 import { createRelationshipRetrieval } from "./relationship-retrieval";
 
 describe("RelationshipRetrieval", () => {

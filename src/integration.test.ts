@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import type { PromptAnalyzer } from "./analysis/prompt-analyzer";
-import { importSillyTavernLorebook } from "./import/silly-tavern-importer";
-import { createEntityExistsRule } from "./validation/entity-exists-rule";
-import { validate } from "./validation/validator";
-import { createWorldBoundaryRule } from "./validation/world-boundary-rule";
-import { createEntityStore } from "./world-state/entity/entity-store";
-import { createLexicon } from "./world-state/lexicon/lexicon";
+import type { PromptAnalyzer } from "../extensions/core/build-scene-context/analyze-prompt/prompt-analyzer";
+import { importSillyTavernLorebook } from "../extensions/core/load-world-data/from-sillytavern/sillytavern-loader";
+import { createEntityExistsRule } from "../extensions/core/validate-consistency/check-entity-exists/entity-exists-rule";
+import { validate } from "../extensions/core/validate-consistency/validation-framework/validator";
+import { createWorldBoundaryRule } from "../extensions/core/validate-consistency/check-world-boundary/world-boundary-rule";
+import { createEntityStore } from "../extensions/core/store-timeline/memory-entity-store/entity-store";
+import { createLexicon } from "../extensions/core/store-timeline/memory-lexicon/lexicon";
 
 const examplesDir = `${import.meta.dir}/example/Excelsia`;
 const worldId = "excelsia";

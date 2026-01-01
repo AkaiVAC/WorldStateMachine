@@ -1,15 +1,15 @@
 import { join } from "node:path";
-import { excelsiaRelationships } from "../../example/Excelsia/relationships";
-import type { LorebookEntry } from "../../retrieval/lorebook-entry";
-import { loadLorebooksFromDir } from "../../retrieval/lorebook-loader";
-import type { RelationshipStore } from "../../world-state/relationship/relationship-store";
-import { createRelationshipStore } from "../../world-state/relationship/relationship-store";
+import { excelsiaRelationships } from "../../../../../src/example/Excelsia/relationships";
+import type { LorebookEntry } from "../../build-scene-context/lorebook-entry";
+import { loadLorebooksFromDir } from "../../build-scene-context/lorebook-loader";
+import type { RelationshipStore } from "../../store-timeline/memory-relationship-store/relationship-store";
+import { createRelationshipStore } from "../../store-timeline/memory-relationship-store/relationship-store";
 
 let cachedEntries: LorebookEntry[] | null = null;
 let cachedRelationshipStore: RelationshipStore | null = null;
 
 const getExcelsiaPath = () => {
-	return join(import.meta.dir, "../../example/Excelsia");
+	return join(import.meta.dir, "../../../../../src/example/Excelsia");
 };
 
 export const getLorebookEntries = async (): Promise<LorebookEntry[]> => {
