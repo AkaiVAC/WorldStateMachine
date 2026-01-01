@@ -1,4 +1,10 @@
-import type { Fact, Entity, Event, Relationship, Visibility } from "../../core-types";
+import type {
+	Entity,
+	Event,
+	Fact,
+	Relationship,
+	Visibility,
+} from "../../core-types";
 
 export type FactStore = {
 	add: (fact: Fact) => void;

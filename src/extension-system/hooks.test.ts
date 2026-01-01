@@ -8,7 +8,7 @@ describe("Hook Manager", () => {
 
 		manager.register(
 			"before-validation",
-			async (ctx: HookContext) => {
+			async (_ctx: HookContext) => {
 				executed = true;
 			},
 			"test-ext",

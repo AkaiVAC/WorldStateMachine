@@ -1,5 +1,5 @@
-import { describe, expect, test, beforeEach, afterEach } from "bun:test";
-import { mkdirSync, writeFileSync, rmSync, existsSync } from "node:fs";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { loadExtensions } from "./loader";
 import { createExtensionRegistry } from "./registry";
@@ -9,7 +9,10 @@ let currentTestDir = "";
 
 const setupTestExtensions = () => {
 	testDirCounter++;
-	currentTestDir = join(import.meta.dir, `__test-extensions-${testDirCounter}__`);
+	currentTestDir = join(
+		import.meta.dir,
+		`__test-extensions-${testDirCounter}__`,
+	);
 	if (existsSync(currentTestDir)) {
 		rmSync(currentTestDir, { recursive: true });
 	}
@@ -33,7 +36,10 @@ const createTsExtension = (name: string, config: object) => {
 const createJsonExtension = (name: string, config: object) => {
 	const dir = join(currentTestDir, name);
 	mkdirSync(dir, { recursive: true });
-	writeFileSync(join(dir, "extension.config.json"), JSON.stringify(config, null, 2));
+	writeFileSync(
+		join(dir, "extension.config.json"),
+		JSON.stringify(config, null, 2),
+	);
 };
 
 describe("Extension Loader", () => {
@@ -58,8 +64,8 @@ describe("Extension Loader", () => {
 		);
 
 		expect(loaded).toHaveLength(1);
-		expect(loaded[0].extension.name).toBe("test-ext");
-		expect(loaded[0].configType).toBe("typescript");
+		expect(loaded[0]!.extension.name).toBe("test-ext");
+		expect(loaded[0]!.configType).toBe("typescript");
 	});
 
 	test("loads JSON config", async () => {
@@ -75,8 +81,8 @@ describe("Extension Loader", () => {
 		);
 
 		expect(loaded).toHaveLength(1);
-		expect(loaded[0].extension.name).toBe("test-ext");
-		expect(loaded[0].configType).toBe("json");
+		expect(loaded[0]!.extension.name).toBe("test-ext");
+		expect(loaded[0]!.configType).toBe("json");
 	});
 
 	test("prefers TypeScript over JSON when both exist", async () => {
@@ -98,8 +104,8 @@ describe("Extension Loader", () => {
 			registry,
 		);
 
-		expect(loaded[0].extension.name).toBe("from-ts");
-		expect(loaded[0].configType).toBe("typescript");
+		expect(loaded[0]!.extension.name).toBe("from-ts");
+		expect(loaded[0]!.configType).toBe("typescript");
 	});
 
 	test("throws when extensions directory does not exist", async () => {
@@ -133,8 +139,8 @@ describe("Extension Loader", () => {
 			registry,
 		);
 
-		expect(loaded[0].extension.id).toBeDefined();
-		expect(typeof loaded[0].extension.id).toBe("string");
+		expect(loaded[0]!.extension.id).toBeDefined();
+		expect(typeof loaded[0]!.extension.id).toBe("string");
 	});
 
 	test("preserves existing ID", async () => {
@@ -150,7 +156,7 @@ describe("Extension Loader", () => {
 			registry,
 		);
 
-		expect(loaded[0].extension.id).toBe("custom-id-12345");
+		expect(loaded[0]!.extension.id).toBe("custom-id-12345");
 	});
 
 	test("validates extension has name", async () => {
@@ -191,7 +197,7 @@ describe("Extension Loader", () => {
 		);
 
 		expect(loaded).toHaveLength(1);
-		expect(loaded[0].extension.name).toBe("enabled");
+		expect(loaded[0]!.extension.name).toBe("enabled");
 	});
 
 	test("sorts by dependencies", async () => {
@@ -209,8 +215,8 @@ describe("Extension Loader", () => {
 		);
 
 		expect(loaded).toHaveLength(2);
-		expect(loaded[0].extension.name).toBe("base");
-		expect(loaded[1].extension.name).toBe("dependent");
+		expect(loaded[0]!.extension.name).toBe("base");
+		expect(loaded[1]!.extension.name).toBe("dependent");
 	});
 
 	test("respects explicit order", async () => {
@@ -227,9 +233,9 @@ describe("Extension Loader", () => {
 			registry,
 		);
 
-		expect(loaded[0].extension.name).toBe("c");
-		expect(loaded[1].extension.name).toBe("a");
-		expect(loaded[2].extension.name).toBe("b");
+		expect(loaded[0]!.extension.name).toBe("c");
+		expect(loaded[1]!.extension.name).toBe("a");
+		expect(loaded[2]!.extension.name).toBe("b");
 	});
 
 	test("explicit order overrides dependencies", async () => {
@@ -249,8 +255,8 @@ describe("Extension Loader", () => {
 			registry,
 		);
 
-		expect(loaded[0].extension.name).toBe("dependent");
-		expect(loaded[1].extension.name).toBe("base");
+		expect(loaded[0]!.extension.name).toBe("dependent");
+		expect(loaded[1]!.extension.name).toBe("base");
 	});
 
 	test("loads multiple extensions", async () => {
@@ -362,7 +368,7 @@ describe("Extension Loader", () => {
 		);
 
 		expect(loaded).toHaveLength(1);
-		expect(loaded[0].extension.name).toBe("test-ext");
+		expect(loaded[0]!.extension.name).toBe("test-ext");
 	});
 
 	test("throws on malformed JSON config", async () => {
