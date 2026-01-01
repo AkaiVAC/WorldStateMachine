@@ -103,24 +103,24 @@ extensions/
 │   │       ├── routes/
 │   │       └── public/
 │   │
-│   └── extension.json                # Core extension manifest
+│   └── extension.config.ts           # TypeScript config (not JSON!)
 │
 ├── worldanvil-importer/              # Example user extension
 │   ├── load-world-data/
 │   │   └── from-worldanvil/
-│   └── extension.json
+│   └── extension.config.ts
 │
 ├── postgres-timeline/                # Example: Replace storage
 │   ├── store-timeline/
 │   │   ├── postgres-fact-store/
 │   │   └── postgres-event-store/
-│   └── extension.json
+│   └── extension.config.ts
 │
 └── advanced-validators/              # Example: Add validators
     ├── validate-consistency/
     │   ├── check-temporal-consistency/
     │   └── check-spatial-validity/
-    └── extension.json
+    └── extension.config.ts
 
 extensions.config.json                # Optional config
 lorebooks/
@@ -132,57 +132,74 @@ lorebooks/
 
 ---
 
-## Extension Manifest Format
+## Extension Configuration (TypeScript!)
+
+### **Why TypeScript instead of JSON?**
+
+✅ **Full type inference** - VS Code autocomplete for all fields
+✅ **Type checking** - Catch errors at development time
+✅ **Import types** - Can import interfaces from extension-system
+✅ **No build step** - Bun imports `.ts` files directly
+✅ **Better DX** - Validation, refactoring, inline docs
 
 ### **Minimal Extension**
 
-```json
-{
-  "name": "worldanvil-importer",
-  "version": "1.0.0",
-  "description": "Import from World Anvil",
-  "author": "Your Name"
-}
+```typescript
+// extensions/worldanvil-importer/extension.config.ts
+import { defineExtension } from '../../src/extension-system'
+
+export default defineExtension({
+  name: 'worldanvil-importer',
+  version: '1.0.0',
+  description: 'Import from World Anvil',
+  author: 'Your Name'
+  // ↑ VS Code provides autocomplete!
+})
 ```
 
 **Notes:**
 - `id` is **auto-generated** on first load (UUID)
-- System writes it back to manifest
+- `defineExtension()` provides full type inference
+- All fields validated at development time
 
 ### **Full Extension with All Features**
 
-```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "name": "advanced-validators",
-  "version": "2.1.0",
-  "description": "Advanced temporal and spatial validators",
-  "author": "Community",
+```typescript
+// extensions/advanced-validators/extension.config.ts
+import { defineExtension } from '../../src/extension-system'
 
-  "dependencies": ["core"],
+export default defineExtension({
+  id: '550e8400-e29b-41d4-a716-446655440000',
+  name: 'advanced-validators',
+  version: '2.1.0',
+  description: 'Advanced temporal and spatial validators',
+  author: 'Community',
 
-  "provides": {
-    "validators": ["temporal-consistency", "spatial-validity"]
+  dependencies: ['core'],  // ← Autocomplete shows available extensions
+
+  provides: {
+    validators: ['temporal-consistency', 'spatial-validity']
   },
 
-  "replaces": {
-    "core/stores/fact-store": {
-      "reason": "PostgreSQL backend for scalability",
-      "interface": "FactStore",
-      "compatible": true
+  replaces: {
+    'core/stores/fact-store': {
+      reason: 'PostgreSQL backend for scalability',
+      interface: 'FactStore',    // ← Type-checked against interfaces
+      compatible: true
     }
   },
 
-  "hooks": {
-    "before-validation": ["pre-check-optimization"],
-    "after-validation": ["detailed-error-reporting"],
-    "on-fact-extracted": ["augment-metadata"]
+  hooks: {
+    'before-validation': ['pre-check-optimization'],
+    'after-validation': ['detailed-error-reporting'],
+    'on-fact-extracted': ['augment-metadata']
+    // ↑ Autocomplete shows all available hooks
   },
 
-  "config": {
-    "postgresUrl": "postgresql://localhost:5432/timeline"
+  config: {
+    postgresUrl: 'postgresql://localhost:5432/timeline'
   }
-}
+})
 ```
 
 ---
@@ -235,10 +252,10 @@ type Hook =
   | 'on-relationship-added'
 
 interface HookContext {
-  data: any                    // Current data
-  metadata: Record<string, any> // Metadata
-  skip?: boolean               // Skip default behavior
-  augment?: any                // Add to result
+  data: unknown                      // Current data (use `unknown`, not `any`!)
+  metadata: Record<string, unknown>  // Metadata
+  skip?: boolean                     // Skip default behavior
+  augment?: unknown                  // Add to result
 }
 ```
 
@@ -246,6 +263,20 @@ interface HookContext {
 - `before-*`: Can skip/modify input
 - `after-*`: Can augment/modify output
 - `on-*`: React to events
+
+**Type Safety:**
+Extensions must narrow `unknown` types before use:
+```typescript
+hooks: {
+  'on-fact-extracted': async (ctx: HookContext) => {
+    // Must validate type before use
+    if (isFact(ctx.data)) {
+      const fact = ctx.data as Fact
+      // Now type-safe!
+    }
+  }
+}
+```
 
 ---
 
@@ -345,6 +376,8 @@ export type Relationship = {
 
 ## Extension Interfaces
 
+**Important:** All interfaces use `unknown` instead of `any` for type safety. Extensions must narrow types before use.
+
 ### **Store Interface**
 
 ```typescript
@@ -438,7 +471,7 @@ export interface SceneContext {
 
 export interface SendResult {
   response: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>  // Use `unknown`, not `any`
 }
 ```
 
@@ -448,16 +481,36 @@ export interface SendResult {
 
 ### **Phase 1: Extension System Core (Week 1)**
 
-1. Create `src/core-types/` with fundamental types
-2. Create `src/extension-system/interfaces/` with all interfaces
-3. Create `src/extension-system/registry.ts` (extension registry)
-4. Create `src/extension-system/loader.ts` (auto-discovery, manifest parsing)
-5. Create `src/extension-system/hooks.ts` (lifecycle hook system)
-6. Tests for extension loading and validation
+1. Create `src/core-types/` with fundamental types (Event, Fact, Entity, Relationship)
+2. Create `src/extension-system/interfaces/` with all interfaces (all use `unknown`, not `any`)
+3. Create `src/extension-system/define-extension.ts` (Extension type + defineExtension helper)
+4. Create `src/extension-system/registry.ts` (extension registry)
+5. Create `src/extension-system/loader.ts` (auto-discovery, loads .ts configs)
+6. Create `src/extension-system/hooks.ts` (lifecycle hook system)
+7. Tests for extension loading and validation
+
+**Key files:**
+```typescript
+// src/extension-system/define-extension.ts
+export type Extension = {
+  id?: string
+  name: string
+  version: string
+  description?: string
+  author?: string
+  dependencies?: string[]
+  provides?: { /* ... */ }
+  replaces?: Record<string, { /* ... */ }>
+  hooks?: Partial<Record<Hook, string[]>>
+  config?: Record<string, unknown>  // ← `unknown`, not `any`!
+}
+
+export const defineExtension = (ext: Extension): Extension => ext
+```
 
 ### **Phase 2: Migrate to Extensions (Week 2)**
 
-1. Create `extensions/core/extension.json`
+1. Create `extensions/core/extension.config.ts` (TypeScript, not JSON!)
 2. Move all current code to `extensions/core/`
    - `src/world-state/` → `extensions/core/store-timeline/`
    - `src/import/` → `extensions/core/load-world-data/`
