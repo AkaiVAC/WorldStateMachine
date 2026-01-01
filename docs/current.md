@@ -1,8 +1,10 @@
 # Current Implementation State
 
-**Last updated:** 2025-12-31
-**Test status:** 204 tests passing
-**Current milestone:** M4 complete, M5 architecture redesigned
+**Last updated:** 2026-01-01
+**Test status:** 192 tests passing (cleaned up redundant tests)
+**Current milestone:** M4 complete, Extension Architecture designed
+
+**🚨 NEXT SESSION: See [NEXT_SESSION.md](NEXT_SESSION.md) for complete extension architecture plan**
 
 ---
 
@@ -395,8 +397,61 @@ See updated roadmap.md M5 and M11 sections for complete designs.
 
 ---
 
+## Recent Changes (2026-01-01)
+
+### **Code Quality Cleanup**
+
+**Removed dead code:**
+- `validate-prompt.ts` - Standalone demo script, functionality covered by tests
+- `markdown.test.ts` - Tested external library, not our code
+- `entity-view.ts` + tests - Unused utility
+
+**Results:**
+- Tests: 192 passing (down from 204, removed 12 redundant tests)
+- Cleaner codebase, no unused code
+
+### **Extension Architecture Decision** 🎯
+
+**Major architectural pivot:** Moving from traditional monolithic structure to **plugin-first architecture**.
+
+**Key decisions:**
+1. **Everything is an extension** - Including core functionality
+2. **Zero codebase changes** to add features - Drop extension folder, restart
+3. **Lifecycle hooks** - Extensions can intercept before/after any operation
+4. **Extensible stores** - Even timeline storage is pluggable
+5. **Auto-discovery** - No manual registration needed
+6. **Readable directory names** - `load-world-data/`, `validate-consistency/`, etc.
+
+**See [NEXT_SESSION.md](NEXT_SESSION.md) for complete implementation plan.**
+
+**Structure preview:**
+```
+src/
+├── core-types/           # Fundamental (Event, Fact, Entity)
+├── extension-system/     # Plugin loader, registry, hooks
+└── runtime/              # Boot system
+
+extensions/
+├── core/                 # ALL current functionality as extension
+│   ├── load-world-data/
+│   ├── store-timeline/
+│   ├── validate-consistency/
+│   ├── build-scene-context/
+│   └── send-scene-context/
+└── (user extensions)
+```
+
+**Impact:**
+- Future features = new extensions (no core changes)
+- Users can replace any component (with validation)
+- Clean separation of concerns
+- VS Code-level extensibility
+
+---
+
 **See also:**
 - `vision.md` - The full picture
 - `roadmap.md` - Step-by-step path from here to vision
 - `DECISIONS.md` - Why we made key design choices
 - `notes/context-injection-analysis.md` - Latest testing/analysis
+- **`NEXT_SESSION.md`** - **Extension architecture implementation plan** 🚨
