@@ -345,10 +345,50 @@ PASS 5: Store in SQLite + Create JSON Snapshot
 - `faction` - Groups (Merchant Guild, Military Order)
 - `constant` - World fundamentals (always in context)
 
+**Character-Specific Extraction (RPG Model):**
+
+Characters get comprehensive state extraction across categories:
+
+**1. Physical Attributes:**
+```typescript
+{subject: "reacher", property: "height", value: 185}  // cm
+{subject: "reacher", property: "strength", value: 7.5}  // 0-10 scale
+{subject: "reacher", property: "dexterity", value: 6.0}
+{subject: "reacher", property: "age", value: 34}
+```
+
+**2. Equipment State:**
+```typescript
+{subject: "reacher", property: "equipment.shoe-left.condition", value: "worn"}
+{subject: "reacher", property: "equipment.tunic.color", value: "red"}
+{subject: "reacher", property: "equipment.sword", value: "standard-steel-blade"}
+```
+
+**3. Appearance:**
+```typescript
+{subject: "reacher", property: "appearance.clothing.tunic.color", value: "red"}
+{subject: "reacher", property: "appearance.hair.style", value: "short-unkempt"}
+{subject: "reacher", property: "appearance.visible-injuries", value: "scar-left-cheek"}
+```
+
+**4. Capabilities:**
+```typescript
+{subject: "reacher", property: "skill.aspect-theory", value: 9.5}  // 0-10
+{subject: "reacher", property: "skill.combat", value: 7.0}
+{subject: "reacher", property: "can-swim", value: true}
+```
+
+**5. Social/Emotional Baseline:**
+```typescript
+{subject: "reacher", property: "attitude-toward.academy", value: 7.0}
+{subject: "reacher", property: "trust-level.council", value: 3.5}
+```
+
 **LLM Requirements:**
 - High-quality model for comprehensive extraction (Opus-tier recommended)
 - Must infer missing numeric values from context
 - Must maintain consistency across similar entities
+- Must extract ALL character attributes (treat characters as RPG stat sheets)
 
 ---
 
@@ -504,6 +544,138 @@ getKnowledge(characterId: string, timestamp: number) {
 
 ---
 
+#### Part 6: Comprehensive Character State Extraction from Scenes
+
+**Files to create:**
+- `src/extraction/character-state-extractor.ts` - Extract state changes from prose
+- `src/extraction/validation-rules.ts` - Consistency validation rules
+- `src/extraction/character-state-extractor.test.ts` - Tests
+
+**What to extract from scene prose:**
+
+**Physical Condition (Temporal):**
+```typescript
+// Injuries, exhaustion, environmental effects
+{subject: "reacher", property: "health.current", value: 85, validFrom: 43}
+{subject: "reacher", property: "stamina.current", value: 60, validFrom: 43}
+{subject: "reacher", property: "condition.wetness", value: "waist-down", validFrom: 43, validTo: 48}
+{subject: "reacher", property: "condition.exhaustion", value: 6.5, validFrom: 43, validTo: 50}
+```
+
+**Equipment Changes (Temporal):**
+```typescript
+// Damage, acquisition, loss
+{subject: "reacher", property: "equipment.shoe-left.condition", value: "damaged-toe-exposed", validFrom: 43}
+{subject: "reacher", property: "equipment.tunic.condition", value: "torn-shoulder", validFrom: 43}
+{subject: "reacher", property: "equipment.sword", value: "lost-in-river", validFrom: 43}
+```
+
+**Appearance Changes (Temporal):**
+```typescript
+// Clothing changes, visible wounds
+{subject: "reacher", property: "appearance.clothing.tunic.color", value: "red", validFrom: 1}  // Consistency check
+{subject: "reacher", property: "appearance.visible-injuries", value: "cut-left-arm", validFrom: 43}
+```
+
+**Social/Emotional Changes (Temporal):**
+```typescript
+// Attitude shifts, mood changes
+{subject: "reacher", property: "mood", value: "irritable", validFrom: 43, validTo: 50}
+{subject: "reacher", property: "attitude-toward.violet-elf", value: "impressed", validFrom: 43}
+```
+
+**Status Effects (Temporal):**
+```typescript
+// Buffs, debuffs, conditions
+{subject: "reacher", property: "status.poisoned", value: true, validFrom: 43, validTo: 50}
+{subject: "reacher", property: "status.blessed", value: "aspect-ward", validFrom: 43, validTo: 100}
+```
+
+**Extraction Process:**
+
+1. **Post-Scene Analysis:**
+   - LLM analyzes prose for state changes
+   - Extracts all changes per character
+   - Returns candidate facts with timestamps
+
+2. **Human Review:**
+   - Show extracted facts to user
+   - "Extracted from Scene 43: Reacher's shoe damaged (toe exposed), wet waist-down, exhausted (6.5/10)"
+   - User approves/edits/rejects
+
+3. **Consistency Validation:**
+   - Check for contradictions (red tunic → green tunic without clothing-change event)
+   - Check for impossible changes (height changes, capabilities lost without cause)
+   - Flag warnings for review
+
+4. **Commit to Timeline:**
+   - Add approved facts to SQLite
+   - Update JSON snapshot
+   - Facts now queryable in future scenes
+
+**Validation Rules:**
+
+**Appearance Consistency:**
+```typescript
+// If clothing color changes without explicit change event, flag it
+validateAppearanceConsistency(newFact, existingFacts) {
+  if (newFact.property === "appearance.clothing.tunic.color") {
+    const previous = existingFacts.find(f => f.property === newFact.property)
+    if (previous && previous.value !== newFact.value) {
+      return {
+        warning: "Clothing color changed without explicit event",
+        previous: previous.value,
+        new: newFact.value,
+        suggestion: "Create clothing-change event or correct color"
+      }
+    }
+  }
+}
+```
+
+**Physical Constraints:**
+```typescript
+// Characters can't exceed reach height, strength limits, etc.
+validatePhysicalConstraints(action, characterFacts) {
+  if (action === "reach-high-table") {
+    const height = characterFacts["height"]
+    const reach = characterFacts["can-reach-height"] || (height + 30)
+    const tableHeight = 180
+
+    if (reach < tableHeight) {
+      return {
+        violation: "Impossible action - cannot reach",
+        characterReach: reach,
+        requiredHeight: tableHeight,
+        suggestion: "Character needs to climb or get help"
+      }
+    }
+  }
+}
+```
+
+**Equipment State Constraints:**
+```typescript
+// Can't use broken equipment
+validateEquipmentUsage(action, equipmentState) {
+  if (action === "sword-attack" && equipmentState["equipment.sword"] === "broken") {
+    return {
+      violation: "Cannot use broken equipment",
+      suggestion: "Repair sword or use different weapon"
+    }
+  }
+}
+```
+
+**Benefits:**
+
+1. **Complete Continuity:** "I was wearing red" stays red across scenes
+2. **Physical Consistency:** Damaged shoe affects future actions (mud avoidance)
+3. **RPG-Style State:** Characters have queryable stats like any entity
+4. **Emergence:** Status effects combine (exhausted + wounded = can't run)
+
+---
+
 **Test Cases:**
 
 **ETL:**
@@ -511,6 +683,7 @@ getKnowledge(characterId: string, timestamp: number) {
 - Extract Sunnaria → ALL attributes (population, borders, military-strength, trade-volume, etc.)
 - All 9 kingdoms have same schema (consistent attributes)
 - Abstract entities (economy, weather) extracted as entities with facts
+- Characters extracted with full RPG stats (appearance, equipment, skills, etc.)
 
 **Persistence:**
 - Save/load world to SQLite
@@ -528,13 +701,19 @@ getKnowledge(characterId: string, timestamp: number) {
 - LLM calls getKnowledge before writing character dialogue
 - Tool returns match database exactly (deterministic)
 
+**Character State Extraction:**
+- Scene: Character's shoe damaged → Extract equipment.shoe-left.condition fact
+- Scene: Character wearing red tunic → Later scene with green tunic → Flag contradiction
+- Scene: Character exhausted and wet → Facts persist into next scene
+- Validation: Short character can't reach high table → Flag violation
+
 ---
 
 **Success Criteria:**
 
 1. **Excelsia ETL Complete:**
    - All 106 lorebook entries → entities in SQLite
-   - ~500-1000 facts extracted (comprehensive)
+   - ~500-1000 facts extracted (comprehensive, including all character RPG stats)
    - Relationship graph populated
    - JSON snapshot readable and accurate
 
@@ -550,9 +729,15 @@ getKnowledge(characterId: string, timestamp: number) {
    - Tool returns grain-tariff: 0.15 (exact value)
    - LLM generates prose using 0.15, not hallucinated value
 
-4. **Round-Trip Works:**
-   - Generate scene → extract new facts → store in DB
-   - Next scene queries updated facts
+4. **Character State Continuity Works:**
+   - Scene 43: Reacher's shoe damaged (extracted as fact)
+   - Scene 50: LLM queries getFacts("reacher"), sees damaged shoe
+   - LLM generates: "Reacher avoided the mud, mindful of his exposed toe"
+   - Validation catches clothing color contradictions
+
+5. **Round-Trip Works:**
+   - Generate scene → extract character state changes → store in DB
+   - Next scene queries updated facts (equipment, conditions, appearance)
    - Changes persist across sessions (SQLite)
 
 **Enables:** Multi-agent orchestration (M6), deterministic world state, true epistemic isolation
@@ -726,35 +911,386 @@ getKnowledge(characterId: string, timestamp: number) {
 
 ---
 
-### M11: Effect Propagation
+### M11: Unified World Tick & Ambient Simulation
 
-**Estimated effort:** 3-4 weeks
+**Estimated effort:** 4-5 weeks
 
-**Goal:** Cascading effects, LLM-generated possibility branches, ambient generation.
+**Goal:** Implement unified world tick architecture where ALL entities simulate forward (at varying detail levels). The world always progresses, whether characters are in focus or off-screen.
+
+**Core Principle:** Everything ticks forward every timestamp. The difference isn't IF entities update, it's HOW MUCH DETAIL.
+
+---
 
 **What to build:**
-- Effect identification (which entities affected by event?)
-- Relationship-based propagation ("flows-through", "depends-on", etc.)
-- LLM-generated effect branches with probabilities
-- Author/dice selection of branch
-- Recursive effect propagation (with checkpoints)
-- Ambient generation (background events within constraints)
+
+**1. Simulation Tier System**
+
+Entities are assigned simulation tiers based on focus:
+
+```typescript
+type SimulationTier = "focus" | "intentional" | "passive" | "system"
+
+type Entity = {
+  id: string
+  tier: SimulationTier  // Changes dynamically
+  lastSimulated: number
+  activeIntent?: Intent
+}
+```
+
+**Tier 1: Focus (Full Scenes)**
+- Characters currently in focus
+- Full prose generation (user-driven or LLM)
+- Complete state extraction
+- Detailed Events with full prose
+
+**Tier 2: Intentional (Off-Screen Active)**
+- Characters with active goals/intents
+- State changes + brief summaries
+- Events with summary prose
+- Example: Aradia fighting necromancer off-screen
+
+**Tier 3: Passive (Background)**
+- Inactive characters, minor NPCs
+- Minimal state drift (location changes, routine activities)
+- Events only for significant changes
+- Example: Guards patrolling, students studying
+
+**Tier 4: System (Automatic)**
+- Non-character entities (economies, weather, kingdoms)
+- Rule-based or stochastic updates
+- Direct fact updates (no Events unless significant)
+- Example: Grain tariff drifts, seasons change
+
+---
+
+**2. Unified Tick Function**
+
+**Files to create:**
+- `src/simulation/world-tick.ts` - Main tick orchestrator
+- `src/simulation/tier-simulators.ts` - Tier-specific simulation logic
+- `src/simulation/intent-manager.ts` - Off-screen intent tracking
+- `src/simulation/relevance-filter.ts` - Determine which entities to simulate
+- `src/simulation/world-tick.test.ts` - Tests
+
+**Core Algorithm:**
+```typescript
+worldTick(timestamp: number) {
+
+  // Get all entities in world
+  const entities = getAllEntities()
+
+  // Group by simulation tier
+  const byTier = groupByTier(entities)
+
+  // Simulate each tier with appropriate detail level
+  const updates = [
+    ...simulateFocusTier(byTier.focus, timestamp),        // Full scenes
+    ...simulateIntentionalTier(byTier.intentional, timestamp),  // Summaries
+    ...simulatePassiveTier(byTier.passive, timestamp),    // Minimal
+    ...simulateSystemTier(byTier.system, timestamp)       // Automatic
+  ]
+
+  // Commit all changes to timeline
+  commitAllUpdates(updates, timestamp)
+
+  // World is now at timestamp+1
+}
+```
+
+**Tier Simulators:**
+
+```typescript
+// Tier 1: Full scene generation
+simulateFocusTier(characters: Entity[], timestamp: number) {
+  const events = []
+
+  for (const char of characters) {
+    // User-driven or LLM prose generation
+    const scene = generateFullScene({
+      character: char,
+      timestamp: timestamp,
+      userPrompt: currentPrompt
+    })
+
+    // Extract comprehensive state changes
+    const stateChanges = extractCharacterState(scene.prose)
+
+    // Create full Event
+    events.push({
+      timestamp: timestamp,
+      participants: [char.id],
+      prose: scene.prose,  // FULL PROSE
+      outcomes: stateChanges,
+      type: "focus"
+    })
+  }
+
+  return events
+}
+
+// Tier 2: Intentional simulation (off-screen active)
+simulateIntentionalTier(characters: Entity[], timestamp: number) {
+  const events = []
+
+  for (const char of characters) {
+    if (!char.activeIntent) continue
+
+    // Generate state changes based on intent progress
+    const update = progressIntent({
+      character: char,
+      intent: char.activeIntent,
+      timestamp: timestamp
+    })
+
+    // Create Event with SUMMARY prose
+    events.push({
+      timestamp: timestamp,
+      participants: [char.id],
+      prose: update.summary,  // BRIEF: "Aradia pressed deeper into crypts..."
+      outcomes: update.stateChanges,
+      type: "intentional"
+    })
+
+    // Check if intent resolves
+    if (update.progress >= 1.0) {
+      const resolution = resolveIntent(char.activeIntent, timestamp)
+      events.push(resolution.event)
+      char.activeIntent = null  // Clear completed intent
+    }
+  }
+
+  return events
+}
+
+// Tier 3: Passive simulation (background)
+simulatePassiveTier(characters: Entity[], timestamp: number) {
+  const updates = []
+
+  for (const char of characters) {
+    // Minimal automatic changes
+    const drift = simulatePassiveDrift(char, timestamp)
+
+    // Only create Event if something significant
+    if (drift.significant) {
+      updates.push({
+        timestamp: timestamp,
+        participants: [char.id],
+        prose: null,  // NO PROSE (just state change)
+        outcomes: drift.stateChanges,
+        type: "passive"
+      })
+    }
+  }
+
+  return updates
+}
+
+// Tier 4: System simulation (economies, weather, etc.)
+simulateSystemTier(systems: Entity[], timestamp: number) {
+  const updates = []
+
+  for (const system of systems) {
+    // Rule-based updates
+    const changes = simulateSystemRules(system, timestamp)
+
+    // Direct fact updates (no Event needed)
+    updates.push({
+      factUpdates: changes,
+      type: "system"
+    })
+  }
+
+  return updates
+}
+```
+
+---
+
+**3. Intent Management**
+
+**Declaring Intents (when character goes off-screen):**
+
+```typescript
+declareIntent({
+  character: "aradia",
+  goal: "defeat-necromancer-lord",
+  estimatedDuration: 15,  // timestamps
+  difficulty: 8.0,
+  consequenceScope: ["northern-provinces", "undead-activity"]
+})
+
+// Character moves to Tier 2 (intentional simulation)
+setEntityTier("aradia", "intentional")
+```
+
+**Intent Resolution (LLM-generated branches):**
+
+```typescript
+resolveIntent(intent: Intent, timestamp: number) {
+
+  // LLM generates outcome branches
+  const branches = generateOutcomeBranches({
+    character: intent.character,
+    goal: intent.goal,
+    difficulty: intent.difficulty,
+    characterStats: getFacts(intent.character, timestamp)
+  })
+
+  // Example branches:
+  // [60%] Complete Success - Necromancer defeated
+  // [30%] Partial Success - Necromancer wounded
+  // [10%] Failure - Aradia captured
+
+  // User selects or dice roll
+  const selected = selectBranch(branches)
+
+  // Create resolution Event
+  return {
+    event: {
+      timestamp: timestamp,
+      title: `${intent.goal} - ${selected.outcome}`,
+      participants: [intent.character],
+      prose: selected.summary,
+      outcomes: selected.effects,
+      type: "intent-resolution"
+    }
+  }
+}
+```
+
+---
+
+**4. Relevance-Based Optimization**
+
+Don't simulate ALL 10,000 NPCs every tick:
+
+```typescript
+// Only simulate entities relevant to current focus
+getRelevantEntities(focusCharacters: string[], radius: number) {
+
+  const relevant = new Set(focusCharacters)
+
+  // Expand by graph distance
+  for (let i = 0; i < radius; i++) {
+    for (const entity of relevant) {
+      const neighbors = getGraphNeighbors(entity)
+      neighbors.forEach(n => relevant.add(n))
+    }
+  }
+
+  return Array.from(relevant)
+}
+
+worldTick(timestamp: number) {
+  const focusChars = getFocusCharacters()
+  const relevantEntities = getRelevantEntities(focusChars, radius: 3)
+
+  // Only simulate relevant subset
+  simulateEntities(relevantEntities, timestamp)
+
+  // Systems always simulate (cheap)
+  simulateAllSystems(timestamp)
+}
+```
+
+**Relevance radius:**
+- Radius 0: Just focus characters
+- Radius 1: Same location, direct relationships
+- Radius 2: 1-hop connections
+- Radius 3: Broader context
+- Beyond radius: Frozen until relevant
+
+---
+
+**5. Dynamic Tier Changes**
+
+Characters move between tiers as focus shifts:
+
+```typescript
+// Aradia goes off-screen with intent
+setEntityTier("aradia", "intentional")
+declareIntent({character: "aradia", goal: "defeat-necromancer", ...})
+
+// Later: Aradia returns to scene
+setEntityTier("aradia", "focus")
+// Now generates full prose again
+
+// Character becomes inactive
+setEntityTier("background-npc-7", "passive")
+// Minimal simulation
+
+// Character becomes relevant again
+setEntityTier("background-npc-7", "intentional")
+// Resume active simulation
+```
+
+---
 
 **Deliverables:**
-- `src/world-state/effects/propagation.ts`
-- `src/world-state/effects/branches.ts`
-- `src/scene/ambient.ts`
-- Tests
 
-**Success criteria:**
-- Event: "Dam built on Great River"
-- System identifies affected: Downstream kingdoms (via `flows-through` relationships)
-- LLM generates branches:
-  - A: Catastrophic flooding (30%)
-  - B: Controlled flow (50%)
-  - C: Improved irrigation (20%)
-- Author selects branch B
-- Effects become facts: Diplomatic tension increases, but manageable
+- Unified tick orchestrator
+- Tier-specific simulators
+- Intent declaration/management system
+- Intent resolution with LLM branches
+- Relevance filtering
+- Dynamic tier assignment
+- Tests for all tiers
+
+---
+
+**Test Cases:**
+
+**Unified Tick:**
+- T48: Reacher (focus) + Aradia (intentional) + NPCs (passive) + Economy (system) all update
+- All entities have state at T49 (no frozen entities)
+
+**Off-Screen Progression:**
+- T30: Aradia declares necromancer intent (15 timestamps)
+- T31-44: Reacher scenes (Aradia simulating off-screen)
+- T45: Aradia's intent resolves (LLM branches, user selects)
+- T48: Reacher asks about north → gets updated facts (necromancer defeated)
+
+**Tier Transitions:**
+- Aradia: focus → intentional → focus (smooth state continuity)
+- NPC: passive → intentional (becomes relevant) → passive (returns to background)
+
+**Relevance Filtering:**
+- 10,000 entities in world
+- Only ~100 simulated per tick (radius 3 from focus)
+- Performance acceptable (<500ms per tick)
+
+---
+
+**Success Criteria:**
+
+1. **Off-Screen Continuity Works:**
+   - Aradia defeats necromancer off-screen (T31-45)
+   - Reacher at T48 sees effects (northern provinces safe)
+   - Timeline consistent
+
+2. **World Feels Alive:**
+   - Economies drift
+   - Weather changes seasonally
+   - Background characters age, move locations
+   - All automatic, no manual updates
+
+3. **Focus Changes Smoothly:**
+   - Switch focus from Reacher → Aradia mid-story
+   - Both characters have continuous state
+   - No jarring gaps or inconsistencies
+
+4. **Performance Acceptable:**
+   - 10,000 entities in world
+   - Tick completes in <500ms
+   - Relevance filtering works
+
+5. **Intent System Works:**
+   - Declare intent → simulate progress → resolve with branches
+   - User/dice selects outcome
+   - Effects propagate to world state
+
+**Enables:** True living world simulation, seamless focus shifts, emergent world events
 
 **Detailed design:** See `architecture/core/03-effects.md`, `architecture/core/09-scene-execution.md` §9.5-9.6
 
