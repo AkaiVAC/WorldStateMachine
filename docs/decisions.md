@@ -1,12 +1,35 @@
 # Design Decisions
 
-**Last updated:** 2025-12-30
+**Last updated:** 2026-01-01
 
 This document captures the "why" behind key architectural decisions.
 
 ---
 
 ## Core Philosophy
+
+### Plugin-First Architecture
+
+**Decision:** Move from a monolithic structure to a plugin-first extension system where everything (including core functionality) is an extension.
+
+**Why:**
+- **Zero-touch extensibility:** Users can add features by dropping a folder into `extensions/`, without modifying core code.
+- **Isolation:** Features are isolated, making testing and debugging easier.
+- **Replaceability:** Users can replace core components (like the storage engine) with custom implementations (e.g., PostgreSQL instead of memory) via configuration.
+- **Maintenance:** "Core" is just another extension, enforcing clean interfaces and contracts.
+
+**Design:**
+- **`extensions/` directory:** Auto-discovered plugins.
+- **`defineExtension()` helper:** TypeScript-based configuration with type inference.
+- **Lifecycle Hooks:** Extensions can intercept system events (before/after/on).
+- **Core as Extension:** The default system features live in `extensions/core/`.
+
+**Alternative considered:** Monolith with optional plugins
+- Rejected: Creates a "second-class citizen" problem for plugins. By making core an extension, the API is proven robust.
+
+**Source:** `NEXT_SESSION.md` (Implementation Plan Phase 1-3)
+
+---
 
 ### Lorebook Is Import Format, Not Runtime Model
 
@@ -880,6 +903,7 @@ const createEntityStore = () => {
 
 | Decision | Rationale |
 |----------|-----------|
+| Plugin-first architecture | Everything is an extension, core included |
 | Lorebook is import format | Entity IDs solve name disambiguation |
 | World state as RPG stats | All entities have queryable numeric attributes |
 | Tool-calling over context-stuffing | Deterministic facts, no hallucination, scalable |

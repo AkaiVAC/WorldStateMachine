@@ -6,7 +6,7 @@
 
 **📦 Architecture:** Plugin-first extension system with path aliases (`@core/*`, `@ext/*`)
 
-**🚧 Next:** Phase 3 - Runtime boot system ([NEXT_SESSION.md](NEXT_SESSION.md))
+**🚧 Next:** Phase 3 - Runtime boot system (see [roadmap.md](roadmap.md))
 
 ---
 
@@ -464,7 +464,7 @@ See updated roadmap.md M5 and M11 sections for complete designs.
 5. **Auto-discovery** - No manual registration needed
 6. **Readable directory names** - `load-world-data/`, `validate-consistency/`, etc.
 
-**See [NEXT_SESSION.md](NEXT_SESSION.md) for complete implementation plan.**
+**See [roadmap.md](roadmap.md) for complete implementation plan.**
 
 **Structure preview:**
 ```
@@ -496,4 +496,3 @@ extensions/
 - `roadmap.md` - Step-by-step path from here to vision
 - `DECISIONS.md` - Why we made key design choices
 - `notes/context-injection-analysis.md` - Latest testing/analysis
-- **`NEXT_SESSION.md`** - **Extension architecture implementation plan** 🚨
