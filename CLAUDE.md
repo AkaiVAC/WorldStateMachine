@@ -1,11 +1,19 @@
 # Lorebook Manager
 
+## 🚨 NEXT SESSION START HERE
+
+**[docs/NEXT_SESSION.md](docs/NEXT_SESSION.md)** - **Extension Architecture Implementation Plan**
+
+We're pivoting to a plugin-first architecture where everything (including core) is an extension. Read this document first to understand the new structure and implementation plan!
+
+---
+
 ## Essential Context for Each Session
 
 **Read these docs to understand the project:**
 
 1. **[docs/vision.md](docs/vision.md)** - Complete constraint engine vision (what we're building)
-2. **[docs/current.md](docs/current.md)** - Current implementation status (M3 complete, 168 tests)
+2. **[docs/current.md](docs/current.md)** - Current implementation status (M4 complete, 192 tests)
 3. **[docs/roadmap.md](docs/roadmap.md)** - M1-M11 milestones (proof-of-concept at M6)
 4. **[docs/decisions.md](docs/decisions.md)** - Design rationale and principles
 
