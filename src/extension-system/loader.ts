@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { createExtensionContext } from "./context";
 import type { Extension } from "./define-extension";
 import type { ExtensionRegistry } from "./registry";
 
@@ -79,6 +80,14 @@ export const loadExtensions = async (
 		throw new Error(
 			`Extension validation failed:\n${errors.map((e) => `  - ${e.message}`).join("\n")}`,
 		);
+	}
+
+	const context = createExtensionContext();
+
+	for (const { extension } of sorted) {
+		if (extension.activate) {
+			await extension.activate(context);
+		}
 	}
 
 	return sorted;

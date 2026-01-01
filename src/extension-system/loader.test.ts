@@ -412,4 +412,31 @@ describe("Extension Loader", () => {
 			loadExtensions({ extensionsDir: currentTestDir }, registry),
 		).rejects.toThrow("must export an object");
 	});
+
+	test("calls activate function on loaded extensions", async () => {
+		const dir = join(currentTestDir, "with-activate");
+		mkdirSync(dir, { recursive: true});
+
+		const activateTracker = join(currentTestDir, "activate-called.txt");
+
+		const extensionCode = `
+import { writeFileSync } from 'node:fs';
+import { defineExtension } from '${join(import.meta.dir, "define-extension.ts")}';
+
+export default defineExtension({
+	name: 'test-ext',
+	version: '1.0.0',
+	activate: async (context) => {
+		writeFileSync('${activateTracker}', 'called');
+	}
+});
+		`;
+
+		writeFileSync(join(dir, "extension.config.ts"), extensionCode);
+
+		const registry = createExtensionRegistry();
+		await loadExtensions({ extensionsDir: currentTestDir }, registry);
+
+		expect(existsSync(activateTracker)).toBe(true);
+	});
 });
