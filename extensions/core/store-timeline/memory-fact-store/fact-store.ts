@@ -1,4 +1,4 @@
-import type { Fact } from "./fact";
+import type { Fact } from "../../../../src/core-types";
 
 export type FactStore = {
 	add: (fact: Fact) => void;

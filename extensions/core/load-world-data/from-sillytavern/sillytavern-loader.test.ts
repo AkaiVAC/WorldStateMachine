@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { importSillyTavernLorebook } from "./silly-tavern-importer";
+import { importSillyTavernLorebook } from "./sillytavern-loader";
 
 const fixturesDir = `${import.meta.dir}/__fixtures__`;
 

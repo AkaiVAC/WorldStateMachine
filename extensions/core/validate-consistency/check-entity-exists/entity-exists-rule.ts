@@ -1,6 +1,6 @@
-import type { PromptAnalyzer } from "../analysis/prompt-analyzer";
-import type { EntityStore } from "../world-state/entity/entity-store";
-import type { Rule, Violation } from "./validator";
+import type { PromptAnalyzer } from "../../build-scene-context/analyze-prompt/prompt-analyzer";
+import type { EntityStore } from "../../store-timeline/memory-entity-store/entity-store";
+import type { Rule, Violation } from "../validation-framework/validator";
 
 const isFuzzyMatch = (term: string, candidate: string): boolean => {
 	if (candidate.includes(term)) return true;

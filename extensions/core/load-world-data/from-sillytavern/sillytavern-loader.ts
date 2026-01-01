@@ -1,4 +1,4 @@
-import type { Entity } from "../world-state/entity/entity";
+import type { Entity } from "../../../../src/core-types";
 
 export type SkippedEntry = {
 	uid?: number;
