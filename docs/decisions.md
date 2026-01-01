@@ -33,31 +33,50 @@ This document captures the "why" behind key architectural decisions.
 
 ### Extension Activate Pattern
 
-**Decision:** Extensions export an `activate(context)` function as their entry point to register services with dependencies.
+**Decision:** Extensions use `defineExtension()` helper that returns an object containing both metadata and an `activate(context)` function.
 
 **Why:**
-- **Dependency Injection:** Stores and services (like EntityStore) need to be passed to consumers (like Validators). Static configuration (`provides: [...]`) isn't enough.
-- **Flexibility:** Extensions can decide at runtime what to register based on config.
-- **Standardization:** Follows established patterns (VS Code, Obsidian) for plugin lifecycle.
+- **Dependency Injection:** Stores and services (like EntityStore) need to be passed to consumers (like Validators). Static configuration can't handle this.
+- **Single File:** Everything in one place - metadata and activation logic together.
+- **No Circularity:** Metadata is in the object literal (readable without calling activate), while activate is called after dependency resolution.
+- **Type Inference:** The `defineExtension()` helper provides full TypeScript type checking and autocomplete.
+- **Standardization:** Follows VS Code's activate pattern but adapted to TypeScript's strengths.
 
 **Design:**
 ```typescript
 // extensions/my-ext/index.ts
-export async function activate(context: ExtensionContext) {
-  const store = createStore();
-  context.registerStore("my-store", store);
-  
-  context.registerValidator({
-    name: "my-validator",
-    check: createValidator(store).check // Inject store!
-  });
-}
+import { defineExtension } from '@core/extension-system'
+
+export default defineExtension({
+  name: 'my-extension',
+  version: '1.0.0',
+  dependencies: ['core'],
+
+  activate: async (context) => {
+    const store = createStore()
+    context.registerStore('my-store', store)
+
+    context.registerValidator({
+      name: 'my-validator',
+      check: createValidator(store).check // Inject dependencies!
+    })
+  }
+})
 ```
 
-**Alternative considered:** Static `provides` map in config
-- Rejected: Can't handle dependencies or dynamic logic.
+**Loading Flow:**
+1. Import default export from extension
+2. Read `.name`, `.version`, `.dependencies` from object (no execution)
+3. Resolve dependency graph
+4. Call `.activate(context)` in dependency order
 
-**Source:** Discussion on 2026-01-01 about runtime boot wiring.
+**Alternative considered:** Separate config file + activate function
+- Rejected: Two files when one suffices, and metadata extraction is simple with object literal.
+
+**Alternative considered:** Metadata in activate return value
+- Rejected: Creates circular dependency (need metadata to build context, need context to call activate).
+
+**Source:** Discussion on 2026-01-01 about extension architecture and activate patterns.
 
 ---
 
