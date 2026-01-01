@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { matchEntries } from "./keyword-matcher";
-import type { LorebookEntry } from "./lorebook-entry";
+import type { LorebookEntry } from "../lorebook-entry";
 
 const makeEntry = (
 	overrides: Partial<LorebookEntry> & { name: string },

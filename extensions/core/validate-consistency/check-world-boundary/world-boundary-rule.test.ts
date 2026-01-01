@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type { PromptAnalyzer } from "../analysis/prompt-analyzer";
+import type { PromptAnalyzer } from "@ext/core/build-scene-context/analyze-prompt/prompt-analyzer";
 import { createWorldBoundaryRule } from "./world-boundary-rule";
 
 const createMockAnalyzer = (anachronisms: string[]): PromptAnalyzer => ({
