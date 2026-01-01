@@ -1,4 +1,4 @@
-import type { Entity } from "../../../../src/core-types";
+import type { Entity } from "@core/entity";
 
 export type EntityStore = {
 	add: (entity: Entity) => void;

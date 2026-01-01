@@ -1,4 +1,5 @@
-import type { Fact, Event, Visibility } from "../../../../src/core-types";
+import type { Fact } from "@core/fact";
+import type { Event, Visibility } from "@core/event";
 
 export const getFactsFromEvent = (event: Event): Fact[] => {
 	if (!event.outcomes) {

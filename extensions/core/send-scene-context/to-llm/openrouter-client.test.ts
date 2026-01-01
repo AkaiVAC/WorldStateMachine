@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { ask, type FetchFn } from "./openrouter-client";
+import { ask, type FetchFn } from "@ext/core/send-scene-context/to-llm/openrouter-client";
 
 const originalEnv = process.env.OPENROUTER_API_KEY;
 

@@ -1,9 +1,9 @@
 import { join } from "node:path";
 import { excelsiaRelationships } from "../../../../../src/example/Excelsia/relationships";
-import type { LorebookEntry } from "../../build-scene-context/lorebook-entry";
-import { loadLorebooksFromDir } from "../../build-scene-context/lorebook-loader";
-import type { RelationshipStore } from "../../store-timeline/memory-relationship-store/relationship-store";
-import { createRelationshipStore } from "../../store-timeline/memory-relationship-store/relationship-store";
+import type { LorebookEntry } from "@ext/core/build-scene-context/lorebook-entry";
+import { loadLorebooksFromDir } from "@ext/core/build-scene-context/lorebook-loader";
+import type { RelationshipStore } from "@ext/core/store-timeline/memory-relationship-store/relationship-store";
+import { createRelationshipStore } from "@ext/core/store-timeline/memory-relationship-store/relationship-store";
 
 let cachedEntries: LorebookEntry[] | null = null;
 let cachedRelationshipStore: RelationshipStore | null = null;

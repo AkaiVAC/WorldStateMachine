@@ -1,4 +1,4 @@
-import type { Relationship } from "../../../../src/core-types";
+import type { Relationship } from "@core/relationship";
 
 export type RelationshipStore = {
 	add: (relationship: Relationship) => void;

@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import type { PromptAnalyzer } from "../extensions/core/build-scene-context/analyze-prompt/prompt-analyzer";
-import { importSillyTavernLorebook } from "../extensions/core/load-world-data/from-sillytavern/sillytavern-loader";
-import { createEntityExistsRule } from "../extensions/core/validate-consistency/check-entity-exists/entity-exists-rule";
-import { validate } from "../extensions/core/validate-consistency/validation-framework/validator";
-import { createWorldBoundaryRule } from "../extensions/core/validate-consistency/check-world-boundary/world-boundary-rule";
-import { createEntityStore } from "../extensions/core/store-timeline/memory-entity-store/entity-store";
-import { createLexicon } from "../extensions/core/store-timeline/memory-lexicon/lexicon";
+import type { PromptAnalyzer } from "@ext/core/build-scene-context/analyze-prompt/prompt-analyzer";
+import { importSillyTavernLorebook } from "@ext/core/load-world-data/from-sillytavern/sillytavern-loader";
+import { createEntityExistsRule } from "@ext/core/validate-consistency/check-entity-exists/entity-exists-rule";
+import { validate } from "@ext/core/validate-consistency/validation-framework/validator";
+import { createWorldBoundaryRule } from "@ext/core/validate-consistency/check-world-boundary/world-boundary-rule";
+import { createEntityStore } from "@ext/core/store-timeline/memory-entity-store/entity-store";
+import { createLexicon } from "@ext/core/store-timeline/memory-lexicon/lexicon";
 
 const examplesDir = `${import.meta.dir}/example/Excelsia`;
 const worldId = "excelsia";

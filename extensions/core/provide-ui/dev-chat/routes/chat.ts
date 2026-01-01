@@ -1,10 +1,10 @@
-import { createPromptAnalyzer } from "../../build-scene-context/analyze-prompt/prompt-analyzer";
-import { ask, type ChatMessage, chat } from "../../send-scene-context/to-llm/openrouter-client";
-import { matchEntitiesFuzzy } from "../../build-scene-context/match-entities/entity-matcher";
-import { matchEntries } from "../../build-scene-context/match-keywords/keyword-matcher";
-import type { LorebookEntry } from "../../build-scene-context/lorebook-entry";
-import { createRelationshipRetrieval } from "../../build-scene-context/expand-relationships/relationship-retrieval";
-import { createGraphTraversal } from "../../store-timeline/memory-relationship-store/graph-traversal";
+import { createPromptAnalyzer } from "@ext/core/build-scene-context/analyze-prompt/prompt-analyzer";
+import { ask, type ChatMessage, chat } from "@ext/core/send-scene-context/to-llm/openrouter-client";
+import { matchEntitiesFuzzy } from "@ext/core/build-scene-context/match-entities/entity-matcher";
+import { matchEntries } from "@ext/core/build-scene-context/match-keywords/keyword-matcher";
+import type { LorebookEntry } from "@ext/core/build-scene-context/lorebook-entry";
+import { createRelationshipRetrieval } from "@ext/core/build-scene-context/expand-relationships/relationship-retrieval";
+import { createGraphTraversal } from "@ext/core/store-timeline/memory-relationship-store/graph-traversal";
 import { getLorebookEntries, getRelationshipStore } from "./lorebook";
 
 const DEFAULT_MODEL = "anthropic/claude-sonnet-4";
