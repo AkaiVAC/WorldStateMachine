@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { createHookManager } from "../extension-system/hooks";
 import { createExtensionRegistry } from "../extension-system/registry";
-import type { RuntimeSystem } from "./boot";
+import type { RuntimeSystem } from "./createRuntime";
 import { createOrchestrator } from "./orchestrate";
 
 const createTestRuntime = (): RuntimeSystem => ({

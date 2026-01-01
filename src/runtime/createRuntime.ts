@@ -12,13 +12,15 @@ export type RuntimeSystem = {
 	extensions: LoadedExtension[];
 };
 
-export type BootConfig = {
+export type RuntimeConfig = {
 	extensionsDir?: string;
 	order?: string[];
 	disabled?: string[];
 };
 
-export const boot = async (config: BootConfig = {}): Promise<RuntimeSystem> => {
+export const createRuntime = async (
+	config: RuntimeConfig = {},
+): Promise<RuntimeSystem> => {
 	const extensionsDir =
 		config.extensionsDir || join(process.cwd(), "extensions");
 
