@@ -361,19 +361,37 @@ See `CLAUDE.md` for full development guidelines.
 
 **Next:** M5 - Epistemic State + Tool-Calling Architecture (major architectural shift)
 
-**Architectural Pivot (2025-12-31):**
+**Architectural Pivots (2025-12-31 / 2026-01-01):**
 
-The M5 design has been significantly expanded based on insights about world state management:
+The M5 and M11 designs have been significantly expanded based on insights about world state management:
 
 1. **World State as RPG Stats:** All entities (characters, kingdoms, economies, weather) have queryable numeric attributes. No hardcoded schemas - facts are arbitrary key-value pairs that adapt to any world.
 
 2. **Tool-Calling Over Context-Stuffing:** LLMs query facts via tools rather than receiving massive context packages. This ensures deterministic values (grain-tariff is exactly 0.15, not "approximately 15%") and prevents hallucination.
 
-3. **Hybrid Persistence:** SQLite for runtime queries + JSON snapshots for human-readable backups. Fast, scalable, inspectable.
+3. **Characters Are RPG Stat Sheets:** Characters get comprehensive state extraction across ALL attributes:
+   - Physical: height, strength, age, health, stamina
+   - Equipment: shoe condition, tunic color, sword state
+   - Appearance: clothing color, visible injuries, hair style
+   - Conditions: wetness, exhaustion, poisoned, blessed
+   - Social: attitudes, mood, trust levels
+   - Skills: combat, magic, knowledge domains
 
-4. **Comprehensive ETL:** Extract ALL measurable attributes from lorebook prose, including inferred values. "Thriving economy" → trade-volume: 8500. All entities in a category get same schema.
+   **Example:** "I was wearing red" stays red across scenes. Damaged shoe affects mud navigation. Height affects reach constraints.
 
-See updated roadmap.md M5 section for complete design.
+4. **Unified World Tick:** ALL entities simulate forward every timestamp at varying detail levels:
+   - **Tier 1 (Focus):** Full prose scenes for current protagonists
+   - **Tier 2 (Intentional):** State changes + summaries for off-screen active characters (Aradia fighting necromancer)
+   - **Tier 3 (Passive):** Minimal drift for background NPCs (location, routine)
+   - **Tier 4 (System):** Automatic updates for economies, weather, kingdoms
+
+   **Result:** World always ticks. Off-screen characters continue to exist and act. No freeze problem. Seamless focus shifts.
+
+5. **Hybrid Persistence:** SQLite for runtime queries + JSON snapshots for human-readable backups. Fast, scalable, inspectable.
+
+6. **Comprehensive ETL:** Extract ALL measurable attributes from lorebook prose, including inferred values. "Thriving economy" → trade-volume: 8500. All entities in a category get same schema.
+
+See updated roadmap.md M5 and M11 sections for complete designs.
 
 ---
 

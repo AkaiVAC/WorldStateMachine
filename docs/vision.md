@@ -1,6 +1,6 @@
 # Vision: World State Constraint Engine
 
-**Last updated:** 2025-12-29
+**Last updated:** 2026-01-01
 
 ## The Goal
 
@@ -9,6 +9,8 @@ Build a constraint engine that enables LLMs to generate world-consistent prose f
 **The core problem:** LLMs invent random names, events, and details that don't fit the established world. They have characters teleport, reference events they shouldn't know about, and contradict established facts.
 
 **The solution:** Maintain external world state (Timeline, Map, Calendar) and build constraint packages that prevent the LLM from generating impossible or inconsistent prose.
+
+**The living world:** The system simulates the entire world forward every timestamp - focus characters get full prose scenes, off-screen characters progress their goals with summaries, background entities drift minimally, and world systems (economies, weather) update automatically. The world is always alive, never frozen.
 
 ---
 

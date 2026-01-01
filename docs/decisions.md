@@ -182,6 +182,164 @@ searchEntities(query)
 
 ---
 
+### Unified World Tick (Everything Simulates)
+
+**Decision:** ALL entities simulate forward every timestamp at varying detail levels. The world always ticks, whether characters are in focus or off-screen.
+
+**Why:**
+- **No freeze problem:** Off-screen characters continue to exist and act
+- **No special cases:** Focus vs off-screen is just simulation granularity
+- **World feels alive:** Economies drift, weather changes, NPCs age
+- **Emergence:** World events arise naturally from ongoing simulation
+- **Simplicity:** Single unified model, not separate "on-screen" vs "off-screen" logic
+
+**Design:**
+```
+Every timestamp tick:
+
+Tier 1 (Focus) → Full prose scenes
+├─ Reacher: Full scene generation
+├─ Extract comprehensive state changes
+└─ Detailed Events with complete prose
+
+Tier 2 (Intentional) → Off-screen active
+├─ Aradia: Fighting necromancer
+├─ State changes + brief summary
+└─ Events with summary prose
+
+Tier 3 (Passive) → Background
+├─ NPCs: Minimal drift (location, routine)
+└─ Events only if significant
+
+Tier 4 (System) → Automatic
+├─ Economies: Rule-based updates
+├─ Weather: Seasonal changes
+└─ Direct fact updates
+```
+
+**Tiers are dynamic:**
+- Aradia: focus → intentional (goes off-screen) → focus (returns)
+- NPC: passive → intentional (becomes relevant) → passive
+
+**Benefits:**
+1. **Consistent world state:** No entity is ever "frozen"
+2. **Off-screen continuity:** Aradia's quest progresses while following Reacher
+3. **Seamless focus shifts:** Switch protagonists mid-story, both have continuous state
+4. **Scalable:** Relevance filtering (only simulate graph-neighbors within radius 3)
+
+**Implementation:**
+```typescript
+worldTick(timestamp: number) {
+  const entities = getAllEntities()
+  const byTier = groupByTier(entities)
+
+  const updates = [
+    ...simulateFocusTier(byTier.focus, timestamp),
+    ...simulateIntentionalTier(byTier.intentional, timestamp),
+    ...simulatePassiveTier(byTier.passive, timestamp),
+    ...simulateSystemTier(byTier.system, timestamp)
+  ]
+
+  commitAllUpdates(updates, timestamp)
+}
+```
+
+**Example:**
+- T30: Aradia declares "I'm going to stop the necromancer" (moves to Tier 2)
+- T31-45: Reacher scenes (Tier 1) while Aradia simulates off-screen (Tier 2)
+- T45: Aradia's intent resolves (LLM branches, user selects outcome)
+- T48: Reacher asks about north → Facts updated (necromancer defeated)
+
+**Alternative considered:** Freeze off-screen characters, only simulate when queried
+- Rejected: Unrealistic, breaks immersion, requires retroactive generation (retcon feel)
+
+**Source:** Discussion on 2026-01-01 about off-screen world simulation
+
+---
+
+### Characters Are RPG Stat Sheets
+
+**Decision:** Characters have comprehensive queryable state across all attributes (physical, equipment, appearance, social, skills). Treat characters as entities with facts, just like economies or kingdoms.
+
+**Why:**
+- **Complete continuity:** "I was wearing red" stays red until clothing-change event
+- **Physical constraints:** Damaged shoe affects mud navigation, height affects reach
+- **Consistency enforcement:** Appearance/equipment can't change without cause
+- **Emergence:** Status effects combine (exhausted + wounded = can't run)
+
+**Design:**
+```typescript
+// Physical Attributes
+{subject: "reacher", property: "height", value: 185}
+{subject: "reacher", property: "strength", value: 7.5}
+
+// Equipment State (temporal)
+{subject: "reacher", property: "equipment.shoe-left.condition", value: "damaged-toe-exposed", validFrom: 43}
+{subject: "reacher", property: "equipment.tunic.color", value: "red", validFrom: 1}
+
+// Appearance (temporal)
+{subject: "reacher", property: "appearance.clothing.tunic.color", value: "red", validFrom: 1}
+{subject: "reacher", property: "appearance.visible-injuries", value: "scar-left-cheek", validFrom: 20}
+
+// Condition (temporal)
+{subject: "reacher", property: "health.current", value: 85, validFrom: 43}
+{subject: "reacher", property: "condition.wetness", value: "waist-down", validFrom: 43, validTo: 48}
+
+// Skills/Capabilities
+{subject: "reacher", property: "skill.aspect-theory", value: 9.5}
+{subject: "reacher", property: "can-reach-height", value: 150}
+
+// Social/Emotional (temporal)
+{subject: "reacher", property: "attitude-toward.violet-elf", value: "impressed", validFrom: 43}
+```
+
+**Extraction strategy:**
+
+**From lorebooks (one-time):**
+- All physical attributes (height, strength, age)
+- Base skills/capabilities
+- Default appearance
+
+**From scenes (ongoing):**
+- Equipment changes (damage, acquisition, loss)
+- Condition changes (injuries, exhaustion, wetness)
+- Appearance changes (clothing, visible wounds)
+- Social/emotional changes (attitude shifts)
+- Status effects (poisoned, blessed, cursed)
+
+**Validation rules:**
+
+**Appearance consistency:**
+```typescript
+// Red tunic → green tunic without clothing-change event → Flag warning
+validateAppearanceConsistency(newFact, existingFacts)
+```
+
+**Physical constraints:**
+```typescript
+// Character height 120cm can't reach table height 180cm → Flag violation
+validatePhysicalConstraints(action, characterFacts)
+```
+
+**Equipment constraints:**
+```typescript
+// Can't use broken sword → Flag violation
+validateEquipmentUsage(action, equipmentState)
+```
+
+**Benefits:**
+1. **Everything that can contradict is tracked:** Clothing color, equipment condition, heights, capabilities
+2. **Character state = queryable facts:** Just like economies have grain-tariff, characters have shoe-condition
+3. **Validation catches contradictions:** System flags "red tunic became green" without explanation
+4. **No hallucination of physical details:** LLM queries character state, can't make up attributes
+
+**Alternative considered:** Only track major changes (injuries, location), let prose handle details
+- Rejected: "I was wearing red" becomes "I was wearing green" without detection
+
+**Source:** Discussion on 2026-01-01 about character state continuity
+
+---
+
 ### The LLM Is Not the State Keeper
 
 **Decision:** External world state (Timeline, Map, Calendar) maintains consistency. The LLM just generates language.
@@ -723,6 +881,10 @@ const createEntityStore = () => {
 | Decision | Rationale |
 |----------|-----------|
 | Lorebook is import format | Entity IDs solve name disambiguation |
+| World state as RPG stats | All entities have queryable numeric attributes |
+| Tool-calling over context-stuffing | Deterministic facts, no hallucination, scalable |
+| Unified world tick | Everything simulates (focus/off-screen just detail level) |
+| Characters are RPG stat sheets | Complete continuity (clothing, equipment, conditions) |
 | Timeline is database | Handle temporal state elegantly |
 | Events → Facts | Preserve context, enable epistemic state |
 | Store verbose, render compact | Different goals (query vs tokens) |
