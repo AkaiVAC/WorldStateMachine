@@ -114,26 +114,35 @@ const sortByDependencies = (
 	}
 
 	const visited = new Set<string>();
+	const visiting = new Set<string>();
 	const sorted: LoadedExtension[] = [];
 
-	const visit = (name: string): void => {
+	const visit = (name: string, path: string[]): void => {
 		if (visited.has(name)) return;
+
+		if (visiting.has(name)) {
+			const cycle = [...path, name].join(" -> ");
+			throw new Error(`Circular dependency detected: ${cycle}`);
+		}
 
 		const ext = byName.get(name);
 		if (!ext) return;
 
+		visiting.add(name);
+
 		if (ext.extension.dependencies) {
 			for (const dep of ext.extension.dependencies) {
-				visit(dep);
+				visit(dep, [...path, name]);
 			}
 		}
 
+		visiting.delete(name);
 		visited.add(name);
 		sorted.push(ext);
 	};
 
 	for (const { extension } of loaded) {
-		visit(extension.name);
+		visit(extension.name, []);
 	}
 
 	return sorted;
