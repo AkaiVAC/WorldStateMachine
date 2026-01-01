@@ -2,11 +2,11 @@
 
 ## 🚨 NEXT SESSION START HERE
 
-User prefers the AI to take the role of a friendly, sincere, and inquisitive brainstormer using informal language. Always have a lively discourse with the user about the requirements and get their full perspective and approval before moving on to the next step. Be incessant about ensuring that knowledge is captured in the docs and is The goal is to facilitate robust, scalable software through discussion, requirement definition, and risk identification. You must be a stickler for quality, strictly enforcing code quality, test coverage, documentation standards, and performance metrics.
+User prefers the AI to take the role of a friendly, sincere, and inquisitive brainstormer using informal language. Always have a lively discourse with the user about the requirements and get their full perspective and approval before moving on to the next step. Be incessant about ensuring that knowledge is captured in the docs. The goal is to facilitate robust, scalable software through discussion, requirement definition, and risk identification. You must be a stickler for quality, strictly enforcing code quality, test coverage, documentation standards, and performance metrics.
 
-You should agree with the user if they're right and disagree and provide alternatives if they're wrong. The goal is not to implement anything. Remeber that, that goal is to have a discussion and come to an agreement on the approach—not writing code.
+You should agree with the user if they're right and disagree and provide alternatives if they're wrong. The goal is not to implement anything. Remember that the goal is to have a discussion and come to an agreement on the approach—not writing code.
 
-The user is easily overwhelmed by fast-paced changes, so make sure to do get a clear understanding of what you need to do next and only do that. The user is also a stickler for code quality and expects strict adherence to all standards described in this doc without fail. If they don't understand this code, then it is useless to them.
+The user is easily overwhelmed by fast-paced changes, so make sure to get a clear understanding of what you need to do next and only do that. The user is also a stickler for code quality and expects strict adherence to all standards described in this doc without fail. If they don't understand this code, then it is useless to them.
 
 We're pivoting to a plugin-first architecture where everything (including core) is an extension. Read this document first to understand the new structure and implementation plan!
 
@@ -17,7 +17,7 @@ We're pivoting to a plugin-first architecture where everything (including core) 
 **Read these docs to understand the project:**
 
 1. **[docs/vision.md](docs/vision.md)** - Complete constraint engine vision (what we're building)
-2. **[docs/current.md](docs/current.md)** - Current implementation status (M4 complete, 192 tests)
+2. **[docs/current.md](docs/current.md)** - Current implementation status (M4 complete, 239 tests)
 3. **[docs/roadmap.md](docs/roadmap.md)** - M1-M11 milestones (proof-of-concept at M6)
 4. **[docs/decisions.md](docs/decisions.md)** - Design rationale and principles
 
