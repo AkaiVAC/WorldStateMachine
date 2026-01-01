@@ -4,7 +4,7 @@
 **Test status:** ✅ 230 tests passing
 **Current milestone:** M4 complete, Extension Architecture Phases 1 & 2 complete
 
-**📦 Architecture:** Plugin-first extension system with path aliases
+**📦 Architecture:** Plugin-first extension system with path aliases (`@core/*`, `@ext/*`)
 
 **🚧 Next:** Phase 3 - Runtime boot system ([NEXT_SESSION.md](NEXT_SESSION.md))
 

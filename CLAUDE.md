@@ -141,11 +141,18 @@ This is a collaboration. Discuss approaches, explain reasoning, consider alterna
 
 ## Current State
 
-**Last updated:** 2025-12-29
+**Last updated:** 2026-01-01
 
 - **M4 complete** - Events with participants, visibility, fact generation
-- **198 tests passing**
+- **Extension Architecture Phases 1 & 2 complete** - Plugin-first architecture implemented
+- **230 tests passing**
 - **Chat UI** with lorebook context injection
-- **Next:** M5 (Epistemic State) - see [docs/roadmap.md](docs/roadmap.md)
+- **Next:** Phase 3 (Runtime boot system) - see [docs/NEXT_SESSION.md](docs/NEXT_SESSION.md)
 
 **For details:** See the Essential Context section above
+
+### Path Aliases
+
+Use these import aliases (defined in `tsconfig.json`):
+- `@core/*` → `src/core-types/*` (fundamental types: Event, Fact, Entity, Relationship)
+- `@ext/*` → `extensions/*` (all extensions including core)
