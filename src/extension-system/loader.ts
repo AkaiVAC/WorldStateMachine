@@ -54,11 +54,17 @@ export const loadExtensions = async (
 			);
 		}
 
-		if (!extension.id) {
-			extension.id = generateExtensionId(extension.name);
+		if (!extension || typeof extension !== "object") {
+			throw new Error(
+				`Invalid extension config in ${extPath}: must export an object`,
+			);
 		}
 
 		validateExtension(extension);
+
+		if (!extension.id) {
+			extension.id = generateExtensionId(extension.name);
+		}
 		loaded.push({ extension, path: extPath, configType });
 	}
 
