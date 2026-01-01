@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { createGraphTraversal } from "@ext/core/store-timeline/memory-relationship-store/graph-traversal";
-import { createRelationshipStore } from "@ext/core/store-timeline/memory-relationship-store/relationship-store";
-import type { LorebookEntry } from "@ext/core/build-scene-context/lorebook-entry";
-import { createRelationshipRetrieval } from "@ext/core/build-scene-context/expand-relationships/relationship-retrieval";
+import { createGraphTraversal } from "@ext/core/2-store-timeline/memory-relationship-store/graph-traversal";
+import { createRelationshipStore } from "@ext/core/2-store-timeline/memory-relationship-store/relationship-store";
+import type { LorebookEntry } from "@ext/core/4-build-scene-context/lorebook-entry";
+import { createRelationshipRetrieval } from "@ext/core/4-build-scene-context/expand-relationships/relationship-retrieval";
 
 describe("RelationshipRetrieval", () => {
 	const createMockEntry = (
