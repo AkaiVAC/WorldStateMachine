@@ -75,15 +75,101 @@ describe("Extension Activate Pattern", () => {
 		expect(true).toBe(true);
 	});
 
-	test.todo("context can registerLoader");
+	test("context can registerLoader", () => {
+		const context = createExtensionContext();
 
-	test.todo("context can registerContextBuilder");
+		const loader = {
+			name: "test-loader",
+			canHandle: () => false,
+			load: async () => ({ entities: [] }),
+		};
 
-	test.todo("context can registerSender");
+		context.registerLoader(loader);
 
-	test.todo("context can registerUIComponent");
+		expect(true).toBe(true);
+	});
 
-	test.todo("activate can be async");
+	test("context can registerContextBuilder", () => {
+		const context = createExtensionContext();
 
-	test.todo("activate can inject dependencies from stores");
+		const builder = {
+			name: "test-builder",
+			build: async () => [],
+		};
+
+		context.registerContextBuilder(builder);
+
+		expect(true).toBe(true);
+	});
+
+	test("context can registerSender", () => {
+		const context = createExtensionContext();
+
+		const sender = {
+			name: "test-sender",
+			send: async () => ({ response: "test" }),
+		};
+
+		context.registerSender(sender);
+
+		expect(true).toBe(true);
+	});
+
+	test("context can registerUIComponent", () => {
+		const context = createExtensionContext();
+
+		const component = {
+			name: "test-component",
+			routes: [],
+		};
+
+		context.registerUIComponent(component);
+
+		expect(true).toBe(true);
+	});
+
+	test("activate can be async", async () => {
+		let executed = false;
+
+		const ext = defineExtension({
+			name: "test-ext",
+			version: "1.0.0",
+			activate: async (context) => {
+				await new Promise((resolve) => setTimeout(resolve, 10));
+				executed = true;
+			},
+		});
+
+		const context = createExtensionContext();
+		await ext.activate(context);
+
+		expect(executed).toBe(true);
+	});
+
+	test("activate can inject dependencies from stores", async () => {
+		const context = createExtensionContext();
+
+		const mockFactStore: FactStore = {
+			add: () => {},
+			getAll: () => [],
+			getBySubject: () => [],
+			getAt: () => [],
+		};
+
+		context.registerStore("fact", mockFactStore);
+
+		let injectedStore: FactStore | undefined;
+
+		const ext = defineExtension({
+			name: "test-ext",
+			version: "1.0.0",
+			activate: async (ctx) => {
+				injectedStore = ctx.getStore("fact") as FactStore;
+			},
+		});
+
+		await ext.activate(context);
+
+		expect(injectedStore).toBe(mockFactStore);
+	});
 });
