@@ -37,6 +37,10 @@ We're pivoting to a plugin-first architecture where everything (including core) 
 5. **Zero TypeScript errors.** The project must always pass `bun run tsc --noEmit` and `bun run check`.
 6. **Stay in scope.** No future features unless explicitly requested.
 7. **No "helpful" additions.** No extra features, refactoring, error handling for impossible cases, or abstractions "for later."
+8. **Clean code is non-negotiable.** Strict adherence to SOLID principles and the Four Rules of Simple Design:
+   - **SOLID:** Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion
+   - **Simple Design:** Passes tests, reveals intention, no duplication, fewest elements
+   - No placeholder code or TODO comments. Either implement it or delete it.
 
 ---
 
