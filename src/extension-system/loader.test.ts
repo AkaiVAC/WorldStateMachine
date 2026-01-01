@@ -337,4 +337,73 @@ describe("Extension Loader", () => {
 		expect(names.indexOf("a")).toBeLessThan(names.indexOf("d"));
 		expect(names.indexOf("b")).toBeLessThan(names.indexOf("d"));
 	});
+
+	test("handles empty extensions directory", async () => {
+		const registry = createExtensionRegistry();
+		const loaded = await loadExtensions(
+			{ extensionsDir: currentTestDir },
+			registry,
+		);
+
+		expect(loaded).toHaveLength(0);
+	});
+
+	test("handles extension with empty dependencies array", async () => {
+		createTsExtension("test-ext", {
+			name: "test-ext",
+			version: "1.0.0",
+			dependencies: [],
+		});
+
+		const registry = createExtensionRegistry();
+		const loaded = await loadExtensions(
+			{ extensionsDir: currentTestDir },
+			registry,
+		);
+
+		expect(loaded).toHaveLength(1);
+		expect(loaded[0].extension.name).toBe("test-ext");
+	});
+
+	test("throws on malformed JSON config", async () => {
+		const dir = join(currentTestDir, "bad-json");
+		mkdirSync(dir, { recursive: true });
+		writeFileSync(join(dir, "extension.config.json"), "{ invalid json }");
+
+		const registry = createExtensionRegistry();
+
+		await expect(
+			loadExtensions({ extensionsDir: currentTestDir }, registry),
+		).rejects.toThrow();
+	});
+
+	test("throws when TS config has no default export", async () => {
+		const dir = join(currentTestDir, "no-default");
+		mkdirSync(dir, { recursive: true });
+		writeFileSync(
+			join(dir, "extension.config.ts"),
+			"export const config = { name: 'test', version: '1.0.0' }",
+		);
+
+		const registry = createExtensionRegistry();
+
+		await expect(
+			loadExtensions({ extensionsDir: currentTestDir }, registry),
+		).rejects.toThrow();
+	});
+
+	test("throws when TS config default export is not an object", async () => {
+		const dir = join(currentTestDir, "invalid-export");
+		mkdirSync(dir, { recursive: true });
+		writeFileSync(
+			join(dir, "extension.config.ts"),
+			"export default 'not an object'",
+		);
+
+		const registry = createExtensionRegistry();
+
+		await expect(
+			loadExtensions({ extensionsDir: currentTestDir }, registry),
+		).rejects.toThrow("must export an object");
+	});
 });
