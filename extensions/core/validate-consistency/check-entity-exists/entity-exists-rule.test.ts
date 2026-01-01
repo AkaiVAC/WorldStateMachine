@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import type { PromptAnalyzer } from "../analysis/prompt-analyzer";
-import { createEntityStore } from "../world-state/entity/entity-store";
+import type { PromptAnalyzer } from "../../build-scene-context/analyze-prompt/prompt-analyzer";
+import { createEntityStore } from "../../store-timeline/memory-entity-store/entity-store";
 import { createEntityExistsRule } from "./entity-exists-rule";
 
 const createMockAnalyzer = (references: string[]): PromptAnalyzer => ({

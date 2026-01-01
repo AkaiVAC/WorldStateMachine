@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { createGraphTraversal } from "../world-state/relationship/graph-traversal";
-import { createRelationshipStore } from "../world-state/relationship/relationship-store";
-import { matchEntitiesFuzzy } from "./entity-matcher";
-import { matchEntries } from "./keyword-matcher";
+import { createGraphTraversal } from "../store-timeline/memory-relationship-store/graph-traversal";
+import { createRelationshipStore } from "../store-timeline/memory-relationship-store/relationship-store";
+import { matchEntitiesFuzzy } from "./match-entities/entity-matcher";
+import { matchEntries } from "./match-keywords/keyword-matcher";
 import type { LorebookEntry } from "./lorebook-entry";
-import { createRelationshipRetrieval } from "./relationship-retrieval";
+import { createRelationshipRetrieval } from "./expand-relationships/relationship-retrieval";
 
 describe("E2E: Context Retrieval with Relationship Graph", () => {
 	test("Sunnarian Princess → finds both Sunnaria and Aradia", () => {

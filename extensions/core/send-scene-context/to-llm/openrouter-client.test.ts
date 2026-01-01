@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { ask, type FetchFn } from "./openrouter";
+import { ask, type FetchFn } from "./openrouter-client";
 
 const originalEnv = process.env.OPENROUTER_API_KEY;
 

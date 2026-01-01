@@ -1,10 +1,10 @@
-import { createPromptAnalyzer } from "../../analysis/prompt-analyzer";
-import { ask, type ChatMessage, chat } from "../../llm/openrouter";
-import { matchEntitiesFuzzy } from "../../retrieval/entity-matcher";
-import { matchEntries } from "../../retrieval/keyword-matcher";
-import type { LorebookEntry } from "../../retrieval/lorebook-entry";
-import { createRelationshipRetrieval } from "../../retrieval/relationship-retrieval";
-import { createGraphTraversal } from "../../world-state/relationship/graph-traversal";
+import { createPromptAnalyzer } from "../../build-scene-context/analyze-prompt/prompt-analyzer";
+import { ask, type ChatMessage, chat } from "../../send-scene-context/to-llm/openrouter-client";
+import { matchEntitiesFuzzy } from "../../build-scene-context/match-entities/entity-matcher";
+import { matchEntries } from "../../build-scene-context/match-keywords/keyword-matcher";
+import type { LorebookEntry } from "../../build-scene-context/lorebook-entry";
+import { createRelationshipRetrieval } from "../../build-scene-context/expand-relationships/relationship-retrieval";
+import { createGraphTraversal } from "../../store-timeline/memory-relationship-store/graph-traversal";
 import { getLorebookEntries, getRelationshipStore } from "./lorebook";
 
 const DEFAULT_MODEL = "anthropic/claude-sonnet-4";
