@@ -1,5 +1,5 @@
 import type { HookContext } from "../extension-system/hooks";
-import type { RuntimeSystem } from "./boot";
+import type { RuntimeSystem } from "./createRuntime";
 
 export const createOrchestrator = (runtime: RuntimeSystem) => {
 	return {

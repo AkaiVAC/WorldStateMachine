@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
-import { boot } from "./boot";
+import { createRuntime } from "./createRuntime";
 
 describe("Runtime Integration", () => {
-	test("boots with core extension", async () => {
+	test("creates runtime with core extension", async () => {
 		const extensionsDir = join(process.cwd(), "extensions");
-		const runtime = await boot({ extensionsDir });
+		const runtime = await createRuntime({ extensionsDir });
 
 		expect(runtime.registry.has("core")).toBe(true);
 		const core = runtime.registry.get("core");

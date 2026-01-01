@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { HookContext } from "../extension-system/hooks";
-import { boot } from "./boot";
+import { createRuntime } from "./createRuntime";
 
 let testDirCounter = 0;
 let currentTestDir = "";
@@ -52,13 +52,13 @@ describe("Runtime Boot", () => {
 	});
 
 	test("Zero: boots with empty extensions directory", async () => {
-		const runtime = await boot({ extensionsDir: currentTestDir });
+		const runtime = await createRuntime({ extensionsDir: currentTestDir });
 		expect(runtime.extensions).toHaveLength(0);
 	});
 
 	test("One: boots with single simple extension", async () => {
 		createTsExtension("ext-1", { name: "ext-1", version: "1.0.0" });
-		const runtime = await boot({ extensionsDir: currentTestDir });
+		const runtime = await createRuntime({ extensionsDir: currentTestDir });
 
 		expect(runtime.extensions).toHaveLength(1);
 		expect(runtime.registry.has("ext-1")).toBe(true);
@@ -68,7 +68,7 @@ describe("Runtime Boot", () => {
 		createTsExtension("ext-a", { name: "ext-a", version: "1.0.0" });
 		createTsExtension("ext-b", { name: "ext-b", version: "1.0.0" });
 
-		const runtime = await boot({
+		const runtime = await createRuntime({
 			extensionsDir: currentTestDir,
 			order: ["ext-b", "ext-a"],
 		});
@@ -96,7 +96,7 @@ describe("Runtime Boot", () => {
 			},
 		);
 
-		const runtime = await boot({ extensionsDir: currentTestDir });
+		const runtime = await createRuntime({ extensionsDir: currentTestDir });
 		const context: HookContext = { data: {}, metadata: {} };
 
 		await runtime.hooks.execute("before-validation", context);
@@ -104,7 +104,7 @@ describe("Runtime Boot", () => {
 		expect(context.metadata["hookExecuted"]).toBe(true);
 	});
 	test("Interface: returns complete RuntimeSystem", async () => {
-		const runtime = await boot({ extensionsDir: currentTestDir });
+		const runtime = await createRuntime({ extensionsDir: currentTestDir });
 
 		expect(runtime).toHaveProperty("registry");
 		expect(runtime).toHaveProperty("hooks");
