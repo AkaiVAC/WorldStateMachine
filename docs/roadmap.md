@@ -1457,11 +1457,24 @@ M1 ✅
 - ✅ Updated all imports with **path aliases** (`@core/*`, `@ext/*`)
 - ✅ All 230 tests passing
 
-#### **Phase 3: Runtime** (Complete)
-- ✅ Created `src/runtime/boot.ts` (load extensions, wire system)
-- ✅ Created `src/runtime/orchestrate.ts` (execute with hooks)
-- ✅ Tested full boot sequence
-- ✅ Verified core extension loading
+#### **Phase 3: Runtime & Activation** (In Progress)
+
+1. **Activation System**:
+   - Update `boot.ts` to call `activate(context)` on extensions
+   - Create `extensions/core/index.ts` as entry point
+   - Register all core providers (loaders, validators, etc.) via activation
+   - Inject dependencies (stores) into validators
+
+2. **Orchestrator**:
+   - Update `orchestrate.ts` to use registered providers
+   - Implement `loadData` (find matching loader -> execute)
+   - Implement `validate` (run all validators)
+   - Implement `buildContext` (run context builders)
+
+3. **Verification**:
+   - Verify `sillytavern` loader is discoverable
+   - Verify `entity-exists` validator is executable
+   - Verify dependency injection works
 
 #### **Next: Phase 4 - Example Extensions** (In Progress)
 Create example extensions to prove the architecture!
@@ -1742,9 +1755,27 @@ hooks: {
 
 ---
 
-### Extension Loading
+### Extension Activation (New Pattern)
 
-#### **Auto-Discovery (Default)**
+Extensions use an `activate(context)` entry point to register dynamic services with dependencies.
+
+```typescript
+// extensions/my-ext/index.ts
+import type { ExtensionContext } from "../../src/runtime";
+
+export async function activate(context: ExtensionContext) {
+  // 1. Create dependencies
+  const store = createMyStore();
+
+  // 2. Register services with dependencies injected
+  context.registerValidator({
+    name: "my-validator",
+    check: createValidator(store).check 
+  });
+}
+```
+
+This solves the dependency injection problem that static JSON config cannot handle.
 
 System scans `extensions/` directory on boot:
 
@@ -2104,4 +2135,4 @@ test('hooks intercept at correct points')
 **See also:**
 - `vision.md` - What we're building toward
 - `current.md` - Where we are now
-- `DECISIONS.md` - Why we made key design choices
+- `decisions.md` - Why we made key design choices

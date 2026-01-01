@@ -132,7 +132,6 @@ src/
 │   │   ├── entity.ts
 │   │   ├── entity-store.ts
 │   │   ├── entity-store.test.ts
-│   │   ├── entity-view.ts
 │   │   └── entity-view.test.ts
 │   └── lexicon/          # World vocabulary tracking
 │       ├── lexicon.ts

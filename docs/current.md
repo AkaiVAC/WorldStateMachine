@@ -265,39 +265,18 @@ extensions/
 
 ```
 src/
-├── world-state/          # Core data model
-│   ├── fact/             # Facts: subject/property/value with temporal bounds
-│   ├── entity/           # Entities: id/name/aliases/group
-│   ├── lexicon/          # World vocabulary tracking
-│   ├── relationship/     # M2: Typed relationships and graph traversal
-│   └── event/            # M4: Events with participants, visibility, outcomes
-│
-├── import/               # Getting data in
-│   └── silly-tavern-importer.ts
-│
-├── validation/           # Constraint checking
-│   ├── validator.ts      # Rule framework
-│   ├── entity-exists-rule.ts
-│   └── world-boundary-rule.ts
-│
-├── llm/                  # LLM integration
-│   └── openrouter.ts
-│
-├── retrieval/            # Context retrieval
-│   ├── keyword-matcher.ts
-│   ├── entity-matcher.ts
-│   ├── lorebook-entry.ts
-│   └── lorebook-loader.ts
-│
-├── analysis/             # Prompt analysis
-│   └── prompt-analyzer.ts
-│
-├── ui/                   # Chat interface
-│   ├── server/           # HTTP server, routing
-│   ├── routes/           # API routes (chat, models, lorebook, sessions)
-│   └── public/           # Frontend (components, utilities)
-│
-└── integration.test.ts   # Full pipeline tests
+├── core-types/           # Fundamental contracts (Event, Fact, Entity, Relationship)
+├── extension-system/     # Plugin infrastructure (Registry, Loader, Hooks)
+└── runtime/              # Boot system and Orchestrator
+
+extensions/
+└── core/                 # Standard implementation
+    ├── store-timeline/   # Fact, Event, Entity, Relationship stores
+    ├── load-world-data/  # SillyTavern and other loaders
+    ├── validate-consistency/ # Entity and world boundary validation
+    ├── build-scene-context/ # Keyword and entity matching, graph expansion
+    ├── send-scene-context/  # OpenRouter / LLM clients
+    └── provide-ui/       # Dev Chat interface
 ```
 
 ---

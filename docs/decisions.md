@@ -31,6 +31,36 @@ This document captures the "why" behind key architectural decisions.
 
 ---
 
+### Extension Activate Pattern
+
+**Decision:** Extensions export an `activate(context)` function as their entry point to register services with dependencies.
+
+**Why:**
+- **Dependency Injection:** Stores and services (like EntityStore) need to be passed to consumers (like Validators). Static configuration (`provides: [...]`) isn't enough.
+- **Flexibility:** Extensions can decide at runtime what to register based on config.
+- **Standardization:** Follows established patterns (VS Code, Obsidian) for plugin lifecycle.
+
+**Design:**
+```typescript
+// extensions/my-ext/index.ts
+export async function activate(context: ExtensionContext) {
+  const store = createStore();
+  context.registerStore("my-store", store);
+  
+  context.registerValidator({
+    name: "my-validator",
+    check: createValidator(store).check // Inject store!
+  });
+}
+```
+
+**Alternative considered:** Static `provides` map in config
+- Rejected: Can't handle dependencies or dynamic logic.
+
+**Source:** Discussion on 2026-01-01 about runtime boot wiring.
+
+---
+
 ### Lorebook Is Import Format, Not Runtime Model
 
 **Decision:** Lorebook entries are imported and transformed into structured Entities, Facts, and Relationships. Runtime queries use entity IDs, not keyword matching.

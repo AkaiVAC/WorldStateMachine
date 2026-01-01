@@ -33,7 +33,6 @@ This tests:
 | `FactStore` | `world-state/fact/fact-store.ts` | 4 | ✅ Complete |
 | `Entity` | `world-state/entity/entity.ts` | - | ✅ Type only |
 | `EntityStore` | `world-state/entity/entity-store.ts` | 10 | ✅ Complete |
-| `getEntities()` | `world-state/entity/entity-view.ts` | 5 | ✅ Complete |
 | `Lexicon` | `world-state/lexicon/lexicon.ts` | 5 | ✅ Complete |
 | **Import** | | | |
 | `importSillyTavernLorebook` | `import/silly-tavern-importer.ts` | 8 | ✅ Complete |
@@ -241,9 +240,7 @@ src/
 │   ├── entity/                       # Entities: first-class objects
 │   │   ├── entity.ts                 # ✅ Entity type definition
 │   │   ├── entity-store.ts           # ✅ Store and query entities
-│   │   ├── entity-store.test.ts      # ✅ 10 tests
-│   │   ├── entity-view.ts            # ✅ Compute entities from facts
-│   │   └── entity-view.test.ts       # ✅ 5 tests
+│   │   └── entity-store.test.ts      # ✅ 10 tests
 │   │
 │   ├── lexicon/                      # Vocabulary: what belongs here
 │   │   ├── lexicon.ts                # ✅ Lexicon store
@@ -273,7 +270,6 @@ src/
 │   └── (Phase 4)
 │
 ├── integration.test.ts               # ✅ MVP integration tests (7 tests)
-├── validate-prompt.ts                # ✅ CLI validation script
 │
 └── example/                          # Test data
     └── Excelsia/                     # ✅ 11 SillyTavern lorebook files
