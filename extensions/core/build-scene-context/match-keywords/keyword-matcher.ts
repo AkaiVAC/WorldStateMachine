@@ -1,4 +1,4 @@
-import type { LorebookEntry } from "./lorebook-entry";
+import type { LorebookEntry } from "../lorebook-entry";
 
 export type MatchResult = {
 	entry: LorebookEntry;

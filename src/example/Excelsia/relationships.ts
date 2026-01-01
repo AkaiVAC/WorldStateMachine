@@ -1,4 +1,4 @@
-import type { Relationship } from "../../world-state/relationship/relationship";
+import type { Relationship } from "@core/relationship";
 
 export const excelsiaRelationships: Relationship[] = [
 	// Sunnaria Royal Family

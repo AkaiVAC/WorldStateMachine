@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { matchEntitiesFuzzy } from "./entity-matcher";
-import type { LorebookEntry } from "./lorebook-entry";
+import type { LorebookEntry } from "../lorebook-entry";
 
 const createEntry = (
 	id: string,
