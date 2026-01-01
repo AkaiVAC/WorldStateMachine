@@ -1,9 +1,11 @@
 export type {
 	Extension,
+	ExtensionContext,
 	ExtensionProvides,
 	ExtensionReplacement,
 } from "./define-extension";
 export { defineExtension } from "./define-extension";
+export { createExtensionContext } from "./context";
 export type { Hook, HookContext, HookHandler, HookManager } from "./hooks";
 export { createHookManager } from "./hooks";
 export * from "./interfaces";
