@@ -1,6 +1,6 @@
-import type { GraphTraversal } from "@ext/core/store-timeline/memory-relationship-store/graph-traversal";
-import type { RelationshipStore } from "@ext/core/store-timeline/memory-relationship-store/relationship-store";
-import type { LorebookEntry } from "@ext/core/build-scene-context/lorebook-entry";
+import type { GraphTraversal } from "@ext/core/2-store-timeline/memory-relationship-store/graph-traversal";
+import type { RelationshipStore } from "@ext/core/2-store-timeline/memory-relationship-store/relationship-store";
+import type { LorebookEntry } from "@ext/core/4-build-scene-context/lorebook-entry";
 
 export type ExpansionOptions = {
 	maxDepth?: number;

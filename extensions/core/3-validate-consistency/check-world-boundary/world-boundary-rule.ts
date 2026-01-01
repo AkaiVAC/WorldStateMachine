@@ -1,5 +1,5 @@
-import type { PromptAnalyzer } from "@ext/core/build-scene-context/analyze-prompt/prompt-analyzer";
-import type { Rule, Violation } from "@ext/core/validate-consistency/validation-framework/validator";
+import type { PromptAnalyzer } from "@ext/core/4-build-scene-context/analyze-prompt/prompt-analyzer";
+import type { Rule, Violation } from "@ext/core/3-validate-consistency/validation-framework/validator";
 
 type WorldBoundaryRuleOptions = {
 	analyzer: PromptAnalyzer;
