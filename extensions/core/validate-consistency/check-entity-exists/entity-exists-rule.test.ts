@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import type { PromptAnalyzer } from "../../build-scene-context/analyze-prompt/prompt-analyzer";
-import { createEntityStore } from "../../store-timeline/memory-entity-store/entity-store";
-import { createEntityExistsRule } from "./entity-exists-rule";
+import type { PromptAnalyzer } from "@ext/core/build-scene-context/analyze-prompt/prompt-analyzer";
+import { createEntityStore } from "@ext/core/store-timeline/memory-entity-store/entity-store";
+import { createEntityExistsRule } from "@ext/core/validate-consistency/check-entity-exists/entity-exists-rule";
 
 const createMockAnalyzer = (references: string[]): PromptAnalyzer => ({
 	analyze: async () => ({ entityReferences: references, anachronisms: [] }),
