@@ -28,11 +28,18 @@ We're pivoting to a plugin-first architecture where everything (including core) 
 1. **TDD is mandatory.** Failing test first → minimum code to pass → refactor. No exceptions.
 2. **No comments.** Code must be self-documenting through naming and structure.
 3. **One step at a time.** Complete one thing, confirm it works, then move to the next.
-4. **Ask before large changes.** Confirm with user before modifying multiple files or making architectural decisions.
-5. **Stay in scope.** No future features unless explicitly requested.
-6. **No "helpful" additions.** No extra features, refactoring, error handling for impossible cases, or abstractions "for later."
+4. **Ask before ANY modification.** Always ask for confirmation before executing commands that modify the codebase, file system, or system state.
+5. **Zero TypeScript errors.** The project must always pass `bun run tsc --noEmit` and `bun run check`.
+6. **Stay in scope.** No future features unless explicitly requested.
+7. **No "helpful" additions.** No extra features, refactoring, error handling for impossible cases, or abstractions "for later."
 
-Run tests: `bun test`
+---
+
+## Git & Commits
+
+- **Conventional Commits:** Use the format `<type>(<scope>): <subject>` (e.g., `feat(core):`, `refactor(tests):`, `docs:`).
+- **Logical Grouping:** Group similar changes into distinct commits rather than one giant blob.
+- **Verify before Commit:** Ensure all tests pass and types are clean before committing.
 
 ---
 
@@ -104,8 +111,9 @@ Use ZOMBIES to determine what tests to write BEFORE implementation:
 ## Tooling
 
 ```bash
-bun test          # Run tests
-bun run check     # Lint + format (auto-fix)
+bun test              # Run tests
+bun run check         # Lint + format (auto-fix)
+bun run tsc --noEmit  # Type check
 ```
 
 Stack: Bun, TypeScript, Biome, vis.js
