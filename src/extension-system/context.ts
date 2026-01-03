@@ -1,4 +1,7 @@
-import type { ExtensionContext } from "./define-extension";
+import type {
+	ExtensionContext,
+	StoreTypeMap,
+} from "./define-extension";
 import type {
 	ContextBuilder,
 	Sender,
@@ -38,7 +41,9 @@ export const createExtensionContext = (): ExtensionContext => {
 				storeRegistry[type] = store;
 			},
 			get: (type) => {
-				return storeRegistry[type];
+				return storeRegistry[type] as
+					| StoreTypeMap[keyof StoreTypeMap]
+					| undefined;
 			},
 		},
 

@@ -11,7 +11,7 @@ import type {
 	WorldDataLoader,
 } from "./interfaces";
 
-type StoreTypeMap = {
+export type StoreTypeMap = {
 	fact: FactStore;
 	event: EventStore;
 	entity: EntityStore;
