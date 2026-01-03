@@ -1,6 +1,6 @@
 import type {
 	ExtensionContext,
-	StoreTypeMap,
+	StoreCollection,
 } from "./define-extension";
 import type {
 	ContextBuilder,
@@ -10,12 +10,7 @@ import type {
 	WorldDataLoader,
 } from "./interfaces";
 
-type StoreRegistry = {
-	fact?: unknown;
-	event?: unknown;
-	entity?: unknown;
-	relationship?: unknown;
-};
+type StoreRegistry = StoreCollection;
 
 type ServiceRegistry = {
 	validators: Validator[];
@@ -26,7 +21,7 @@ type ServiceRegistry = {
 };
 
 export const createExtensionContext = (): ExtensionContext => {
-	const storeRegistry: StoreRegistry = {};
+	const storeRegistry: StoreRegistry = new Map();
 	const services: ServiceRegistry = {
 		validators: [],
 		loaders: [],
@@ -38,12 +33,10 @@ export const createExtensionContext = (): ExtensionContext => {
 	return {
 		stores: {
 			set: (type, store) => {
-				storeRegistry[type] = store;
+				storeRegistry.set(type, store);
 			},
 			get: (type) => {
-				return storeRegistry[type] as
-					| StoreTypeMap[keyof StoreTypeMap]
-					| undefined;
+				return storeRegistry.get(type);
 			},
 		},
 
