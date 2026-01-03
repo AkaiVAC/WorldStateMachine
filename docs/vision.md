@@ -334,6 +334,92 @@ Effects become facts:
 
 ---
 
+## Who Is This For?
+
+**Primary audience:** Writers and worldbuilders who use LLMs for content generation and struggle with inconsistency.
+
+**Target users:**
+- **Solo authors** who can't think like every character (villains, diplomats, tacticians)
+- **Roleplayers** using ChatGPT/Claude who are frustrated by LLM contradictions
+- **Novel writers** who want LLM assistance but hate when it breaks their world
+- **Text adventure creators** building interactive stories
+- **Visual novel developers** (future: branching narratives with consistent state)
+
+**The core use case:** "I want to generate content with an LLM, but I need it to respect my established world and not contradict itself."
+
+---
+
+## How This Differs from World Anvil and Other Tools
+
+### World Anvil (and similar wikis)
+- **What it is:** Static knowledge base / worldbuilding wiki
+- **What it does:** Store, organize, and reference lore
+- **What it doesn't do:** Generate content, enforce constraints, integrate with LLMs
+
+**Relationship:** World Anvil is the *input*. This project is the *constraint engine*.
+
+```
+World Anvil (your lore)
+    ↓
+  [Import via extension]
+    ↓
+This System (constraint engine)
+    ↓
+LLM generates new content that respects your lore
+    ↓
+Extract new facts, update timeline
+    ↓
+Optionally: Export back to World Anvil
+```
+
+### Research Prototypes (HAMLET, CharacterBox, Patchview)
+- **What they are:** Academic research systems
+- **What they do:** Multi-agent narratives, BDI modeling, visualization
+- **What they don't do:** Production tools, general-purpose worldbuilding
+
+**Relationship:** We learn from their architectures but build a user-facing tool.
+
+### D&D AI Dungeon Masters (rpg-mcp, etc.)
+- **What they are:** Game mechanics enforcers for D&D 5e
+- **What they do:** Tool-calling for dice rolls, combat, spell slots
+- **What they don't do:** General worldbuilding, epistemic isolation, temporal queries
+
+**Relationship:** Similar architecture (tool-calling, state persistence) but domain-specific.
+
+### Vector DB Memory Systems (ChromaDB, Mem0)
+- **What they are:** Semantic memory for LLM conversations
+- **What they do:** Retrieve similar past conversations via embeddings
+- **What they don't do:** Exact value retrieval, temporal queries, epistemic isolation
+
+**Relationship:** Different approach - we need exact values ("grain tariff is 0.15"), not fuzzy similarity.
+
+---
+
+## What Makes This Unique
+
+**No existing tool combines:**
+
+1. **Timeline-centric with temporal facts** - "What was true at Chapter 5?" is a first-class query
+2. **Tool-calling for deterministic world state** - Exact values, not embeddings or hallucinations
+3. **Epistemic isolation** - Character knowledge boundaries enforced by architecture
+4. **Multi-agent orchestration** - Characters with conflicting knowledge in the same scene
+5. **Living world simulation** - Off-screen progression with detail tiers (focus/intentional/passive/system)
+6. **General-purpose** - Works for any world (fantasy, sci-fi, historical)
+7. **Plugin architecture** - User-extensible via extensions
+
+**Closest comparisons:**
+- **rpg-mcp** (tool-calling + state management, but D&D-specific, no epistemic isolation)
+- **HAMLET** (multi-agent narratives, but research prototype, no persistent world)
+- **RoleKE-Bench** (measures epistemic errors, doesn't solve them)
+
+**Research validation:**
+- RoleKE-Bench found LLMs score ≤45% on epistemic knowledge errors
+- **Our epistemic isolation architecture solves this problem**
+
+See `docs/architecture/reference/12-prior-art.md` for detailed comparison.
+
+---
+
 ## Technology Stack
 
 - **State:** Timeline (events, facts), Map (locations, routes), Calendar
