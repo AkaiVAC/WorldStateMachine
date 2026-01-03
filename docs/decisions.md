@@ -310,15 +310,19 @@ worldTick(timestamp: number) {
 
 ---
 
-### Characters Are RPG Stat Sheets
+### Characters Are Complete People, Not Just Stat Blocks
 
-**Decision:** Characters have comprehensive queryable state across all attributes (physical, equipment, appearance, social, skills). Treat characters as entities with facts, just like economies or kingdoms.
+**Decision:** Characters have comprehensive queryable state across ALL attributes: physical, equipment, appearance, skills, AND psychological (goals, motivations, fears, values, conflicts). Treat characters as complete people with agency and depth.
+
+**Core principle:** "What is a character if not a bundle of desires and motivations? They would just be caricatures bound to their roles and titles."
 
 **Why:**
-- **Complete continuity:** "I was wearing red" stays red until clothing-change event
+- **Characters need agency:** Without goals/motivations, they're just NPCs following scripts
+- **Complete continuity:** Physical ("I was wearing red") AND psychological ("I fear failure") both persist
 - **Physical constraints:** Damaged shoe affects mud navigation, height affects reach
-- **Consistency enforcement:** Appearance/equipment can't change without cause
-- **Emergence:** Status effects combine (exhausted + wounded = can't run)
+- **Psychological depth:** Goals drive behavior, fears create tension, conflicts make characters real
+- **Consistency enforcement:** Appearance, equipment, AND motivations can't change without cause
+- **Emergence:** Status effects combine (exhausted + wounded = can't run), motivations conflict (duty vs morality)
 
 **Design:**
 ```typescript
@@ -342,23 +346,42 @@ worldTick(timestamp: number) {
 {subject: "reacher", property: "skill.aspect-theory", value: 9.5}
 {subject: "reacher", property: "can-reach-height", value: 150}
 
-// Social/Emotional (temporal)
+// Goals & Motivations (WHO they are - M5)
+{subject: "aradia", property: "primary-goal", value: "achieve-peace-with-lunaria"}
+{subject: "aradia", property: "motivation.peace", value: "haunted-by-war-casualties"}
+{subject: "alaric", property: "primary-goal", value: "protect-sunnaria"}
+{subject: "alaric", property: "motivation", value: "honor-ancestors-legacy"}
+
+// Fears & Internal Conflicts
+{subject: "aradia", property: "fears", value: "failing-her-people"}
+{subject: "aradia", property: "internal-conflict", value: "duty-to-father-vs-moral-conviction"}
+{subject: "alaric", property: "internal-conflict", value: "peace-vs-strength-dilemma"}
+
+// Values & Beliefs
+{subject: "aradia", property: "values.primary", value: "compassion-over-conquest"}
+{subject: "alaric", property: "belief.leadership", value: "strength-earns-respect"}
+
+// Attitudes (temporal)
 {subject: "reacher", property: "attitude-toward.violet-elf", value: "impressed", validFrom: 43}
 ```
 
 **Extraction strategy:**
 
-**From lorebooks (one-time):**
+**From lorebooks (M5 ETL - one-time):**
 - All physical attributes (height, strength, age)
 - Base skills/capabilities
 - Default appearance
+- **Goals & motivations** (what they want, why they want it)
+- **Fears & conflicts** (what holds them back, internal struggles)
+- **Values & beliefs** (what guides their behavior)
 
-**From scenes (ongoing):**
+**From scenes (ongoing extraction):**
 - Equipment changes (damage, acquisition, loss)
 - Condition changes (injuries, exhaustion, wetness)
 - Appearance changes (clothing, visible wounds)
-- Social/emotional changes (attitude shifts)
+- Attitude changes (how they feel about specific entities)
 - Status effects (poisoned, blessed, cursed)
+- **Goal evolution** (rare - major character development events only)
 
 **Validation rules:**
 
@@ -381,15 +404,23 @@ validateEquipmentUsage(action, equipmentState)
 ```
 
 **Benefits:**
-1. **Everything that can contradict is tracked:** Clothing color, equipment condition, heights, capabilities
-2. **Character state = queryable facts:** Just like economies have grain-tariff, characters have shoe-condition
-3. **Validation catches contradictions:** System flags "red tunic became green" without explanation
-4. **No hallucination of physical details:** LLM queries character state, can't make up attributes
+1. **Everything that can contradict is tracked:** Physical, equipment, appearance, AND psychological
+2. **Character state = queryable facts:** Just like economies have grain-tariff, characters have shoe-condition AND primary-goal
+3. **Validation catches contradictions:** System flags "red tunic became green" AND "pacifist became warmonger" without explanation
+4. **No hallucination:** LLM queries character state for both physical attributes AND motivations
+5. **Characters have agency:** Goals/motivations drive behavior, making characters active participants (not NPCs)
+6. **Depth without complexity:** Single fact model handles both "height: 185cm" and "primary-goal: achieve-peace"
 
-**Alternative considered:** Only track major changes (injuries, location), let prose handle details
-- Rejected: "I was wearing red" becomes "I was wearing green" without detection
+**Critical distinction - M5 vs M11:**
+- **M5 character facts** define WHO they are (goals, motivations, fears) - static or slow-changing
+- **M11 Intent system** tracks HOW they pursue goals (active off-screen progression) - dynamic
+- Example: Aradia's goal "achieve-peace" (M5 fact) drives her intent "negotiate-treaty" (M11 active pursuit)
+- Without M5 psychological facts, M11 Intent would have nothing to build on
 
-**Source:** Discussion on 2026-01-01 about character state continuity
+**Alternative considered:** Only track physical attributes, let LLM handle psychology
+- Rejected: Characters become stat blocks without agency or depth. Goals are just as important as height.
+
+**Source:** Discussion on 2026-01-03 about character depth and agency
 
 ---
 
