@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { createExtensionContext } from "./context";
-import type { Extension } from "./define-extension";
+import type { Extension, ExtensionContext } from "./define-extension";
 import type { ExtensionRegistry } from "./registry";
 
 export type ExtensionLoaderConfig = {
@@ -16,10 +16,15 @@ export type LoadedExtension = {
     configType: "typescript" | "json";
 };
 
+export type LoadExtensionResult = {
+    extensions: LoadedExtension[];
+    context: ExtensionContext;
+};
+
 export const loadExtensions = async (
     config: ExtensionLoaderConfig,
     registry: ExtensionRegistry,
-): Promise<LoadedExtension[]> => {
+): Promise<LoadExtensionResult> => {
     const { extensionsDir, order, disabled = [] } = config;
 
     if (!existsSync(extensionsDir)) {
@@ -78,7 +83,9 @@ export const loadExtensions = async (
     const errors = registry.validate();
     if (errors.length > 0) {
         throw new Error(
-            `Extension validation failed:\n${errors.map((e) => `  - ${e.message}`).join("\n")}`,
+            `Extension validation failed:\n${errors
+                .map((e) => `  - ${e.message}`)
+                .join("\n")}`,
         );
     }
 
@@ -90,7 +97,7 @@ export const loadExtensions = async (
         }
     }
 
-    return sorted;
+    return { extensions: sorted, context };
 };
 
 const generateExtensionId = (name: string): string => {

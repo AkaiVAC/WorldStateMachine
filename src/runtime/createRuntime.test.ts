@@ -116,4 +116,37 @@ describe("Runtime Boot", () => {
         expect(typeof runtime.registry.register).toBe("function");
         expect(typeof runtime.hooks.execute).toBe("function");
     });
+
+    test("services registered during activation are accessible via runtime", async () => {
+        const dir = join(currentTestDir, "service-ext");
+        mkdirSync(dir, { recursive: true });
+
+        const extensionCode = `
+import { defineExtension } from '${join(
+            import.meta.dir,
+            "../extension-system/define-extension.ts",
+        ).replace(/\\/g, "\\\\")}';
+
+export default defineExtension({
+    name: 'service-ext',
+    version: '1.0.0',
+    activate: async (context) => {
+        context.validators.add({
+            name: 'test-validator',
+            check: async () => []
+        });
+    }
+});
+`;
+
+        writeFileSync(join(dir, "extension.config.ts"), extensionCode);
+
+        const runtime = await createRuntime({ extensionsDir: currentTestDir });
+
+        expect(runtime.services).toBeDefined();
+        expect(runtime.services.validators.getAll()).toHaveLength(1);
+        expect(runtime.services.validators.getAll()[0]?.name).toBe(
+            "test-validator",
+        );
+    });
 });

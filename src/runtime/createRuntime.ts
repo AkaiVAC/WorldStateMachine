@@ -1,4 +1,5 @@
 import { join } from "node:path";
+import type { ExtensionContext } from "../extension-system";
 import type { Hook, HookManager } from "../extension-system/hooks";
 import { createHookManager } from "../extension-system/hooks";
 import type { LoadedExtension } from "../extension-system/loader";
@@ -10,6 +11,7 @@ export type RuntimeSystem = {
     registry: ExtensionRegistry;
     hooks: HookManager;
     extensions: LoadedExtension[];
+    services: ExtensionContext;
 };
 
 export type RuntimeConfig = {
@@ -27,7 +29,7 @@ export const createRuntime = async (
     const registry = createExtensionRegistry();
     const hooks = createHookManager();
 
-    const extensions = await loadExtensions(
+    const { extensions, context } = await loadExtensions(
         {
             extensionsDir,
             order: config.order,
@@ -61,7 +63,9 @@ export const createRuntime = async (
                         );
                     } catch (err) {
                         throw new Error(
-                            `Failed to load hook '${handlerFile}' for extension '${loaded.extension.name}': ${(err as Error).message}`,
+                            `Failed to load hook '${handlerFile}' for extension '${
+                                loaded.extension.name
+                            }': ${(err as Error).message}`,
                         );
                     }
                 }
@@ -73,5 +77,6 @@ export const createRuntime = async (
         registry,
         hooks,
         extensions,
+        services: context,
     };
 };

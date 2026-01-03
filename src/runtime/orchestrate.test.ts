@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import type { ExtensionContext } from "../extension-system";
 import { createHookManager } from "../extension-system/hooks";
 import { createExtensionRegistry } from "../extension-system/registry";
 import type { RuntimeSystem } from "./createRuntime";
@@ -8,6 +9,7 @@ const createTestRuntime = (): RuntimeSystem => ({
     registry: createExtensionRegistry(),
     hooks: createHookManager(),
     extensions: [],
+    services: {} as ExtensionContext,
 });
 
 describe("Orchestrator", () => {

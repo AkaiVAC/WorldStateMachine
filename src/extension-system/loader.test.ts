@@ -58,7 +58,7 @@ describe("Extension Loader", () => {
         });
 
         const registry = createExtensionRegistry();
-        const loaded = await loadExtensions(
+        const { extensions: loaded } = await loadExtensions(
             { extensionsDir: currentTestDir },
             registry,
         );
@@ -75,7 +75,7 @@ describe("Extension Loader", () => {
         });
 
         const registry = createExtensionRegistry();
-        const loaded = await loadExtensions(
+        const { extensions: loaded } = await loadExtensions(
             { extensionsDir: currentTestDir },
             registry,
         );
@@ -99,7 +99,7 @@ describe("Extension Loader", () => {
         );
 
         const registry = createExtensionRegistry();
-        const loaded = await loadExtensions(
+        const { extensions: loaded } = await loadExtensions(
             { extensionsDir: currentTestDir },
             registry,
         );
@@ -134,7 +134,7 @@ describe("Extension Loader", () => {
         });
 
         const registry = createExtensionRegistry();
-        const loaded = await loadExtensions(
+        const { extensions: loaded } = await loadExtensions(
             { extensionsDir: currentTestDir },
             registry,
         );
@@ -151,7 +151,7 @@ describe("Extension Loader", () => {
         });
 
         const registry = createExtensionRegistry();
-        const loaded = await loadExtensions(
+        const { extensions: loaded } = await loadExtensions(
             { extensionsDir: currentTestDir },
             registry,
         );
@@ -188,7 +188,7 @@ describe("Extension Loader", () => {
         createTsExtension("disabled", { name: "disabled", version: "1.0.0" });
 
         const registry = createExtensionRegistry();
-        const loaded = await loadExtensions(
+        const { extensions: loaded } = await loadExtensions(
             {
                 extensionsDir: currentTestDir,
                 disabled: ["disabled"],
@@ -209,7 +209,7 @@ describe("Extension Loader", () => {
         });
 
         const registry = createExtensionRegistry();
-        const loaded = await loadExtensions(
+        const { extensions: loaded } = await loadExtensions(
             { extensionsDir: currentTestDir },
             registry,
         );
@@ -225,7 +225,7 @@ describe("Extension Loader", () => {
         createTsExtension("c", { name: "c", version: "1.0.0" });
 
         const registry = createExtensionRegistry();
-        const loaded = await loadExtensions(
+        const { extensions: loaded } = await loadExtensions(
             {
                 extensionsDir: currentTestDir,
                 order: ["c", "a", "b"],
@@ -247,7 +247,7 @@ describe("Extension Loader", () => {
         });
 
         const registry = createExtensionRegistry();
-        const loaded = await loadExtensions(
+        const { extensions: loaded } = await loadExtensions(
             {
                 extensionsDir: currentTestDir,
                 order: ["dependent", "base"],
@@ -265,7 +265,7 @@ describe("Extension Loader", () => {
         createJsonExtension("ext3", { name: "ext3", version: "3.0.0" });
 
         const registry = createExtensionRegistry();
-        const loaded = await loadExtensions(
+        const { extensions: loaded } = await loadExtensions(
             { extensionsDir: currentTestDir },
             registry,
         );
@@ -330,7 +330,7 @@ describe("Extension Loader", () => {
         });
 
         const registry = createExtensionRegistry();
-        const loaded = await loadExtensions(
+        const { extensions: loaded } = await loadExtensions(
             { extensionsDir: currentTestDir },
             registry,
         );
@@ -346,7 +346,7 @@ describe("Extension Loader", () => {
 
     test("handles empty extensions directory", async () => {
         const registry = createExtensionRegistry();
-        const loaded = await loadExtensions(
+        const { extensions: loaded } = await loadExtensions(
             { extensionsDir: currentTestDir },
             registry,
         );
@@ -362,7 +362,7 @@ describe("Extension Loader", () => {
         });
 
         const registry = createExtensionRegistry();
-        const loaded = await loadExtensions(
+        const { extensions: loaded } = await loadExtensions(
             { extensionsDir: currentTestDir },
             registry,
         );
@@ -421,7 +421,10 @@ describe("Extension Loader", () => {
 
         const extensionCode = `
 import { writeFileSync } from 'node:fs';
-import { defineExtension } from '${join(import.meta.dir, "define-extension.ts").replace(/\\/g, "\\\\")}';
+import { defineExtension } from '${join(
+            import.meta.dir,
+            "define-extension.ts",
+        ).replace(/\\/g, "\\\\")}';
 
 export default defineExtension({
 	name: 'test-ext',
