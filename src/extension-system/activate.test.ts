@@ -10,7 +10,7 @@ describe("Extension Activate Pattern", () => {
 			name: "test-ext",
 			version: "1.0.0",
 			activate: async (context) => {
-				context.registerValidator({
+				context.validators.add({
 					name: "test-validator",
 					check: async () => [],
 				});
@@ -39,7 +39,7 @@ describe("Extension Activate Pattern", () => {
 		expect(receivedContext).toBe(context);
 	});
 
-	test("context can registerStore with type safety", () => {
+	test("context can set store with type safety", () => {
 		const context = createExtensionContext();
 
 		const mockFactStore: FactStore = {
@@ -49,20 +49,20 @@ describe("Extension Activate Pattern", () => {
 			getAt: () => [],
 		};
 
-		context.registerStore("fact", mockFactStore);
+		context.stores.set("fact", mockFactStore);
 
-		const retrieved = context.getStore("fact");
+		const retrieved = context.stores.get("fact");
 		expect(retrieved).toBe(mockFactStore);
 	});
 
-	test("context can getStore with type safety", () => {
+	test("context can get store with type safety", () => {
 		const context = createExtensionContext();
 
-		expect(context.getStore("fact")).toBeUndefined();
-		expect(context.getStore("event")).toBeUndefined();
+		expect(context.stores.get("fact")).toBeUndefined();
+		expect(context.stores.get("event")).toBeUndefined();
 	});
 
-	test("context can registerValidator", () => {
+	test("context can add and retrieve validators", () => {
 		const context = createExtensionContext();
 
 		const validator = {
@@ -70,12 +70,14 @@ describe("Extension Activate Pattern", () => {
 			check: async () => [],
 		};
 
-		context.registerValidator(validator);
+		context.validators.add(validator);
 
-		expect(true).toBe(true);
+		const retrieved = context.validators.getAll();
+		expect(retrieved).toHaveLength(1);
+		expect(retrieved[0]).toBe(validator);
 	});
 
-	test("context can registerLoader", () => {
+	test("context can add and retrieve loaders", () => {
 		const context = createExtensionContext();
 
 		const loader = {
@@ -84,12 +86,14 @@ describe("Extension Activate Pattern", () => {
 			load: async () => ({ entities: [] }),
 		};
 
-		context.registerLoader(loader);
+		context.loaders.add(loader);
 
-		expect(true).toBe(true);
+		const retrieved = context.loaders.getAll();
+		expect(retrieved).toHaveLength(1);
+		expect(retrieved[0]).toBe(loader);
 	});
 
-	test("context can registerContextBuilder", () => {
+	test("context can add and retrieve context builders", () => {
 		const context = createExtensionContext();
 
 		const builder = {
@@ -97,12 +101,14 @@ describe("Extension Activate Pattern", () => {
 			build: async () => [],
 		};
 
-		context.registerContextBuilder(builder);
+		context.contextBuilders.add(builder);
 
-		expect(true).toBe(true);
+		const retrieved = context.contextBuilders.getAll();
+		expect(retrieved).toHaveLength(1);
+		expect(retrieved[0]).toBe(builder);
 	});
 
-	test("context can registerSender", () => {
+	test("context can add and retrieve senders", () => {
 		const context = createExtensionContext();
 
 		const sender = {
@@ -110,12 +116,14 @@ describe("Extension Activate Pattern", () => {
 			send: async () => ({ response: "test" }),
 		};
 
-		context.registerSender(sender);
+		context.senders.add(sender);
 
-		expect(true).toBe(true);
+		const retrieved = context.senders.getAll();
+		expect(retrieved).toHaveLength(1);
+		expect(retrieved[0]).toBe(sender);
 	});
 
-	test("context can registerUIComponent", () => {
+	test("context can add and retrieve UI components", () => {
 		const context = createExtensionContext();
 
 		const component = {
@@ -123,9 +131,11 @@ describe("Extension Activate Pattern", () => {
 			routes: [],
 		};
 
-		context.registerUIComponent(component);
+		context.uiComponents.add(component);
 
-		expect(true).toBe(true);
+		const retrieved = context.uiComponents.getAll();
+		expect(retrieved).toHaveLength(1);
+		expect(retrieved[0]).toBe(component);
 	});
 
 	test("activate can be async", async () => {
@@ -156,7 +166,7 @@ describe("Extension Activate Pattern", () => {
 			getAt: () => [],
 		};
 
-		context.registerStore("fact", mockFactStore);
+		context.stores.set("fact", mockFactStore);
 
 		let injectedStore: FactStore | undefined;
 
@@ -164,7 +174,7 @@ describe("Extension Activate Pattern", () => {
 			name: "test-ext",
 			version: "1.0.0",
 			activate: async (ctx) => {
-				injectedStore = ctx.getStore("fact") as FactStore;
+				injectedStore = ctx.stores.get("fact") as FactStore;
 			},
 		});
 
