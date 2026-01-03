@@ -1,0 +1,21 @@
+#!/bin/sh
+set -e
+
+# Ensure Bun is in the PATH (common fix for Windows/GUI Git clients)
+export PATH="$PATH:$HOME/.bun/bin"
+
+echo "Running pre-commit checks..."
+
+echo "→ Running formatter..."
+bun run format
+
+echo "→ Running type checks..."
+bun run typecheck
+
+echo "→ Running tests..."
+bun test
+
+echo "→ Running linter..."
+bun run check
+
+echo "✓ All pre-commit checks passed!"
