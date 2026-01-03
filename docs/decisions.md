@@ -1,7 +1,5 @@
 # Design Decisions
 
-**Last updated:** 2026-01-01
-
 This document captures the "why" behind key architectural decisions.
 
 ---
@@ -27,7 +25,7 @@ This document captures the "why" behind key architectural decisions.
 **Alternative considered:** Monolith with optional plugins
 - Rejected: Creates a "second-class citizen" problem for plugins. By making core an extension, the API is proven robust.
 
-**Source:** `NEXT_SESSION.md` (Implementation Plan Phase 1-3)
+**Source:** Extension Architecture design in [roadmap.md](roadmap.md)
 
 ---
 

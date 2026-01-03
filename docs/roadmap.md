@@ -1,8 +1,6 @@
 # Roadmap: From Current to Vision
 
-**Last updated:** 2026-01-01
 **Current position:** M4 complete, ready for M5
-**Estimated timeline:** 5-7 months to full vision
 **Proof-of-concept target:** M6 (epistemic state + multi-agent)
 
 ---
@@ -73,22 +71,19 @@ LOREBOOK (Import)              RUNTIME MODEL
 
 ## Milestone Overview
 
-| # | Milestone | Focus | Effort | Status |
-|---|-----------|-------|--------|--------|
-| 1 | Basic Validation | Entity checking, world boundary | 3-4 weeks | ✅ DONE |
-| 2 | Relationship Graph | Entity relationships, graph traversal | 2-3 weeks | ✅ DONE |
-| 3 | Timeline Foundation | Chapter-based chronology | 1-2 weeks | ✅ DONE |
-| 4 | Events | Source of truth, participation tracking | 2-3 weeks | ✅ DONE |
-| 5 | Epistemic State | POV-filtered knowledge | 3-4 weeks | 🎯 NEXT ⭐ |
-| 6 | Multi-Agent Orchestration | Separate contexts, secrets | 2-3 weeks | 🔜 ⭐ |
-| 7 | Basic Geography | Containment, proximity | 2 weeks | 🔜 |
-| 8 | Travel Validation | Routes, travel time | 1-2 weeks | 🔜 |
-| 9 | Full Map System | 2D coordinates, terrain, weather | 3-4 weeks | 🔜 |
-| 10 | Calendar System | Full temporal granularity | 2-3 weeks | 🔜 |
-| 11 | Effect Propagation | Cascading effects, ambient | 3-4 weeks | 🔜 |
-
-**Total estimated effort:** 20-28 weeks (5-7 months)
-**To proof-of-concept (M6):** 11-17 weeks (2.5-4 months)
+| # | Milestone | Focus | Status |
+|---|-----------|-------|--------|
+| 1 | Basic Validation | Entity checking, world boundary | ✅ DONE |
+| 2 | Relationship Graph | Entity relationships, graph traversal | ✅ DONE |
+| 3 | Timeline Foundation | Chapter-based chronology | ✅ DONE |
+| 4 | Events | Source of truth, participation tracking | ✅ DONE |
+| 5 | Epistemic State | POV-filtered knowledge | 🎯 NEXT ⭐ |
+| 6 | Multi-Agent Orchestration | Separate contexts, secrets | 🔜 ⭐ |
+| 7 | Basic Geography | Containment, proximity | 🔜 |
+| 8 | Travel Validation | Routes, travel time | 🔜 |
+| 9 | Full Map System | 2D coordinates, terrain, weather | 🔜 |
+| 10 | Calendar System | Full temporal granularity | 🔜 |
+| 11 | Effect Propagation | Cascading effects, ambient | 🔜 |
 
 ---
 
@@ -97,8 +92,6 @@ LOREBOOK (Import)              RUNTIME MODEL
 **Goal:** Enable realistic character knowledge boundaries in roleplay scenarios.
 
 ### M2: Relationship Graph ✅ DONE
-
-**Estimated effort:** 2-3 weeks
 
 **Goal:** Add relationships between entities and enable graph traversal for context retrieval.
 
@@ -139,8 +132,6 @@ LOREBOOK (Import)              RUNTIME MODEL
 
 ### M3: Timeline Foundation ✅ DONE
 
-**Estimated effort:** 1-2 weeks
-
 **Goal:** Add temporal ordering to facts (chapter-based chronology).
 
 **What to build:**
@@ -175,8 +166,6 @@ LOREBOOK (Import)              RUNTIME MODEL
 
 ### M4: Events as Source of Truth ✅ DONE
 
-**Estimated effort:** 2-3 weeks
-
 **Goal:** Track events that generate facts, record participation, preserve original prose.
 
 **What was built:**
@@ -184,12 +173,11 @@ LOREBOOK (Import)              RUNTIME MODEL
 - `EventStore` with queries by participant, timestamp, location, visibility
 - Fact generation from events (`getFactsFromEvent`)
 - Visibility levels: private, restricted, public
-- 30 tests passing
 
 **Deliverables:**
 - `src/world-state/event/event.ts` - Event type
 - `src/world-state/event/event-store.ts` - Store, query, and fact generation
-- `src/world-state/event/event-store.test.ts` - 30 tests
+- `src/world-state/event/event-store.test.ts` - Tests
 - `src/world-state/event/index.ts` - Exports
 
 **Event structure:**
@@ -214,8 +202,6 @@ type Event = {
 ---
 
 ### M5: Epistemic State + Tool-Calling Architecture ⭐ FIRST BIG WIN
-
-**Estimated effort:** 5-6 weeks
 
 **Goal:** Track what each character knows based on event participation and visibility. Enable tool-calling LLM architecture with deterministic facts. Transform lorebooks into comprehensive structured data.
 
@@ -806,8 +792,6 @@ validateEquipmentUsage(action, equipmentState) {
 
 ### M6: Multi-Agent Orchestration ⭐ PROOF-OF-CONCEPT COMPLETE
 
-**Estimated effort:** 2-3 weeks
-
 **Goal:** Generate scenes with multiple characters who have different knowledge. Each character gets POV-filtered context.
 
 **What to build:**
@@ -853,8 +837,6 @@ validateEquipmentUsage(action, equipmentState) {
 
 ### M7: Basic Geography
 
-**Estimated effort:** 2 weeks
-
 **Goal:** Locations with containment hierarchy. "X is in Y" relationships.
 
 **What to build:**
@@ -880,8 +862,6 @@ validateEquipmentUsage(action, equipmentState) {
 ---
 
 ### M8: Travel Validation
-
-**Estimated effort:** 1-2 weeks
 
 **Goal:** Routes between locations, travel time validation. Characters can't teleport.
 
@@ -915,8 +895,6 @@ validateEquipmentUsage(action, equipmentState) {
 
 ### M9: Full Map System
 
-**Estimated effort:** 3-4 weeks
-
 **Goal:** 2D coordinates, terrain, weather, advanced travel physics.
 
 **What to build:**
@@ -944,8 +922,6 @@ validateEquipmentUsage(action, equipmentState) {
 
 ### M10: Calendar System
 
-**Estimated effort:** 2-3 weeks
-
 **Goal:** Full temporal granularity (year → season → month → day → hour).
 
 **What to build:**
@@ -970,8 +946,6 @@ validateEquipmentUsage(action, equipmentState) {
 ---
 
 ### M11: Unified World Tick & Ambient Simulation
-
-**Estimated effort:** 4-5 weeks
 
 **Goal:** Implement unified world tick architecture where ALL entities simulate forward (at varying detail levels). The world always progresses, whether characters are in focus or off-screen.
 
@@ -1459,27 +1433,6 @@ M1 ✅
 
 ---
 
-## Timeline Estimates
-
-| Milestone | Weeks | Cumulative |
-|-----------|-------|------------|
-| M1 | - | ✅ DONE |
-| M2 | 2-3 | 2-3 weeks |
-| M3 | 1-2 | 3-5 weeks |
-| M4 | 2-3 | 5-8 weeks |
-| M5 | 3-4 | 8-12 weeks |
-| **M6** | **2-3** | **10-15 weeks** ⭐ **PROOF-OF-CONCEPT** |
-| M7 | 2 | 12-17 weeks |
-| M8 | 1-2 | 13-19 weeks |
-| M9 | 3-4 | 16-23 weeks |
-| M10 | 2-3 | 18-26 weeks |
-| M11 | 3-4 | 21-30 weeks |
-
-**To proof-of-concept:** 2.5-4 months
-**To full vision:** 5-7.5 months
-
----
-
 ## Future Features (Post-M11)
 
 ### Anticipatory Context Injection
@@ -1508,7 +1461,7 @@ M1 ✅
 
 **Date Started:** 2026-01-01
 **Status:** Phases 1, 2, & 3 Complete ✅ | Phase 4 Next 🎯
-**Progress:** 3 of 5 phases complete | 251 tests passing
+**Progress:** 3 of 5 phases complete
 
 ---
 
@@ -1521,8 +1474,7 @@ M1 ✅
 - ✅ Implemented extension registry with dependency validation
 - ✅ Implemented extension loader with **TS + JSON hybrid support**
 - ✅ Implemented lifecycle hook system with execution control
-- ✅ Added 33 comprehensive tests for extension system
-- ✅ All 230 tests passing
+- ✅ Added comprehensive tests for extension system
 
 #### **Phase 2: Migrate to Extensions** (Complete)
 - ✅ Created `extensions/core/extension.config.ts`
@@ -1534,7 +1486,6 @@ M1 ✅
   - `src/llm/` → `extensions/core/send-scene-context/`
   - `src/ui/` → `extensions/core/provide-ui/`
 - ✅ Updated all imports with **path aliases** (`@core/*`, `@ext/*`)
-- ✅ All 230 tests passing
 
 #### **Phase 3: Runtime & Activation** ✅ Complete
 
@@ -1547,14 +1498,38 @@ M1 ✅
 2. ✅ **Runtime System**:
    - Renamed `boot.ts` → `createRuntime.ts` (better semantics)
    - Integrated activate calls into loader (dependency order)
-   - All 251 tests passing
 
 3. ✅ **Architecture Decisions**:
    - Added SOLID + Simple Design as Hard Rule #8
    - Core extension directories numbered 1-6 for clarity
    - Clean separation: createRuntime (system init) vs loadExtensions (extension management)
 
-#### **Next: Phase 4 - Example Extensions** 🎯
+#### **Next: Extension System Rewrite** 🎯
+
+**Decision:** Rewrite extension system with verb-based directory structure matching `extensions/core/` pattern.
+
+**Why:** Current implementation has code quality issues (nested loops, hard to follow). The extension system is foundational — it needs to be robust and readable.
+
+**Planned structure:**
+```
+src/extension-system/
+├── 1-discover-extensions/   # Find dirs + load configs
+├── 2-validate-configs/      # Check required fields, generate IDs
+├── 3-sort-dependencies/     # Order by dependencies
+├── 4-register-extensions/   # Add to registry
+├── 5-activate-extensions/   # Run activate() with context
+├── 6-wire-hooks/            # Connect lifecycle hooks
+└── index.ts
+```
+
+**Additional changes:**
+- Eliminate `src/runtime/` directory (merge into extension-system)
+- Add `deactivate()` hook support
+- Apply ZOMBIES testing methodology
+
+---
+
+#### **After Rewrite: Phase 4 - Example Extensions**
 Create example extensions to prove the architecture!
 
 ---
@@ -2097,7 +2072,7 @@ export const defineExtension = (ext: Extension): Extension => ext
 1. ✅ Created `src/runtime/createRuntime.ts` (load extensions, wire system)
 2. ✅ Created `src/runtime/orchestrate.ts` (execute with hooks)
 3. ✅ Implemented activate pattern with ExtensionContext
-4. ✅ Full boot sequence tested (251 tests passing)
+4. ✅ Full boot sequence tested
 
 #### **Phase 4: Example Extensions (Week 3)**
 

@@ -1,5 +1,9 @@
 ## 14. MVP Scope
 
+> **Historical Document:** This describes the original MVP scope and progress as of December 2025 (M1 completion). The project has since progressed through M4 and adopted a plugin-first architecture. See [current.md](../../current.md) for current status.
+
+---
+
 ### 14.1 Success Criterion
 
 A single test validates the MVP:
