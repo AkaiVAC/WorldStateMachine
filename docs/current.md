@@ -1,12 +1,12 @@
 # Current Implementation State
 
 **Last updated:** 2026-01-01
-**Test status:** ✅ 239 tests passing
-**Current milestone:** M4 complete, Extension Architecture Phases 1 & 2 complete
+**Test status:** ✅ 251 tests passing
+**Current milestone:** M4 complete, Extension Architecture Phases 1-3 complete
 
 **📦 Architecture:** Plugin-first extension system with path aliases (`@core/*`, `@ext/*`)
 
-**🚧 Next:** Phase 3 - Runtime boot system (see [roadmap.md](roadmap.md))
+**🚧 Next:** Phase 4 - Example extensions to prove architecture (see [roadmap.md](roadmap.md))
 
 ---
 
@@ -23,7 +23,8 @@ The project now uses a **plugin-first architecture** where all functionality (in
 - ✅ **Auto-discovery** from `extensions/` directory
 - ✅ **Circular dependency detection**
 - ✅ **Path aliases** (`@core/*`, `@ext/*`)
-- 33 tests passing
+- ✅ **Activate pattern** with ExtensionContext for dependency injection
+- 45 tests passing
 
 ### Core Types
 **Location:** `src/core-types/`
@@ -39,12 +40,12 @@ src/
 
 extensions/
 └── core/              # All current functionality
-    ├── store-timeline/
-    ├── load-world-data/
-    ├── validate-consistency/
-    ├── build-scene-context/
-    ├── send-scene-context/
-    └── provide-ui/
+    ├── 1-load-world-data/
+    ├── 2-store-timeline/
+    ├── 3-validate-consistency/
+    ├── 4-build-scene-context/
+    ├── 5-send-scene-context/
+    └── 6-provide-ui/
 ```
 
 ---
@@ -267,16 +268,16 @@ extensions/
 src/
 ├── core-types/           # Fundamental contracts (Event, Fact, Entity, Relationship)
 ├── extension-system/     # Plugin infrastructure (Registry, Loader, Hooks)
-└── runtime/              # Boot system and Orchestrator
+└── runtime/              # Runtime creation and Orchestrator
 
 extensions/
 └── core/                 # Standard implementation
-    ├── store-timeline/   # Fact, Event, Entity, Relationship stores
-    ├── load-world-data/  # SillyTavern and other loaders
-    ├── validate-consistency/ # Entity and world boundary validation
-    ├── build-scene-context/ # Keyword and entity matching, graph expansion
-    ├── send-scene-context/  # OpenRouter / LLM clients
-    └── provide-ui/       # Dev Chat interface
+    ├── 1-load-world-data/    # SillyTavern and other loaders
+    ├── 2-store-timeline/     # Fact, Event, Entity, Relationship stores
+    ├── 3-validate-consistency/ # Entity and world boundary validation
+    ├── 4-build-scene-context/  # Keyword and entity matching, graph expansion
+    ├── 5-send-scene-context/   # OpenRouter / LLM clients
+    └── 6-provide-ui/         # Dev Chat interface
 ```
 
 ---
@@ -420,20 +421,17 @@ See updated roadmap.md M5 and M11 sections for complete designs.
 
 ## Recent Changes (2026-01-01)
 
-### **Code Quality Cleanup**
+### **Extension Architecture - Phases 1-3 Complete** 🎯
 
-**Removed dead code:**
-- `validate-prompt.ts` - Standalone demo script, functionality covered by tests
-- `markdown.test.ts` - Tested external library, not our code
-- `entity-view.ts` + tests - Unused utility
+**Major architectural pivot:** Plugin-first architecture fully implemented.
 
-**Results:**
-- Tests: 192 passing (down from 204, removed 12 redundant tests)
-- Cleaner codebase, no unused code
+**Completed:**
+1. ✅ **Phase 1**: Extension system core (registry, loader, hooks, activate pattern)
+2. ✅ **Phase 2**: Migrated all code to `extensions/core/` with numbered directories
+3. ✅ **Phase 3**: Runtime system with activation and dependency injection
+4. ✅ **Hard Rule #8**: SOLID principles and Simple Design enforced
 
-### **Extension Architecture Decision** 🎯
-
-**Major architectural pivot:** Moving from traditional monolithic structure to **plugin-first architecture**.
+**Test status:** 251 tests passing (45 extension system, 206 core functionality)
 
 **Key decisions:**
 1. **Everything is an extension** - Including core functionality
@@ -445,20 +443,21 @@ See updated roadmap.md M5 and M11 sections for complete designs.
 
 **See [roadmap.md](roadmap.md) for complete implementation plan.**
 
-**Structure preview:**
+**Current structure:**
 ```
 src/
 ├── core-types/           # Fundamental (Event, Fact, Entity)
-├── extension-system/     # Plugin loader, registry, hooks
-└── runtime/              # Boot system
+├── extension-system/     # Plugin loader, registry, hooks, activate
+└── runtime/              # createRuntime and orchestrator
 
 extensions/
 ├── core/                 # ALL current functionality as extension
-│   ├── load-world-data/
-│   ├── store-timeline/
-│   ├── validate-consistency/
-│   ├── build-scene-context/
-│   └── send-scene-context/
+│   ├── 1-load-world-data/
+│   ├── 2-store-timeline/
+│   ├── 3-validate-consistency/
+│   ├── 4-build-scene-context/
+│   ├── 5-send-scene-context/
+│   └── 6-provide-ui/
 └── (user extensions)
 ```
 
