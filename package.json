@@ -1,24 +1,27 @@
 {
-	"name": "lorebook-manager",
-	"type": "module",
-	"private": true,
-	"scripts": {
-		"test": "bun test",
-		"check": "biome check --write .",
-		"lint": "biome lint .",
-		"format": "biome format --write .",
-		"ui": "bun run src/ui/main.ts"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "^2.3.10",
-		"@types/bun": "latest"
-	},
-	"peerDependencies": {
-		"typescript": "^5"
-	},
-	"dependencies": {
-		"marked": "^17.0.1",
-		"vis-data": "^8.0.3",
-		"vis-network": "^10.0.2"
-	}
+    "name": "lorebook-manager",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "test": "bun test",
+        "check": "biome check --write .",
+        "typecheck": "bun run tsc --noEmit",
+        "lint": "biome lint .",
+        "format": "biome format --write .",
+        "ui": "bun run src/ui/main.ts",
+        "prepare": "husky"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^2.3.10",
+        "@types/bun": "latest",
+        "husky": "^9.1.7"
+    },
+    "peerDependencies": {
+        "typescript": "^5"
+    },
+    "dependencies": {
+        "marked": "^17.0.1",
+        "vis-data": "^8.0.3",
+        "vis-network": "^10.0.2"
+    }
 }
