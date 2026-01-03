@@ -349,17 +349,17 @@ Effects become facts:
 
 ---
 
-## How This Differs from World Anvil and Other Tools
+## How This Differs from Other Tools
 
-### World Anvil (and similar wikis)
-- **What it is:** Static knowledge base / worldbuilding wiki
-- **What it does:** Store, organize, and reference lore
-- **What it doesn't do:** Generate content, enforce constraints, integrate with LLMs
+### Worldbuilding Wikis and Knowledge Bases
+- **What they are:** Static knowledge bases (wikis, note-taking apps, lorebook managers)
+- **What they do:** Store, organize, and reference lore
+- **What they don't do:** Generate content, enforce constraints, integrate with LLMs
 
-**Relationship:** World Anvil is the *input*. This project is the *constraint engine*.
+**Relationship:** These are potential *input sources*. This project is the *constraint engine*.
 
 ```
-World Anvil (your lore)
+Your existing lore (SillyTavern, JSON, text files)
     ↓
   [Import via extension]
     ↓
@@ -368,8 +368,6 @@ This System (constraint engine)
 LLM generates new content that respects your lore
     ↓
 Extract new facts, update timeline
-    ↓
-Optionally: Export back to World Anvil
 ```
 
 ### Research Prototypes (HAMLET, CharacterBox, Patchview)
