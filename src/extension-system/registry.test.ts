@@ -8,6 +8,7 @@ describe("Extension Registry", () => {
 		const ext = defineExtension({
 			name: "test-ext",
 			version: "1.0.0",
+			activate: async () => {},
 		});
 
 		registry.register(ext);
@@ -21,6 +22,7 @@ describe("Extension Registry", () => {
 		const ext = defineExtension({
 			name: "test-ext",
 			version: "1.0.0",
+			activate: async () => {},
 		});
 
 		registry.register(ext);
@@ -39,8 +41,16 @@ describe("Extension Registry", () => {
 
 	test("getAll returns all registered extensions", () => {
 		const registry = createExtensionRegistry();
-		const ext1 = defineExtension({ name: "ext1", version: "1.0.0" });
-		const ext2 = defineExtension({ name: "ext2", version: "2.0.0" });
+		const ext1 = defineExtension({
+			name: "ext1",
+			version: "1.0.0",
+			activate: async () => {},
+		});
+		const ext2 = defineExtension({
+			name: "ext2",
+			version: "2.0.0",
+			activate: async () => {},
+		});
 
 		registry.register(ext1);
 		registry.register(ext2);
@@ -57,6 +67,7 @@ describe("Extension Registry", () => {
 			name: "dependent",
 			version: "1.0.0",
 			dependencies: ["missing-dep"],
+			activate: async () => {},
 		});
 
 		registry.register(ext);
@@ -72,11 +83,16 @@ describe("Extension Registry", () => {
 
 	test("validates successfully with satisfied dependencies", () => {
 		const registry = createExtensionRegistry();
-		const base = defineExtension({ name: "base", version: "1.0.0" });
+		const base = defineExtension({
+			name: "base",
+			version: "1.0.0",
+			activate: async () => {},
+		});
 		const dependent = defineExtension({
 			name: "dependent",
 			version: "1.0.0",
 			dependencies: ["base"],
+			activate: async () => {},
 		});
 
 		registry.register(base);
@@ -92,11 +108,13 @@ describe("Extension Registry", () => {
 			name: "ext1",
 			version: "1.0.0",
 			dependencies: ["ext2"],
+			activate: async () => {},
 		});
 		const ext2 = defineExtension({
 			name: "ext2",
 			version: "1.0.0",
 			dependencies: ["ext1"],
+			activate: async () => {},
 		});
 
 		registry.register(ext1);
@@ -113,16 +131,19 @@ describe("Extension Registry", () => {
 			name: "a",
 			version: "1.0.0",
 			dependencies: ["b"],
+			activate: async () => {},
 		});
 		const ext2 = defineExtension({
 			name: "b",
 			version: "1.0.0",
 			dependencies: ["c"],
+			activate: async () => {},
 		});
 		const ext3 = defineExtension({
 			name: "c",
 			version: "1.0.0",
 			dependencies: ["a"],
+			activate: async () => {},
 		});
 
 		registry.register(ext1);
