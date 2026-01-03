@@ -345,7 +345,9 @@ PASS 5: Store in SQLite + Create JSON Snapshot
 - `faction` - Groups (Merchant Guild, Military Order)
 - `constant` - World fundamentals (always in context)
 
-**Character-Specific Extraction (RPG Model):**
+**Character-Specific Extraction (Complete Person Model):**
+
+**Core principle:** Characters are not stat blocks. They are people with desires, fears, and motivations. Without these, they're just caricatures bound to their roles.
 
 Characters get comprehensive state extraction across categories:
 
@@ -378,17 +380,73 @@ Characters get comprehensive state extraction across categories:
 {subject: "reacher", property: "can-swim", value: true}
 ```
 
-**5. Social/Emotional Baseline:**
+**5. Goals & Desires (WHO they are):**
 ```typescript
-{subject: "reacher", property: "attitude-toward.academy", value: 7.0}
+// Primary goals - what they want
+{subject: "aradia", property: "primary-goal", value: "achieve-peace-with-lunaria"}
+{subject: "aradia", property: "secondary-goal", value: "prove-worth-to-father"}
+
+// Motivations - why they want it
+{subject: "aradia", property: "motivation.peace", value: "haunted-by-war-casualties"}
+{subject: "aradia", property: "motivation.prove-worth", value: "dismissed-as-naive-idealist"}
+
+// What drives their decisions
+{subject: "alaric", property: "primary-goal", value: "protect-sunnaria"}
+{subject: "alaric", property: "motivation", value: "honor-ancestors-legacy"}
+```
+
+**6. Fears & Internal Conflicts:**
+```typescript
+// What they fear
+{subject: "aradia", property: "fears", value: "failing-her-people"}
+{subject: "aradia", property: "fears.secondary", value: "fathers-disappointment"}
+
+// Internal conflicts that create tension
+{subject: "aradia", property: "internal-conflict", value: "duty-to-father-vs-moral-conviction"}
+{subject: "alaric", property: "internal-conflict", value: "peace-vs-strength-dilemma"}
+```
+
+**7. Values & Beliefs:**
+```typescript
+// Core values that guide behavior
+{subject: "aradia", property: "values.primary", value: "compassion-over-conquest"}
+{subject: "aradia", property: "values.secondary", value: "dialogue-before-force"}
+
+// Beliefs about the world
+{subject: "alaric", property: "belief.leadership", value: "strength-earns-respect"}
+{subject: "alaric", property: "belief.peace", value: "won-through-power-not-words"}
+```
+
+**8. Attitudes & Social Bonds (context-specific):**
+```typescript
+// How they feel about specific entities/situations
+{subject: "reacher", property: "attitude-toward.academy", value: 7.0}  // 0-10 scale
 {subject: "reacher", property: "trust-level.council", value: 3.5}
+{subject: "aradia", property: "attitude-toward.war", value: "deeply-opposed"}
 ```
 
 **LLM Requirements:**
 - High-quality model for comprehensive extraction (Opus-tier recommended)
 - Must infer missing numeric values from context
 - Must maintain consistency across similar entities
-- Must extract ALL character attributes (treat characters as RPG stat sheets)
+- Must extract ALL character attributes (treat characters as complete people, not stat blocks)
+- Must extract psychological depth: goals, motivations, fears, values, conflicts
+
+**Critical distinction - M5 vs M11:**
+
+**M5 extracts character ATTRIBUTES (WHO they are):**
+- These are static or slow-changing facts about the character
+- Goals, motivations, fears define their personality
+- Example: `{subject: "aradia", property: "primary-goal", value: "achieve-peace"}`
+- This is extracted from lorebook during ETL
+
+**M11 Intent System tracks PURSUIT (HOW they act on goals):**
+- Active, off-screen progression toward goals
+- References M5 goal facts
+- Example: `{characterId: "aradia", activeIntent: "negotiate-treaty", goal: "achieve-peace", progress: 0.6}`
+- This is dynamic simulation, not character definition
+
+**Without M5 goals/motivations, characters are just NPCs with no agency or depth.**
 
 ---
 
@@ -1109,20 +1167,41 @@ simulateSystemTier(systems: Entity[], timestamp: number) {
 
 **3. Intent Management**
 
+**Intent references character goals (M5 facts):**
+
+M11 Intent system builds on M5 character goals. Characters pursue their goals off-screen.
+
 **Declaring Intents (when character goes off-screen):**
 
 ```typescript
+// First, retrieve character's goals from M5 facts
+const characterGoals = getFacts("aradia", timestamp)
+  .filter(f => f.property.startsWith("goal") || f.property.startsWith("motivation"))
+
+// Example M5 facts:
+// {subject: "aradia", property: "primary-goal", value: "achieve-peace"}
+// {subject: "aradia", property: "motivation.peace", value: "haunted-by-war-casualties"}
+
+// Declare intent based on character goals
 declareIntent({
   character: "aradia",
-  goal: "defeat-necromancer-lord",
+  goal: "negotiate-peace-treaty",           // Active pursuit of M5 goal
+  basedOnGoal: "achieve-peace",             // References M5 primary-goal
+  motivation: "haunted-by-war-casualties",  // References M5 motivation
   estimatedDuration: 15,  // timestamps
-  difficulty: 8.0,
-  consequenceScope: ["northern-provinces", "undead-activity"]
+  difficulty: 7.0,
+  stakes: "war-continues-if-fails",         // What happens if intent fails
+  consequenceScope: ["sunnaria", "lunaria", "diplomatic-relations"]
 })
 
 // Character moves to Tier 2 (intentional simulation)
 setEntityTier("aradia", "intentional")
 ```
+
+**Why goals matter for Intent:**
+- Character goals (M5) define WHO they are
+- Intents (M11) show HOW they pursue those goals
+- Without M5 goals, we don't know what characters want or why they act
 
 **Intent Resolution (LLM-generated branches):**
 
