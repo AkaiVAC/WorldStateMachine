@@ -18,9 +18,12 @@ export type StoreTypeMap = {
 	relationship: RelationshipStore;
 };
 
-type StoreCollection = {
-	set<T extends keyof StoreTypeMap>(type: T, store: StoreTypeMap[T]): void;
-	get<T extends keyof StoreTypeMap>(type: T): StoreTypeMap[T] | undefined;
+export type StoreCollection = {
+	set: <T extends keyof StoreTypeMap>(
+		type: T,
+		store: StoreTypeMap[T],
+	) => void;
+	get: <T extends keyof StoreTypeMap>(type: T) => StoreTypeMap[T] | undefined;
 };
 
 type ValidatorCollection = {

@@ -73,8 +73,8 @@ describe("Runtime Boot", () => {
 			order: ["ext-b", "ext-a"],
 		});
 
-		expect(runtime.extensions[0]!.extension.name).toBe("ext-b");
-		expect(runtime.extensions[1]!.extension.name).toBe("ext-a");
+		expect(runtime.extensions[0]?.extension.name).toBe("ext-b");
+		expect(runtime.extensions[1]?.extension.name).toBe("ext-a");
 	});
 	test("Wiring: loads and registers hook handlers from files", async () => {
 		createTsExtension(
@@ -101,7 +101,7 @@ describe("Runtime Boot", () => {
 
 		await runtime.hooks.execute("before-validation", context);
 
-		expect(context.metadata["hookExecuted"]).toBe(true);
+		expect(context.metadata.hookExecuted).toBe(true);
 	});
 	test("Interface: returns complete RuntimeSystem", async () => {
 		const runtime = await createRuntime({ extensionsDir: currentTestDir });

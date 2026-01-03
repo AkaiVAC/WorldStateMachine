@@ -122,7 +122,7 @@ describe("Extension Registry", () => {
 
 		const errors = registry.validate();
 		expect(errors.length).toBeGreaterThan(0);
-		expect(errors[0]!.type).toBe("circular-dependency");
+		expect(errors[0]?.type).toBe("circular-dependency");
 	});
 
 	test("detects complex circular dependencies", () => {

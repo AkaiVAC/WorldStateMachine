@@ -23,7 +23,7 @@ describe("Extension Activate Pattern", () => {
 	});
 
 	test("activate receives ExtensionContext", async () => {
-		let receivedContext: ExtensionContext | null = null;
+		let receivedContext: ExtensionContext | undefined;
 
 		const ext = defineExtension({
 			name: "test-ext",
@@ -144,7 +144,7 @@ describe("Extension Activate Pattern", () => {
 		const ext = defineExtension({
 			name: "test-ext",
 			version: "1.0.0",
-			activate: async (context) => {
+			activate: async () => {
 				await new Promise((resolve) => setTimeout(resolve, 10));
 				executed = true;
 			},

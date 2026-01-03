@@ -13,4 +13,6 @@ export default defineExtension({
 		senders: ["openrouter"],
 		uiComponents: ["dev-chat"],
 	},
+
+	activate: () => {}
 });
