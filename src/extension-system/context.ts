@@ -23,7 +23,7 @@ type ServiceRegistry = {
 };
 
 export const createExtensionContext = (): ExtensionContext => {
-	const stores: StoreRegistry = {};
+	const storeRegistry: StoreRegistry = {};
 	const services: ServiceRegistry = {
 		validators: [],
 		loaders: [],
@@ -33,32 +33,58 @@ export const createExtensionContext = (): ExtensionContext => {
 	};
 
 	return {
-		registerStore: (type, store) => {
-			stores[type] = store;
+		stores: {
+			set: (type, store) => {
+				storeRegistry[type] = store;
+			},
+			get: (type) => {
+				return storeRegistry[type];
+			},
 		},
 
-		getStore: (type) => {
-			return stores[type];
+		validators: {
+			add: (validator) => {
+				services.validators.push(validator);
+			},
+			getAll: () => {
+				return services.validators;
+			},
 		},
 
-		registerValidator: (validator) => {
-			services.validators.push(validator);
+		loaders: {
+			add: (loader) => {
+				services.loaders.push(loader);
+			},
+			getAll: () => {
+				return services.loaders;
+			},
 		},
 
-		registerLoader: (loader) => {
-			services.loaders.push(loader);
+		contextBuilders: {
+			add: (builder) => {
+				services.contextBuilders.push(builder);
+			},
+			getAll: () => {
+				return services.contextBuilders;
+			},
 		},
 
-		registerContextBuilder: (builder) => {
-			services.contextBuilders.push(builder);
+		senders: {
+			add: (sender) => {
+				services.senders.push(sender);
+			},
+			getAll: () => {
+				return services.senders;
+			},
 		},
 
-		registerSender: (sender) => {
-			services.senders.push(sender);
-		},
-
-		registerUIComponent: (component) => {
-			services.uiComponents.push(component);
+		uiComponents: {
+			add: (component) => {
+				services.uiComponents.push(component);
+			},
+			getAll: () => {
+				return services.uiComponents;
+			},
 		},
 	};
 };

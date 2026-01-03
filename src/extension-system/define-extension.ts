@@ -18,17 +18,43 @@ type StoreTypeMap = {
 	relationship: RelationshipStore;
 };
 
+type StoreCollection = {
+	set<T extends keyof StoreTypeMap>(type: T, store: StoreTypeMap[T]): void;
+	get<T extends keyof StoreTypeMap>(type: T): StoreTypeMap[T] | undefined;
+};
+
+type ValidatorCollection = {
+	add: (validator: Validator) => void;
+	getAll: () => Validator[];
+};
+
+type LoaderCollection = {
+	add: (loader: WorldDataLoader) => void;
+	getAll: () => WorldDataLoader[];
+};
+
+type ContextBuilderCollection = {
+	add: (builder: ContextBuilder) => void;
+	getAll: () => ContextBuilder[];
+};
+
+type SenderCollection = {
+	add: (sender: Sender) => void;
+	getAll: () => Sender[];
+};
+
+type UIComponentCollection = {
+	add: (component: UIComponent) => void;
+	getAll: () => UIComponent[];
+};
+
 export type ExtensionContext = {
-	registerStore<T extends keyof StoreTypeMap>(
-		type: T,
-		store: StoreTypeMap[T],
-	): void;
-	getStore<T extends keyof StoreTypeMap>(type: T): StoreTypeMap[T] | undefined;
-	registerValidator(validator: Validator): void;
-	registerLoader(loader: WorldDataLoader): void;
-	registerContextBuilder(builder: ContextBuilder): void;
-	registerSender(sender: Sender): void;
-	registerUIComponent(component: UIComponent): void;
+	stores: StoreCollection;
+	validators: ValidatorCollection;
+	loaders: LoaderCollection;
+	contextBuilders: ContextBuilderCollection;
+	senders: SenderCollection;
+	uiComponents: UIComponentCollection;
 };
 
 export type ExtensionProvides = {
