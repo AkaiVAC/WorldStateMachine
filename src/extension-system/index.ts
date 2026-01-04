@@ -1,18 +1,20 @@
-export { createExtensionContext } from "./context";
-export type {
-    Extension,
-    ExtensionContext,
-    ExtensionProvides,
-    ExtensionReplacement,
-} from "./define-extension";
-export { defineExtension } from "./define-extension";
-export type { Hook, HookContext, HookHandler, HookManager } from "./hooks";
-export { createHookManager } from "./hooks";
-export * from "./interfaces";
-export type {
-    ExtensionLoaderConfig,
-    LoadedExtension,
-} from "./loader";
-export { loadExtensions } from "./loader";
-export type { ExtensionRegistry, ValidationError } from "./registry";
-export { createExtensionRegistry } from "./registry";
+export { discoverExtensions } from "./1-discover/discover-extensions";
+export type { DiscoveredExtension } from "./1-discover/discover-extensions";
+
+export type Extension = {
+	name: string;
+	version: string;
+	description?: string;
+	author?: string;
+	dependencies?: string[];
+	provides?: {
+		loaders?: string[];
+		validators?: string[];
+		contextBuilders?: string[];
+		senders?: string[];
+		uiComponents?: string[];
+	};
+	activate: () => void | Promise<void>;
+};
+
+export const defineExtension = (ext: Extension): Extension => ext;
