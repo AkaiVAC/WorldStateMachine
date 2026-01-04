@@ -1,10 +1,10 @@
 # Current Implementation State
 
-**Current milestone:** M4 complete, Extension Architecture Phases 1-3 complete
+**Current milestone:** M4 complete, Extension System Rewrite in progress
 
 **Architecture:** Plugin-first extension system with path aliases (`@core/*`, `@ext/*`)
 
-**Next:** Phase 4 - Example extensions to prove architecture (see [roadmap.md](roadmap.md))
+**Next:** Complete extension system rewrite (3-stage pipeline), then M5
 
 **Run tests:** `bun test`
 
@@ -17,8 +17,10 @@ The project uses a **plugin-first architecture** where all functionality (includ
 ```
 src/
 ├── core-types/           # Fundamental contracts (Event, Fact, Entity, Relationship)
-├── extension-system/     # Plugin infrastructure (Registry, Loader, Hooks)
-└── runtime/              # Runtime creation and Orchestrator
+└── extension-system/     # Plugin infrastructure (3-stage pipeline)
+    ├── 1-discover/       # Find extension directories
+    ├── 2-load/           # Import, validate, sort by dependencies
+    └── 3-activate/       # Call activate(), wire hooks
 
 extensions/
 └── core/                 # Standard implementation
@@ -34,14 +36,17 @@ extensions/
 
 ## What Works
 
-### Extension System
+### Extension System (Rewrite in Progress)
 **Location:** `src/extension-system/`
-- Extension registry with dependency validation
-- Extension loader with TS + JSON config support
-- Lifecycle hook system with execution control
-- Auto-discovery from `extensions/` directory
-- Circular dependency detection
-- Activate pattern with ExtensionContext for dependency injection
+
+**Completed:**
+- `1-discover/` - Find extension directories with `extension.config.ts`
+
+**In Progress:**
+- `2-load/` - Import configs, validate, sort by dependencies
+
+**Pending:**
+- `3-activate/` - Call activate() with context, wire hooks
 
 ### Timeline Storage
 **Location:** `extensions/core/2-store-timeline/`

@@ -6,6 +6,58 @@ This document captures the "why" behind key architectural decisions.
 
 ## Core Philosophy
 
+### TypeScript-Only Extensions (2026-01-05)
+
+**Decision:** Extensions are TypeScript-only. No JSON config support.
+
+**Why:**
+- **YAGNI:** JSON configs can't define `activate()` functions, so you'd need a separate TS file anyway
+- **Simpler:** One file does everything (metadata + activation logic)
+- **Type safety:** Full TypeScript inference and validation
+- **Future-proof:** If we want multi-language extensions later (Rust, Go via WASM/IPC), that's a separate concern from config format
+
+**Design:**
+- Extensions have `extension.config.ts` that exports metadata and `activate()` function
+- No `extension.config.json` support
+- Discovery looks only for `.ts` configs
+
+**Alternative considered:** Support both TS and JSON
+- Rejected: JSON can't handle `activate()`, adds complexity for no benefit
+
+**Source:** Discussion on 2026-01-05 about extension config formats
+
+---
+
+### Three-Stage Extension Pipeline (2026-01-05)
+
+**Decision:** Extension system has 3 stages: discover, load, activate. Not 6 separate stages.
+
+**Why (through SOLID + Simple Design lens):**
+- **Single Responsibility:** Group by "reason to change"
+  - `1-discover` changes if filesystem structure changes
+  - `2-load` changes if config structure changes (validate, sort, register all coupled to Extension type)
+  - `3-activate` changes if runtime behavior changes (activate + hooks both about "starting")
+- **Fewest Elements:** 3 < 6. Simpler.
+- **Cohesion:** Validation, sorting, and registration are all about "preparing configs" - they belong together
+
+**Design:**
+```
+src/extension-system/
+├── 1-discover/    # Find extension directories
+├── 2-load/        # Import, validate, sort, register
+├── 3-activate/    # Call activate(), wire hooks
+└── index.ts       # Orchestrator
+```
+
+**Internal functions within stages are still testable** - they're just not separate pipeline stages.
+
+**Alternative considered:** 6 granular stages (discover, validate, sort, register, activate, wire-hooks)
+- Rejected: Over-engineering. Stages that change together should be together.
+
+**Source:** Discussion on 2026-01-05 about extension system architecture
+
+---
+
 ### Plugin-First Architecture
 
 **Decision:** Move from a monolithic structure to a plugin-first extension system where everything (including core functionality) is an extension.
