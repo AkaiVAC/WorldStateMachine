@@ -37,23 +37,26 @@ See **[vision.md](vision.md)** for how these pillars work together.
 
 ## Architecture
 
-The project uses a **plugin-first architecture** where everything (including core functionality) is an extension.
+The project uses a **config-driven extension architecture** where extensions are organized into 6 stages.
 
 ```
+lorebook.config.json         # Central config listing enabled extensions per stage
+
 extensions/
-└── core/                    # Core extension (loaders, validators, context builders)
-    ├── 1-load-world-data/   # SillyTavern importer
-    ├── 2-store-timeline/    # Facts, entities, events, relationships
-    ├── 3-validate-consistency/  # Entity exists, world boundary rules
-    ├── 4-build-scene-context/   # Keyword/entity matching, prompt analysis
-    ├── 5-send-scene-context/    # OpenRouter integration
-    └── 6-provide-ui/        # Dev chat interface
+└── core/                    # Standard implementation (split by stage)
+    ├── 1-load-world-data/       # SillyTavern and other data loaders
+    ├── 2-store-timeline/        # Fact, Event, Entity, Relationship stores
+    ├── 3-validate-consistency/  # Entity exists, world boundary validation
+    ├── 4-build-scene-context/   # Keyword/entity matching, graph expansion
+    ├── 5-send-scene-context/    # OpenRouter / LLM clients
+    └── 6-provide-ui/            # Dev Chat interface
 
 src/
-├── extension-system/        # Extension loading, validation, activation
-├── runtime/                 # Boot sequence, service wiring
-└── core-types/              # Shared type definitions
+├── extension-system/        # Extension loading, activation, validation
+└── core-types/              # Shared type definitions (Event, Fact, Entity, Relationship)
 ```
+
+**The 6 Stages:** loaders → stores → validators → contextBuilders → senders → ui
 
 See **[current.md](current.md)** for detailed implementation status.
 
@@ -104,14 +107,14 @@ Event: "Council Meeting"
 
 ## Key Decisions (Summary)
 
-1. **Constrain LLM generation** - Build constraint packages that prevent impossible prose
-2. **Timeline is the database** - Entities are derived views from facts with temporal bounds
-3. **Events are source of truth** - Facts are materialized views from events
-4. **Map is first-class** - 2D geography with coordinates, routes, terrain, weather
-5. **Epistemic state via events** - Never cache knowledge; compute from participation + visibility
-6. **Generic constraint framework** - Extensible validation rules, not hardcoded physics
-7. **Store verbose, render compact** - Internal structure for queries, token-efficient for LLM
-8. **Plugin-first architecture** - Everything is an extension, including core
+1. **Config-driven extensions** - Explicit loading via JSON config, 6-stage pipeline
+2. **Constrain LLM generation** - Build constraint packages that prevent impossible prose
+3. **Timeline is the database** - Entities are derived views from facts with temporal bounds
+4. **Events are source of truth** - Facts are materialized views from events
+5. **Map is first-class** - 2D geography with coordinates, routes, terrain, weather
+6. **Epistemic state via events** - Never cache knowledge; compute from participation + visibility
+7. **Generic constraint framework** - Extensible validation rules, not hardcoded physics
+8. **Store verbose, render compact** - Internal structure for queries, token-efficient for LLM
 
 See **[decisions.md](decisions.md)** for full rationale.
 

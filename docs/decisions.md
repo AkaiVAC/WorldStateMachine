@@ -6,127 +6,190 @@ This document captures the "why" behind key architectural decisions.
 
 ## Core Philosophy
 
-### TypeScript-Only Extensions (2026-01-05)
+### Config-Driven Extension System (2026-01-10)
 
-**Decision:** Extensions are TypeScript-only. No JSON config support.
+**Decision:** Extensions are loaded via a central config file with 6 stage arrays, not auto-discovered from directories.
 
 **Why:**
-- **YAGNI:** JSON configs can't define `activate()` functions, so you'd need a separate TS file anyway
-- **Simpler:** One file does everything (metadata + activation logic)
-- **Type safety:** Full TypeScript inference and validation
-- **Future-proof:** If we want multi-language extensions later (Rust, Go via WASM/IPC), that's a separate concern from config format
+- **Explicit over magic:** Config file shows exactly what's loaded and in what order
+- **Non-technical friendly:** Users edit JSON (or later, a GUI edits it for them)
+- **No custom loader needed:** Simpler than directory scanning
+- **Familiar model:** Similar to VS Code's extensions.json approach
 
 **Design:**
-- Extensions have `extension.config.ts` that exports metadata and `activate()` function
-- No `extension.config.json` support
-- Discovery looks only for `.ts` configs
-
-**Alternative considered:** Support both TS and JSON
-- Rejected: JSON can't handle `activate()`, adds complexity for no benefit
-
-**Source:** Discussion on 2026-01-05 about extension config formats
-
----
-
-### Three-Stage Extension Pipeline (2026-01-05)
-
-**Decision:** Extension system has 3 stages: discover, load, activate. Not 6 separate stages.
-
-**Why (through SOLID + Simple Design lens):**
-- **Single Responsibility:** Group by "reason to change"
-  - `1-discover` changes if filesystem structure changes
-  - `2-load` changes if config structure changes (validate, sort, register all coupled to Extension type)
-  - `3-activate` changes if runtime behavior changes (activate + hooks both about "starting")
-- **Fewest Elements:** 3 < 6. Simpler.
-- **Cohesion:** Validation, sorting, and registration are all about "preparing configs" - they belong together
-
-**Design:**
-```
-src/extension-system/
-├── 1-discover/    # Find extension directories
-├── 2-load/        # Import, validate, sort, register
-├── 3-activate/    # Call activate(), wire hooks
-└── index.ts       # Orchestrator
+```json
+{
+  "loaders": [
+    { "path": "./extensions/sillytavern-loader", "enabled": true }
+  ],
+  "stores": [
+    { "path": "./extensions/memory-store", "enabled": true }
+  ],
+  "validators": [
+    { "path": "./extensions/entity-exists", "enabled": true }
+  ],
+  "contextBuilders": [
+    { "path": "./extensions/keyword-matcher", "enabled": true }
+  ],
+  "senders": [
+    { "path": "./extensions/openrouter-client", "enabled": true }
+  ],
+  "ui": [
+    { "path": "./extensions/dev-chat", "enabled": true }
+  ]
+}
 ```
 
-**Internal functions within stages are still testable** - they're just not separate pipeline stages.
+**Alternative considered:** Auto-discovery (scan `extensions/` directory)
+- Rejected: Magic behavior, error-prone (random folders get loaded), harder to debug
 
-**Alternative considered:** 6 granular stages (discover, validate, sort, register, activate, wire-hooks)
-- Rejected: Over-engineering. Stages that change together should be together.
+**Alternative considered:** `runtime.use()` calls in code
+- Rejected: Requires code changes to add extensions, not accessible to non-technical users
 
-**Source:** Discussion on 2026-01-05 about extension system architecture
-
----
-
-### Plugin-First Architecture
-
-**Decision:** Move from a monolithic structure to a plugin-first extension system where everything (including core functionality) is an extension.
-
-**Why:**
-- **Zero-touch extensibility:** Users can add features by dropping a folder into `extensions/`, without modifying core code.
-- **Isolation:** Features are isolated, making testing and debugging easier.
-- **Replaceability:** Users can replace core components (like the storage engine) with custom implementations (e.g., PostgreSQL instead of memory) via configuration.
-- **Maintenance:** "Core" is just another extension, enforcing clean interfaces and contracts.
-
-**Design:**
-- **`extensions/` directory:** Auto-discovered plugins.
-- **`defineExtension()` helper:** TypeScript-based configuration with type inference.
-- **Lifecycle Hooks:** Extensions can intercept system events (before/after/on).
-- **Core as Extension:** The default system features live in `extensions/core/`.
-
-**Alternative considered:** Monolith with optional plugins
-- Rejected: Creates a "second-class citizen" problem for plugins. By making core an extension, the API is proven robust.
-
-**Source:** Extension Architecture design in [roadmap.md](roadmap.md)
+**Source:** Discussion on 2026-01-10 about extension system simplification
 
 ---
 
-### Extension Activate Pattern
+### Six-Stage Pipeline Architecture (2026-01-10)
 
-**Decision:** Extensions use `defineExtension()` helper that returns an object containing both metadata and an `activate(context)` function.
+**Decision:** Extensions are organized into 6 stages that execute in order. Stage determines when an extension runs, not complex dependency graphs.
 
 **Why:**
-- **Dependency Injection:** Stores and services (like EntityStore) need to be passed to consumers (like Validators). Static configuration can't handle this.
-- **Single File:** Everything in one place - metadata and activation logic together.
-- **No Circularity:** Metadata is in the object literal (readable without calling activate), while activate is called after dependency resolution.
-- **Type Inference:** The `defineExtension()` helper provides full TypeScript type checking and autocomplete.
-- **Standardization:** Follows VS Code's activate pattern but adapted to TypeScript's strengths.
+- **Natural data flow:** loaders → stores → validators → contextBuilders → senders → ui
+- **Simple ordering:** Stage number = execution order
+- **No cross-stage dependencies:** Extensions in stage N can only depend on stages 1 to N-1
+- **DAG guaranteed:** No circular dependencies possible
+
+**The 6 Stages:**
+
+| Stage | Purpose | Model |
+|-------|---------|-------|
+| 1. loaders | Import data (SillyTavern, CSV, DB) | Additive (all run) |
+| 2. stores | Storage backends (memory, postgres) | Slot-based (last wins) |
+| 3. validators | Validation rules (entity exists, etc.) | Additive (all run) |
+| 4. contextBuilders | Build LLM context (keywords, graphs) | Additive (all run) |
+| 5. senders | Send to LLM or export | Slot-based (primary) |
+| 6. ui | User interface components | Additive (all run) |
+
+**Within-stage ordering:** Array order in config, plus optional `after` field for explicit dependencies. Topological sort within stage.
+
+**Alternative considered:** Flat extension list with explicit dependencies
+- Rejected: Complex dependency resolution, easy to create cycles
+
+**Source:** Discussion on 2026-01-10 about pipeline architecture
+
+---
+
+### Simple ExtensionContext (2026-01-10)
+
+**Decision:** ExtensionContext is a plain shared object, not a registry abstraction.
+
+**Why:**
+- **Direct and simple:** Just mutate a shared object
+- **No ceremony:** No `context.registerStore('fact', store)`, just `context.factStore = store`
+- **Clear types:** TypeScript knows exactly what's available
 
 **Design:**
 ```typescript
-// extensions/my-ext/index.ts
-import { defineExtension } from '@core/extension-system'
+type ExtensionContext = {
+  // Stores (set by store extensions, used by later stages)
+  factStore?: FactStore
+  eventStore?: EventStore
+  entityStore?: EntityStore
+  relationshipStore?: RelationshipStore
 
+  // Collections (pushed to by extensions)
+  loaders: WorldDataLoader[]
+  validators: Validator[]
+  contextBuilders: ContextBuilder[]
+  senders: Sender[]
+  uiComponents: UIComponent[]
+}
+```
+
+**Store slot behavior:** Last one to set wins. If two store extensions both set `context.factStore`, the one that activates later (array order) becomes THE fact store.
+
+**Secondary stores:** Extensions that want to observe/backup don't set the slot - they read from it and do their own thing.
+
+**Alternative considered:** Registry abstraction with `get()`/`set()`
+- Rejected: Over-engineering. Plain object is simpler and equally capable.
+
+**Source:** Discussion on 2026-01-10 about context simplification
+
+---
+
+### Required Slots Validation (2026-01-10)
+
+**Decision:** The runtime validates that required slots are filled after all extensions activate.
+
+**Why:**
+- **Fail fast:** Better to error on startup than crash later
+- **Clear errors:** "No fact store registered" is actionable
+- **Flexible:** Users can use any store implementation, just need one
+
+**Required slots:**
+- `factStore` - system can't function without facts
+- `eventStore` - system can't function without events
+- `entityStore` - system can't function without entities
+
+**Optional stages:** Loaders, validators, contextBuilders, senders, ui can all be empty.
+
+**Alternative considered:** Built-in defaults (always have in-memory stores)
+- Rejected: Adds complexity, hides misconfiguration
+
+**Alternative considered:** No validation (let it crash)
+- Rejected: Poor developer experience
+
+**Source:** Discussion on 2026-01-10 about required vs optional stages
+
+---
+
+### Extension Definition (2026-01-10)
+
+**Decision:** Extensions export a simple object with metadata and an `activate` function.
+
+**Why:**
+- **Single file:** Everything in one place
+- **Type inference:** `defineExtension()` helper provides autocomplete
+- **Standard pattern:** Similar to VS Code activate pattern
+
+**Design:**
+```typescript
+type ExtensionKind = 'loader' | 'store' | 'validator' | 'contextBuilder' | 'sender' | 'ui'
+
+type Extension = {
+  name: string
+  version: string
+  kind: ExtensionKind
+  after?: string[]  // within-stage dependencies
+
+  activate: (context: ExtensionContext) => Promise<void> | void
+  deactivate?: () => Promise<void> | void
+}
+
+// Helper for type inference
+const defineExtension = (ext: Extension): Extension => ext
+```
+
+**Kind validation:** If extension's `kind` doesn't match the stage it's placed in (config), runtime errors.
+
+**Example:**
+```typescript
+// extensions/memory-store/index.ts
 export default defineExtension({
-  name: 'my-extension',
+  name: 'memory-store',
   version: '1.0.0',
-  dependencies: ['core'],
+  kind: 'store',
 
-  activate: async (context) => {
-    const store = createStore()
-    context.registerStore('my-store', store)
-
-    context.registerValidator({
-      name: 'my-validator',
-      check: createValidator(store).check // Inject dependencies!
-    })
+  activate: (context) => {
+    context.factStore = createMemoryFactStore()
+    context.eventStore = createMemoryEventStore()
+    context.entityStore = createMemoryEntityStore()
   }
 })
 ```
 
-**Loading Flow:**
-1. Import default export from extension
-2. Read `.name`, `.version`, `.dependencies` from object (no execution)
-3. Resolve dependency graph
-4. Call `.activate(context)` in dependency order
-
-**Alternative considered:** Separate config file + activate function
-- Rejected: Two files when one suffices, and metadata extraction is simple with object literal.
-
-**Alternative considered:** Metadata in activate return value
-- Rejected: Creates circular dependency (need metadata to build context, need context to call activate).
-
-**Source:** Discussion on 2026-01-01 about extension architecture and activate patterns.
+**Source:** Discussion on 2026-01-10 about extension API
 
 ---
 
@@ -1033,7 +1096,10 @@ const createEntityStore = () => {
 
 | Decision | Rationale |
 |----------|-----------|
-| Plugin-first architecture | Everything is an extension, core included |
+| Config-driven extensions | Explicit loading via JSON config, not auto-discovery |
+| Six-stage pipeline | Natural data flow, simple ordering, no cycles |
+| Simple ExtensionContext | Plain object, no registry abstraction |
+| Required slots validation | Fail fast if stores missing |
 | Lorebook is import format | Entity IDs solve name disambiguation |
 | World state as RPG stats | All entities have queryable numeric attributes |
 | Tool-calling over context-stuffing | Deterministic facts, no hallucination, scalable |

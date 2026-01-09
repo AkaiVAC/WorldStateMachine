@@ -32,7 +32,7 @@ Read these project docs first for context:
 
 Architecture notes:
 
--   We are **plugin-first**: everything (including “core”) is an extension.
+-   We use a **config-driven extension system** with 6 stages (loaders → stores → validators → contextBuilders → senders → ui).
 -   Import aliases:
     -   `@core/*` → `src/core-types/*`
     -   `@ext/*` → `extensions/*`
@@ -139,9 +139,8 @@ Architecture reference: `ARCHITECTURE.md`
 
 Current state:
 
-**Last updated:** 2026-01-01
+**Last updated:** 2026-01-10
 
 -   **M4 complete** - Events with participants, visibility, fact generation
--   **Extension Architecture Phases 1 & 2 complete** - Plugin-first architecture implemented
--   **230 tests passing**
+-   **Extension System Redesign** - Simplified to config-driven 6-stage pipeline
 -   **Chat UI** with lorebook context injection

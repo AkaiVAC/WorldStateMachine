@@ -1,10 +1,10 @@
 # Current Implementation State
 
-**Current milestone:** M4 complete, Extension System Rewrite in progress
+**Current milestone:** M4 complete, Extension System Redesign in progress
 
-**Architecture:** Plugin-first extension system with path aliases (`@core/*`, `@ext/*`)
+**Architecture:** Config-driven 6-stage extension pipeline with path aliases (`@core/*`, `@ext/*`)
 
-**Next:** Complete extension system rewrite (3-stage pipeline), then M5
+**Next:** Implement new extension system (config-driven, simple context), then M5
 
 **Run tests:** `bun test`
 
@@ -12,41 +12,55 @@
 
 ## Architecture Overview
 
-The project uses a **plugin-first architecture** where all functionality (including core) is an extension.
+The project uses a **config-driven extension architecture** where extensions are organized into 6 stages.
 
 ```
 src/
 ├── core-types/           # Fundamental contracts (Event, Fact, Entity, Relationship)
-└── extension-system/     # Plugin infrastructure (3-stage pipeline)
-    ├── 1-discover/       # Find extension directories
-    ├── 2-load/           # Import, validate, sort by dependencies
-    └── 3-activate/       # Call activate(), wire hooks
+└── extension-system/     # Extension loading and activation
+    ├── types.ts          # Extension, ExtensionContext, ExtensionKind
+    ├── loader.ts         # Load from config, validate kinds, topo sort
+    └── runtime.ts        # Activate in order, validate required slots
 
 extensions/
-└── core/                 # Standard implementation
-    ├── 1-load-world-data/       # SillyTavern and other loaders
+└── core/                 # Standard implementation (split by stage)
+    ├── 1-load-world-data/       # SillyTavern and other data loaders
     ├── 2-store-timeline/        # Fact, Event, Entity, Relationship stores
-    ├── 3-validate-consistency/  # Entity and world boundary validation
+    ├── 3-validate-consistency/  # Entity exists, world boundary validation
     ├── 4-build-scene-context/   # Keyword/entity matching, graph expansion
     ├── 5-send-scene-context/    # OpenRouter / LLM clients
     └── 6-provide-ui/            # Dev Chat interface
+
+lorebook.config.json      # Central config listing enabled extensions per stage
 ```
+
+### The 6 Stages
+
+| Stage | Purpose | Model |
+|-------|---------|-------|
+| 1. loaders | Import data (SillyTavern, CSV, DB) | Additive |
+| 2. stores | Storage backends (memory, postgres) | Slot-based |
+| 3. validators | Validation rules | Additive |
+| 4. contextBuilders | Build LLM context | Additive |
+| 5. senders | Send to LLM or export | Slot-based |
+| 6. ui | User interface | Additive |
 
 ---
 
 ## What Works
 
-### Extension System (Rewrite in Progress)
+### Extension System (Redesign in Progress)
 **Location:** `src/extension-system/`
 
-**Completed:**
-- `1-discover/` - Find extension directories with `extension.config.ts`
+**Status:** Redesigning from auto-discovery to config-driven approach.
 
-**In Progress:**
-- `2-load/` - Import configs, validate, sort by dependencies
+**New Design (2026-01-10):**
+- Config file lists extensions per stage (no auto-discovery)
+- Simple ExtensionContext as plain object (no registry)
+- Within-stage ordering via array order + `after` field
+- Required slots validation (stores must be present)
 
-**Pending:**
-- `3-activate/` - Call activate() with context, wire hooks
+**See [decisions.md](decisions.md) for full rationale.**
 
 ### Timeline Storage
 **Location:** `extensions/core/2-store-timeline/`
@@ -111,6 +125,26 @@ extensions/
 
 ## Key Architectural Decisions
 
+### Config-Driven Extensions (2026-01-10)
+
+**Approach:** Extensions loaded via central config file, not auto-discovered.
+
+**Benefits:**
+- Explicit over magic (see exactly what's loaded)
+- Non-technical users can edit JSON config
+- GUI can easily read/write config later
+- No custom directory scanning needed
+
+### Six-Stage Pipeline (2026-01-10)
+
+Extensions organized into 6 ordered stages:
+1. loaders → 2. stores → 3. validators → 4. contextBuilders → 5. senders → 6. ui
+
+**Benefits:**
+- Natural data flow, simple ordering
+- No cross-stage circular dependencies
+- Stage N only depends on stages 1 to N-1
+
 ### Lorebook Is Import Format (2025-12-30)
 
 **Problem:** Keyword matching "Elara" can't distinguish Queen Elara from a student named Elara.
@@ -119,16 +153,6 @@ extensions/
 - **Entities** with unique IDs (not names)
 - **Facts** with subject=entityId (structured, queryable, temporal)
 - **Relationships** linking entity IDs
-
-**Implication:** M5 includes lorebook ETL as prerequisite for epistemic isolation.
-
-### Plugin-First Architecture (2026-01-01)
-
-Everything is an extension, including core functionality:
-- Zero codebase changes to add features
-- Lifecycle hooks for interception
-- Extensible stores
-- Auto-discovery
 
 ### World State as RPG Stats
 

@@ -8,7 +8,7 @@ You should agree with the user if they're right and disagree and provide alterna
 
 The user is easily overwhelmed by fast-paced changes, so make sure to get a clear understanding of what you need to do next and only do that. The user is also a stickler for code quality and expects strict adherence to all standards described in this doc without fail. If they don't understand this code, then it is useless to them.
 
-We're pivoting to a plugin-first architecture where everything (including core) is an extension. Read this document first to understand the new structure and implementation plan!
+We're implementing a **config-driven extension system** with 6 stages (loaders → stores → validators → contextBuilders → senders → ui). Read the docs to understand the new structure!
 
 ---
 
@@ -17,7 +17,7 @@ We're pivoting to a plugin-first architecture where everything (including core) 
 **Read these docs to understand the project:**
 
 1. **[docs/vision.md](docs/vision.md)** - Complete constraint engine vision (what we're building)
-2. **[docs/current.md](docs/current.md)** - Current implementation status (M4 complete, 239 tests)
+2. **[docs/current.md](docs/current.md)** - Current implementation status
 3. **[docs/roadmap.md](docs/roadmap.md)** - M1-M11 milestones (proof-of-concept at M6)
 4. **[docs/decisions.md](docs/decisions.md)** - Design rationale and principles
 
@@ -158,11 +158,10 @@ This is a collaboration. Discuss approaches, explain reasoning, consider alterna
 
 ## Current State
 
-**Last updated:** 2026-01-01
+**Last updated:** 2026-01-10
 
 -   **M4 complete** - Events with participants, visibility, fact generation
--   **Extension Architecture Phases 1 & 2 complete** - Plugin-first architecture implemented
--   **230 tests passing**
+-   **Extension System Redesign** - Simplified to config-driven 6-stage pipeline
 -   **Chat UI** with lorebook context injection
 
 **For details:** See the Essential Context section above
