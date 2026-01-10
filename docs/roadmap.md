@@ -1460,7 +1460,7 @@ M1 ✅
 ## Active Track: Extension System Redesign
 
 **Date Started:** 2026-01-10
-**Status:** Design Complete ✅ | Implementation Next 🎯
+**Status:** Config Schema Finalized ✅ | Implementation Next 🎯
 
 ---
 
@@ -1472,34 +1472,56 @@ We redesigned the extension system to be simpler and more explicit. Key changes:
 2. **Six-stage pipeline** instead of complex dependency graphs
 3. **Simple ExtensionContext** as plain object instead of registry abstraction
 4. **Required slots validation** instead of built-in defaults
+5. **System-managed config** with automatic dependency tracking
+6. **Parallel loading** via dependency DAG
 
 See [decisions.md](decisions.md) for full rationale.
 
 ---
 
-### New Architecture
+### Config Schema
 
-#### Config File (`lorebook.config.json`)
+```typescript
+type Status = "on" | "off" | `needs:${string}`
+
+type ExtensionEntry = {
+  path: string
+  status: Status
+  options?: unknown
+}
+
+type LorebookConfig = {
+  loaders: ExtensionEntry[]
+  stores: ExtensionEntry[]
+  validators: ExtensionEntry[]
+  contextBuilders: ExtensionEntry[]
+  senders: ExtensionEntry[]
+  ui: ExtensionEntry[]
+}
+```
+
+#### Example Config (`lorebook.config.json`)
 
 ```json
 {
   "loaders": [
-    { "path": "./extensions/sillytavern-loader", "enabled": true }
+    { "path": "extensions/core/1-load-world-data/from-sillytavern", "status": "on" }
   ],
   "stores": [
-    { "path": "./extensions/memory-store", "enabled": true }
+    { "path": "extensions/core/2-store-timeline/memory-store", "status": "on" }
   ],
   "validators": [
-    { "path": "./extensions/entity-exists", "enabled": true }
+    { "path": "extensions/core/3-validate-consistency/entity-exists", "status": "on" }
   ],
   "contextBuilders": [
-    { "path": "./extensions/keyword-matcher", "enabled": true }
+    { "path": "extensions/core/4-build-scene-context/keyword-matcher", "status": "off" },
+    { "path": "extensions/core/4-build-scene-context/relationship-expander", "status": "needs:keyword-matcher" }
   ],
   "senders": [
-    { "path": "./extensions/openrouter-client", "enabled": true }
+    { "path": "extensions/core/5-send-scene-context/openrouter", "status": "on" }
   ],
   "ui": [
-    { "path": "./extensions/dev-chat", "enabled": true }
+    { "path": "extensions/core/6-provide-ui/dev-chat", "status": "on" }
   ]
 }
 ```
@@ -1511,8 +1533,9 @@ export default defineExtension({
   name: 'memory-store',
   version: '1.0.0',
   kind: 'store',
+  after: [],  // within-stage dependencies
 
-  activate: (context) => {
+  activate: (context, options) => {
     context.factStore = createMemoryFactStore()
     context.eventStore = createMemoryEventStore()
     context.entityStore = createMemoryEntityStore()
@@ -1542,10 +1565,11 @@ type ExtensionContext = {
 ### Implementation Plan
 
 #### Phase 1: Core Types and Runtime
-- Create `src/extension-system/types.ts` (Extension, ExtensionContext, ExtensionKind)
-- Create `src/extension-system/loader.ts` (load config, import extensions, validate kinds)
-- Create `src/extension-system/runtime.ts` (topo sort, activate, validate required slots)
-- Tests for loading, sorting, activation
+- Create `src/extension-system/types.ts` (Extension, ExtensionContext, ExtensionKind, config types)
+- Create `src/extension-system/config-loader.ts` (load config, validate paths, normalize)
+- Create `src/extension-system/runtime.ts` (build DAG, parallel activation, validate required slots)
+- Create `src/extension-system/config-writer.ts` (write back normalizations, dependency status)
+- Tests for loading, DAG building, parallel activation, config write-back
 
 #### Phase 2: Migrate Extensions
 - Update existing extensions to new format

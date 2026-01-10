@@ -49,18 +49,22 @@ lorebook.config.json      # Central config listing enabled extensions per stage
 
 ## What Works
 
-### Extension System (Redesign in Progress)
+### Extension System (Config Schema Finalized)
 **Location:** `src/extension-system/`
 
-**Status:** Redesigning from auto-discovery to config-driven approach.
+**Status:** Config schema design complete. Implementation next.
 
-**New Design (2026-01-10):**
-- Config file lists extensions per stage (no auto-discovery)
+**Design (2026-01-10):**
+- Config file (`lorebook.config.json`) lists extensions per stage
+- Path-based references (forward slashes, relative to project root)
+- Status field: `"on"`, `"off"`, or `"needs:<dependency>"`
+- System-managed config (writes back normalizations, dependency status)
+- Parallel loading via dependency DAG
 - Simple ExtensionContext as plain object (no registry)
-- Within-stage ordering via array order + `after` field
+- Within-stage ordering via `after` field in extension definitions
 - Required slots validation (stores must be present)
 
-**See [decisions.md](decisions.md) for full rationale.**
+**See [decisions.md](decisions.md) for full schema and rationale.**
 
 ### Timeline Storage
 **Location:** `extensions/core/2-store-timeline/`

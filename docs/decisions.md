@@ -6,9 +6,9 @@ This document captures the "why" behind key architectural decisions.
 
 ## Core Philosophy
 
-### Config-Driven Extension System (2026-01-10)
+### Config-Driven Extension System (2026-01-10, finalized 2026-01-10)
 
-**Decision:** Extensions are loaded via a central config file with 6 stage arrays, not auto-discovered from directories.
+**Decision:** Extensions are loaded via a central config file with 6 stage arrays, not auto-discovered from directories. Config is system-managed.
 
 **Why:**
 - **Explicit over magic:** Config file shows exactly what's loaded and in what order
@@ -16,35 +16,91 @@ This document captures the "why" behind key architectural decisions.
 - **No custom loader needed:** Simpler than directory scanning
 - **Familiar model:** Similar to VS Code's extensions.json approach
 
-**Design:**
+**Schema:**
+
+```typescript
+type Status = "on" | "off" | `needs:${string}`
+
+type ExtensionEntry = {
+  path: string
+  status: Status
+  options?: unknown
+}
+
+type LorebookConfig = {
+  loaders: ExtensionEntry[]
+  stores: ExtensionEntry[]
+  validators: ExtensionEntry[]
+  contextBuilders: ExtensionEntry[]
+  senders: ExtensionEntry[]
+  ui: ExtensionEntry[]
+}
+```
+
+**Status values:**
+- `"on"` - Extension is active
+- `"off"` - User explicitly disabled
+- `"needs:keyword-matcher"` - Auto-disabled, waiting on dependency
+- `"needs:dep-a,dep-b"` - Auto-disabled, waiting on multiple dependencies
+
+**Example config (`lorebook.config.json`):**
+
 ```json
 {
   "loaders": [
-    { "path": "./extensions/sillytavern-loader", "enabled": true }
+    { "path": "extensions/core/1-load-world-data/from-sillytavern", "status": "on" }
   ],
   "stores": [
-    { "path": "./extensions/memory-store", "enabled": true }
+    { "path": "extensions/core/2-store-timeline/memory-store", "status": "on" }
   ],
   "validators": [
-    { "path": "./extensions/entity-exists", "enabled": true }
+    { "path": "extensions/core/3-validate-consistency/entity-exists", "status": "on" }
   ],
   "contextBuilders": [
-    { "path": "./extensions/keyword-matcher", "enabled": true }
+    { "path": "extensions/core/4-build-scene-context/keyword-matcher", "status": "off" },
+    { "path": "extensions/core/4-build-scene-context/relationship-expander", "status": "needs:keyword-matcher" }
   ],
   "senders": [
-    { "path": "./extensions/openrouter-client", "enabled": true }
+    { "path": "extensions/core/5-send-scene-context/openrouter", "status": "on" }
   ],
   "ui": [
-    { "path": "./extensions/dev-chat", "enabled": true }
+    { "path": "extensions/core/6-provide-ui/dev-chat", "status": "on" }
   ]
 }
 ```
+
+**Path format:**
+- Always forward slashes (even on Windows)
+- Relative to project root (where config lives)
+- System normalizes to OS-native at load time
+- Security: Paths validated to stay within allowed boundaries
+
+**System-managed config:**
+The system writes back to the config file:
+- Path normalization (backslashes → forward slashes)
+- Dependency status updates (`"on"` → `"needs:dep"` when dep disabled)
+- Auto re-enable (`"needs:dep"` → `"on"` when dep re-enabled, but `"off"` stays `"off"`)
+
+**Parallelization:**
+Extensions within a stage are loaded in parallel waves based on dependency DAG:
+1. Build dependency graph from `after` fields in extension definitions
+2. Topological sort into waves (extensions with no pending deps)
+3. Load each wave in parallel
+4. Proceed to next wave when current completes
+
+**Security:**
+- Validate all paths resolve within project root or designated extensions folder
+- Verify extension has expected structure (entry point exists)
+- Reject paths with traversal attempts (`../`)
 
 **Alternative considered:** Auto-discovery (scan `extensions/` directory)
 - Rejected: Magic behavior, error-prone (random folders get loaded), harder to debug
 
 **Alternative considered:** `runtime.use()` calls in code
 - Rejected: Requires code changes to add extensions, not accessible to non-technical users
+
+**Alternative considered:** Name/ref-based resolution instead of paths
+- Rejected: Too much magic in resolution, unclear where extensions live, potential name collisions
 
 **Source:** Discussion on 2026-01-10 about extension system simplification
 
