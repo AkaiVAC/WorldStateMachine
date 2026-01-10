@@ -31,7 +31,7 @@ extensions/
     ├── 5-send-scene-context/    # OpenRouter / LLM clients
     └── 6-provide-ui/            # Dev Chat interface
 
-lorebook.config.json      # Central config listing enabled extensions per stage
+extensions.config.json      # Central config listing enabled extensions per stage
 ```
 
 ### The 6 Stages
@@ -55,9 +55,11 @@ lorebook.config.json      # Central config listing enabled extensions per stage
 **Status:** Config schema design complete. Implementation next.
 
 **Design (2026-01-10):**
-- Config file (`lorebook.config.json`) lists extensions per stage
+- Config file (`extensions.config.json`) lists extensions per stage
+- Stable `name` field identifies each extension and matches the export
 - Path-based references (forward slashes, relative to project root)
 - Status field: `"on"`, `"off"`, or `"needs:<dependency>"`
+- Default config checked into repo; missing config fails fast with a direct error
 - System-managed config (writes back normalizations, dependency status)
 - Parallel loading via dependency DAG
 - Simple ExtensionContext as plain object (no registry)

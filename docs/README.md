@@ -40,7 +40,7 @@ See **[vision.md](vision.md)** for how these pillars work together.
 The project uses a **config-driven extension architecture** where extensions are organized into 6 stages.
 
 ```
-lorebook.config.json         # Central config listing enabled extensions per stage
+extensions.config.json         # Central config listing enabled extensions per stage
 
 extensions/
 └── core/                    # Standard implementation (split by stage)
@@ -55,6 +55,8 @@ src/
 ├── extension-system/        # Extension loading, activation, validation
 └── core-types/              # Shared type definitions (Event, Fact, Entity, Relationship)
 ```
+
+The default `extensions.config.json` is checked into the repo. If it is missing, the system fails fast with a direct error and does not auto-discover extensions.
 
 **The 6 Stages:** loaders → stores → validators → contextBuilders → senders → ui
 

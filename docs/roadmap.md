@@ -1475,6 +1475,11 @@ We redesigned the extension system to be simpler and more explicit. Key changes:
 5. **System-managed config** with automatic dependency tracking
 6. **Parallel loading** via dependency DAG
 
+**Config presence:**
+- Default `extensions.config.json` is checked into the repo
+- No auto-discovery or init command when config is missing
+- Missing config fails fast with: `Config missing: extensions.config.json. Restore the default file.`
+
 See [decisions.md](decisions.md) for full rationale.
 
 ---
@@ -1485,6 +1490,7 @@ See [decisions.md](decisions.md) for full rationale.
 type Status = "on" | "off" | `needs:${string}`
 
 type ExtensionEntry = {
+  name: string
   path: string
   status: Status
   options?: unknown
@@ -1500,28 +1506,28 @@ type LorebookConfig = {
 }
 ```
 
-#### Example Config (`lorebook.config.json`)
+#### Example Config (`extensions.config.json`)
 
 ```json
 {
   "loaders": [
-    { "path": "extensions/core/1-load-world-data/from-sillytavern", "status": "on" }
+    { "name": "@core/sillytavern-loader", "path": "extensions/core/1-load-world-data/from-sillytavern", "status": "on" }
   ],
   "stores": [
-    { "path": "extensions/core/2-store-timeline/memory-store", "status": "on" }
+    { "name": "@core/memory-store", "path": "extensions/core/2-store-timeline/memory-store", "status": "on" }
   ],
   "validators": [
-    { "path": "extensions/core/3-validate-consistency/entity-exists", "status": "on" }
+    { "name": "@core/entity-exists", "path": "extensions/core/3-validate-consistency/entity-exists", "status": "on" }
   ],
   "contextBuilders": [
-    { "path": "extensions/core/4-build-scene-context/keyword-matcher", "status": "off" },
-    { "path": "extensions/core/4-build-scene-context/relationship-expander", "status": "needs:keyword-matcher" }
+    { "name": "@core/keyword-matcher", "path": "extensions/core/4-build-scene-context/keyword-matcher", "status": "off" },
+    { "name": "@core/relationship-expander", "path": "extensions/core/4-build-scene-context/relationship-expander", "status": "needs:@core/keyword-matcher" }
   ],
   "senders": [
-    { "path": "extensions/core/5-send-scene-context/openrouter", "status": "on" }
+    { "name": "@core/openrouter", "path": "extensions/core/5-send-scene-context/openrouter", "status": "on" }
   ],
   "ui": [
-    { "path": "extensions/core/6-provide-ui/dev-chat", "status": "on" }
+    { "name": "@core/dev-chat", "path": "extensions/core/6-provide-ui/dev-chat", "status": "on" }
   ]
 }
 ```
@@ -1530,10 +1536,10 @@ type LorebookConfig = {
 
 ```typescript
 export default defineExtension({
-  name: 'memory-store',
+  name: '@core/memory-store',
   version: '1.0.0',
   kind: 'store',
-  after: [],  // within-stage dependencies
+  after: [],  // within-stage dependencies (by name)
 
   activate: (context, options) => {
     context.factStore = createMemoryFactStore()
@@ -1573,7 +1579,7 @@ type ExtensionContext = {
 
 #### Phase 2: Migrate Extensions
 - Update existing extensions to new format
-- Create `lorebook.config.json`
+- Create `extensions.config.json`
 - Ensure all tests pass
 
 #### Phase 3: Documentation

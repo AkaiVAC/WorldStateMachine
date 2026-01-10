@@ -22,6 +22,7 @@ This document captures the "why" behind key architectural decisions.
 type Status = "on" | "off" | `needs:${string}`
 
 type ExtensionEntry = {
+  name: string
   path: string
   status: Status
   options?: unknown
@@ -40,40 +41,50 @@ type LorebookConfig = {
 **Status values:**
 - `"on"` - Extension is active
 - `"off"` - User explicitly disabled
-- `"needs:keyword-matcher"` - Auto-disabled, waiting on dependency
+- `"needs:@core/keyword-matcher"` - Auto-disabled, waiting on dependency
 - `"needs:dep-a,dep-b"` - Auto-disabled, waiting on multiple dependencies
 
-**Example config (`lorebook.config.json`):**
+**Example config (`extensions.config.json`):**
 
 ```json
 {
   "loaders": [
-    { "path": "extensions/core/1-load-world-data/from-sillytavern", "status": "on" }
+    { "name": "@core/sillytavern-loader", "path": "extensions/core/1-load-world-data/from-sillytavern", "status": "on" }
   ],
   "stores": [
-    { "path": "extensions/core/2-store-timeline/memory-store", "status": "on" }
+    { "name": "@core/memory-store", "path": "extensions/core/2-store-timeline/memory-store", "status": "on" }
   ],
   "validators": [
-    { "path": "extensions/core/3-validate-consistency/entity-exists", "status": "on" }
+    { "name": "@core/entity-exists", "path": "extensions/core/3-validate-consistency/entity-exists", "status": "on" }
   ],
   "contextBuilders": [
-    { "path": "extensions/core/4-build-scene-context/keyword-matcher", "status": "off" },
-    { "path": "extensions/core/4-build-scene-context/relationship-expander", "status": "needs:keyword-matcher" }
+    { "name": "@core/keyword-matcher", "path": "extensions/core/4-build-scene-context/keyword-matcher", "status": "off" },
+    { "name": "@core/relationship-expander", "path": "extensions/core/4-build-scene-context/relationship-expander", "status": "needs:@core/keyword-matcher" }
   ],
   "senders": [
-    { "path": "extensions/core/5-send-scene-context/openrouter", "status": "on" }
+    { "name": "@core/openrouter", "path": "extensions/core/5-send-scene-context/openrouter", "status": "on" }
   ],
   "ui": [
-    { "path": "extensions/core/6-provide-ui/dev-chat", "status": "on" }
+    { "name": "@core/dev-chat", "path": "extensions/core/6-provide-ui/dev-chat", "status": "on" }
   ]
 }
 ```
+
+**Name format:**
+- `name` is the stable ID and must match the extension's exported `name`
+- `name` values are globally unique across all stages
+- `needs:` references `name` values, not paths
 
 **Path format:**
 - Always forward slashes (even on Windows)
 - Relative to project root (where config lives)
 - System normalizes to OS-native at load time
 - Security: Paths validated to stay within allowed boundaries
+
+**Config presence:**
+- `extensions.config.json` is checked into the repo as the default config
+- No auto-discovery or init command for missing config
+- If missing, fail fast with: `Config missing: extensions.config.json. Restore the default file.`
 
 **System-managed config:**
 The system writes back to the config file:
@@ -127,7 +138,7 @@ Extensions within a stage are loaded in parallel waves based on dependency DAG:
 | 5. senders | Send to LLM or export | Slot-based (primary) |
 | 6. ui | User interface components | Additive (all run) |
 
-**Within-stage ordering:** Array order in config, plus optional `after` field for explicit dependencies. Topological sort within stage.
+**Within-stage ordering:** Array order in config, plus optional `after` field (by name) for explicit dependencies. Topological sort within stage.
 
 **Alternative considered:** Flat extension list with explicit dependencies
 - Rejected: Complex dependency resolution, easy to create cycles
@@ -217,9 +228,9 @@ type Extension = {
   name: string
   version: string
   kind: ExtensionKind
-  after?: string[]  // within-stage dependencies
+  after?: string[]  // within-stage dependencies (by name)
 
-  activate: (context: ExtensionContext) => Promise<void> | void
+  activate: (context: ExtensionContext, options?: unknown) => Promise<void> | void
   deactivate?: () => Promise<void> | void
 }
 
@@ -233,7 +244,7 @@ const defineExtension = (ext: Extension): Extension => ext
 ```typescript
 // extensions/memory-store/index.ts
 export default defineExtension({
-  name: 'memory-store',
+  name: '@core/memory-store',
   version: '1.0.0',
   kind: 'store',
 
