@@ -1460,7 +1460,7 @@ M1 ✅
 ## Active Track: Extension System Redesign
 
 **Date Started:** 2026-01-10
-**Status:** Config Schema Finalized ✅ | Implementation Next 🎯
+**Status:** Config Schema Finalized ✅ | Config Loader Implemented ✅ | Runtime Next 🎯
 
 ---
 
@@ -1571,11 +1571,11 @@ type ExtensionContext = {
 ### Implementation Plan
 
 #### Phase 1: Core Types and Runtime
-- Create `src/extension-system/types.ts` (Extension, ExtensionContext, ExtensionKind, config types)
-- Create `src/extension-system/config-loader.ts` (load config, validate paths, normalize)
-- Create `src/extension-system/runtime.ts` (build DAG, parallel activation, validate required slots)
-- Create `src/extension-system/config-writer.ts` (write back normalizations, dependency status)
-- Tests for loading, DAG building, parallel activation, config write-back
+- ✅ Create `src/extension-system/types.ts` (config types)
+- ✅ Create `src/extension-system/config-loader.ts` (load config, validate schema)
+- 🎯 Create `src/extension-system/runtime.ts` (build DAG, parallel activation, validate required slots)
+- 🎯 Create `src/extension-system/config-writer.ts` (write back normalizations, dependency status)
+- 🎯 Tests for DAG building, parallel activation, config write-back
 
 #### Phase 2: Migrate Extensions
 - Update existing extensions to new format

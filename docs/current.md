@@ -4,7 +4,7 @@
 
 **Architecture:** Config-driven 6-stage extension pipeline with path aliases (`@core/*`, `@ext/*`)
 
-**Next:** Implement new extension system (config-driven, simple context), then M5
+**Next:** Finish extension system runtime + config writer, then M5
 
 **Run tests:** `bun test`
 
@@ -18,8 +18,9 @@ The project uses a **config-driven extension architecture** where extensions are
 src/
 ├── core-types/           # Fundamental contracts (Event, Fact, Entity, Relationship)
 └── extension-system/     # Extension loading and activation
-    ├── types.ts          # Extension, ExtensionContext, ExtensionKind
-    ├── loader.ts         # Load from config, validate kinds, topo sort
+    ├── types.ts          # Config and extension types
+    ├── config-loader.ts  # Load and validate extensions.config.json
+    ├── config-loader/    # Validation helpers
     └── runtime.ts        # Activate in order, validate required slots
 
 extensions/
@@ -49,10 +50,10 @@ extensions.config.json      # Central config listing enabled extensions per stag
 
 ## What Works
 
-### Extension System (Config Schema Finalized)
+### Extension System (Config Loader Implemented)
 **Location:** `src/extension-system/`
 
-**Status:** Config schema design complete. Implementation next.
+**Status:** Config loader and validation implemented. Runtime activation next.
 
 **Design (2026-01-10):**
 - Config file (`extensions.config.json`) lists extensions per stage
