@@ -33,7 +33,7 @@ We're implementing a **config-driven extension system** with 6 stages (loaders â
 1. **TDD is mandatory.** Failing test first â†’ minimum code to pass â†’ refactor. No exceptions.
 2. **No comments.** Code must be self-documenting through naming and structure.
 3. **One step at a time.** Complete one thing, confirm it works, then move to the next.
-4. **Ask before ANY modification.** Always ask for confirmation before executing commands that modify the codebase, file system, or system state.
+4. **Ask before modifications.** Ask before file edits and state-changing commands. Read-only commands and test runs are pre-approved. Read the project greedily to stay current without asking each time.
 5. **Zero TypeScript errors.** The project must always pass `bun run tsc --noEmit` and `bun run check`.
 6. **Stay in scope.** No future features unless explicitly requested.
 7. **No "helpful" additions.** No extra features, refactoring, error handling for impossible cases, or abstractions "for later."
@@ -49,6 +49,7 @@ We're implementing a **config-driven extension system** with 6 stages (loaders â
 -   **Conventional Commits:** Use the format `<type>(<scope>): <subject>` (e.g., `feat(core):`, `refactor(tests):`, `docs:`).
 -   **Logical Grouping:** Group similar changes into distinct commits rather than one giant blob.
 -   **Verify before Commit:** Ensure all tests pass and types are clean before committing.
+-   **Push support:** If asked to push but lacking environment access, propose micro-commit command sequences for the user to run.
 
 ---
 
@@ -152,7 +153,9 @@ See **ARCHITECTURE.md** for the full design (timeline-centric model, facts, retr
 
 This is a collaboration. Discuss approaches, explain reasoning, consider alternatives. The user wants to understand _why_, not just _what_.
 
-**Ask** rather than assume. **Confirm** before implementing.
+**Ask** rather than assume. **Confirm** before implementing file edits. When asking for a decision, be thorough: include concrete examples, code snippets, and tradeoffs so the next step is clear.
+
+When pairing on TDD, the assistant may implement the failing test step, and the user may implement the minimum code to pass it. Agree on error messages upfront to avoid churn.
 
 ---
 
