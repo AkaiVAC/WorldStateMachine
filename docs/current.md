@@ -1,10 +1,10 @@
 # Current Implementation State
 
-**Current milestone:** M4 complete, Extension System Redesign in progress
+**Current milestone:** M4 complete, Extension System Bootstrap complete
 
 **Architecture:** Config-driven 6-stage extension pipeline with path aliases (`@core/*`, `@ext/*`)
 
-**Next:** Finish extension system runtime + config writer, then M5
+**Next:** Extension system `needs:` dependency status logic, then M5
 
 **Run tests:** `bun test`
 
@@ -18,10 +18,15 @@ The project uses a **config-driven extension architecture** where extensions are
 src/
 ├── core-types/           # Fundamental contracts (Event, Fact, Entity, Relationship)
 └── extension-system/     # Extension loading and activation
-    ├── types.ts          # Config and extension types
-    ├── config-loader.ts  # Load and validate extensions.config.json
-    ├── config-loader/    # Validation helpers
-    └── runtime.ts        # Activate in order, validate required slots
+    ├── types.ts                    # Config and extension types
+    ├── config-loader.ts            # Load and validate extensions.config.json
+    ├── config-loader/              # Validation helpers
+    ├── import-extension.ts         # Load and validate extension modules
+    ├── build-dependency-graph.ts   # Build DAG with cycle detection
+    ├── topological-sort.ts         # Sort into parallel activation waves
+    ├── validate-required-slots.ts  # Validate required stores
+    ├── activate-extensions.ts      # Parallel extension activation
+    └── bootstrap.ts                # Orchestrate full bootstrap process
 
 extensions/
 └── core/                 # Standard implementation (split by stage)
@@ -37,10 +42,12 @@ extensions.config.json      # Central config listing enabled extensions per stag
 
 ### The 6 Stages
 
+Execution order: stores → loaders → validators → contextBuilders → senders → ui
+
 | Stage | Purpose | Model |
 |-------|---------|-------|
-| 1. loaders | Import data (SillyTavern, CSV, DB) | Additive |
-| 2. stores | Storage backends (memory, postgres) | Slot-based |
+| 1. stores | Storage backends (memory, postgres) | Slot-based |
+| 2. loaders | Import data (SillyTavern, CSV, DB) | Additive |
 | 3. validators | Validation rules | Additive |
 | 4. contextBuilders | Build LLM context | Additive |
 | 5. senders | Send to LLM or export | Slot-based |
@@ -50,24 +57,40 @@ extensions.config.json      # Central config listing enabled extensions per stag
 
 ## What Works
 
-### Extension System (Config Loader Implemented)
+### Extension System Bootstrap (Complete)
 **Location:** `src/extension-system/`
 
-**Status:** Config loader and validation implemented. Runtime activation next.
+**Status:** ✅ Bootstrap fully implemented and tested (59 tests, 94 assertions)
 
-**Design (2026-01-10):**
-- Config file (`extensions.config.json`) lists extensions per stage
-- Stable `name` field identifies each extension and matches the export
-- Path-based references (forward slashes, relative to project root)
-- Status field: `"on"`, `"off"`, or `"needs:<dependency>"`
-- Default config checked into repo; missing config fails fast with a direct error
-- System-managed config (writes back normalizations, dependency status)
-- Parallel loading via dependency DAG
-- Simple ExtensionContext as plain object (no registry)
-- Within-stage ordering via `after` field in extension definitions
-- Required slots validation (stores must be present)
+**Components:**
+- **Config Loader** - Load and validate `extensions.config.json`
+- **Extension Importer** - Load extension modules with validation
+- **Dependency Graph** - Build DAG with cycle detection
+- **Topological Sort** - Sort into parallel activation waves
+- **Extension Activation** - Parallel activation within waves
+- **Slot Validation** - Ensure required stores present
+- **Bootstrap Orchestrator** - Full end-to-end initialization
 
-**See [decisions.md](decisions.md) for full schema and rationale.**
+**Bootstrap Process:**
+1. Load config from `extensions.config.json`
+2. Filter extensions by status (`"on"` only)
+3. Process stages in order (stores → loaders → validators → contextBuilders → senders → ui)
+4. Within each stage: import → build DAG → topological sort → activate waves
+5. Validate required slots (factStore, eventStore, entityStore)
+6. Return populated ExtensionContext
+
+**Features:**
+- Stages execute in order (no cross-stage dependency graphs)
+- Within-stage parallel activation via `after` field dependencies
+- Status filtering: `"on"`, `"off"`, or `"needs:<dependency>"` (needs: logic pending)
+- ExtensionContext is plain object with arbitrary property support
+- Comprehensive test coverage (unit + integration)
+
+**Still needed:**
+- `needs:` dependency status auto-disable/enable logic
+- Config writer to persist status updates
+
+**See [decisions.md](decisions.md) for full design rationale.**
 
 ### Timeline Storage
 **Location:** `extensions/core/2-store-timeline/`

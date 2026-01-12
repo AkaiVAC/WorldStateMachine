@@ -117,12 +117,12 @@ Extensions within a stage are loaded in parallel waves based on dependency DAG:
 
 ---
 
-### Six-Stage Pipeline Architecture (2026-01-10)
+### Six-Stage Pipeline Architecture (2026-01-10, corrected 2026-01-12)
 
 **Decision:** Extensions are organized into 6 stages that execute in order. Stage determines when an extension runs, not complex dependency graphs.
 
 **Why:**
-- **Natural data flow:** loaders → stores → validators → contextBuilders → senders → ui
+- **Natural data flow:** stores → loaders → validators → contextBuilders → senders → ui
 - **Simple ordering:** Stage number = execution order
 - **No cross-stage dependencies:** Extensions in stage N can only depend on stages 1 to N-1
 - **DAG guaranteed:** No circular dependencies possible
@@ -131,12 +131,14 @@ Extensions within a stage are loaded in parallel waves based on dependency DAG:
 
 | Stage | Purpose | Model |
 |-------|---------|-------|
-| 1. loaders | Import data (SillyTavern, CSV, DB) | Additive (all run) |
-| 2. stores | Storage backends (memory, postgres) | Slot-based (last wins) |
+| 1. stores | Storage backends (memory, postgres) | Slot-based (last wins) |
+| 2. loaders | Import data (SillyTavern, CSV, DB) | Additive (all run) |
 | 3. validators | Validation rules (entity exists, etc.) | Additive (all run) |
 | 4. contextBuilders | Build LLM context (keywords, graphs) | Additive (all run) |
 | 5. senders | Send to LLM or export | Slot-based (primary) |
 | 6. ui | User interface components | Additive (all run) |
+
+**Stage order rationale:** Stores must exist before loaders can import data. The original design documentation had the order backwards; this has been corrected during implementation (2026-01-12).
 
 **Within-stage ordering:** Array order in config, plus optional `after` field (by name) for explicit dependencies. Topological sort within stage.
 
