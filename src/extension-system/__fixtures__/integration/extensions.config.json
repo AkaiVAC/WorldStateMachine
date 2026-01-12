@@ -1,0 +1,32 @@
+{
+	"loaders": [
+		{
+			"name": "@test/data-loader",
+			"path": "extensions/data-loader.ts",
+			"status": "on"
+		}
+	],
+	"stores": [
+		{
+			"name": "@test/memory-store",
+			"path": "extensions/memory-store.ts",
+			"status": "on"
+		}
+	],
+	"validators": [
+		{
+			"name": "@test/entity-validator",
+			"path": "extensions/entity-validator.ts",
+			"status": "on"
+		}
+	],
+	"contextBuilders": [
+		{
+			"name": "@test/context-builder",
+			"path": "extensions/context-builder.ts",
+			"status": "on"
+		}
+	],
+	"senders": [],
+	"ui": []
+}

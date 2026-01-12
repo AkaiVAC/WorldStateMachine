@@ -43,4 +43,5 @@ export type ExtensionContext = {
     contextBuilders: unknown[];
     senders: unknown[];
     uiComponents: unknown[];
+    [key: string]: unknown;
 };
