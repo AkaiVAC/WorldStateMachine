@@ -21,3 +21,26 @@ export type EntryWithStage<T> = {
     index: number;
     entry: T;
 };
+
+export type ExtensionKind = "loader" | "store" | "validator" | "contextBuilder" | "sender" | "ui";
+
+export type Extension = {
+    name: string;
+    version: string;
+    kind: ExtensionKind;
+    after?: string[];
+    activate: (context: ExtensionContext, options?: unknown) => Promise<void> | void;
+    deactivate?: () => Promise<void> | void;
+};
+
+export type ExtensionContext = {
+    factStore?: unknown;
+    eventStore?: unknown;
+    entityStore?: unknown;
+    relationshipStore?: unknown;
+    loaders: unknown[];
+    validators: unknown[];
+    contextBuilders: unknown[];
+    senders: unknown[];
+    uiComponents: unknown[];
+};

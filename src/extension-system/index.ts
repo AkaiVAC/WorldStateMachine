@@ -1,2 +1,10 @@
 export { loadConfig } from "./config-loader";
-export type { ExtensionEntry, ExtensionsConfig, Status } from "./types";
+export { bootstrap } from "./bootstrap";
+export type {
+	ExtensionEntry,
+	ExtensionsConfig,
+	Status,
+	Extension,
+	ExtensionContext,
+	ExtensionKind,
+} from "./types";

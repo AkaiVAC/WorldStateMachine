@@ -1,0 +1,14 @@
+{
+	"loaders": [],
+	"stores": [
+		{
+			"name": "@test/memory-store",
+			"path": "extensions/memory-store.ts",
+			"status": "on"
+		}
+	],
+	"validators": [],
+	"contextBuilders": [],
+	"senders": [],
+	"ui": []
+}
