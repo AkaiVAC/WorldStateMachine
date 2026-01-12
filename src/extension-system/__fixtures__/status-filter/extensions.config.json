@@ -1,0 +1,25 @@
+{
+	"loaders": [
+		{
+			"name": "@test/loader-on",
+			"path": "extensions/loader-on.ts",
+			"status": "on"
+		},
+		{
+			"name": "@test/loader-off",
+			"path": "extensions/loader-off.ts",
+			"status": "off"
+		}
+	],
+	"stores": [
+		{
+			"name": "@test/memory-store",
+			"path": "extensions/memory-store.ts",
+			"status": "on"
+		}
+	],
+	"validators": [],
+	"contextBuilders": [],
+	"senders": [],
+	"ui": []
+}
