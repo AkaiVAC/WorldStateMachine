@@ -1573,7 +1573,7 @@ type ExtensionContext = {
 #### Phase 1: Core Types and Runtime
 - ✅ Create `src/extension-system/types.ts` (config types)
 - ✅ Create `src/extension-system/config-loader.ts` (load config, validate schema)
-- 🎯 Create `src/extension-system/runtime.ts` (build DAG, parallel activation, validate required slots)
+- 🎯 Create `src/extension-system/extension-bootstrap.ts` (build DAG, parallel activation, validate required slots)
 - 🎯 Create `src/extension-system/config-writer.ts` (write back normalizations, dependency status)
 - 🎯 Tests for DAG building, parallel activation, config write-back
 

@@ -58,7 +58,7 @@ src/
 
 The default `extensions.config.json` is checked into the repo. If it is missing, the system fails fast with a direct error and does not auto-discover extensions.
 
-The config loader is implemented; runtime activation and config write-back are the next steps.
+The config loader is implemented; bootstrap activation and config write-back are the next steps.
 
 **The 6 Stages:** loaders → stores → validators → contextBuilders → senders → ui
 
