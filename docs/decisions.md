@@ -29,8 +29,8 @@ type ExtensionEntry = {
 }
 
 type LorebookConfig = {
-  loaders: ExtensionEntry[]
   stores: ExtensionEntry[]
+  loaders: ExtensionEntry[]
   validators: ExtensionEntry[]
   contextBuilders: ExtensionEntry[]
   senders: ExtensionEntry[]
@@ -44,15 +44,15 @@ type LorebookConfig = {
 - `"needs:@core/keyword-matcher"` - Auto-disabled, waiting on dependency
 - `"needs:dep-a,dep-b"` - Auto-disabled, waiting on multiple dependencies
 
-**Example config (`extensions.config.json`):**
+**Example config (`extensions.json`):**
 
 ```json
 {
-  "loaders": [
-    { "name": "@core/sillytavern-loader", "path": "extensions/core/1-load-world-data/from-sillytavern", "status": "on" }
-  ],
   "stores": [
     { "name": "@core/memory-store", "path": "extensions/core/2-store-timeline/memory-store", "status": "on" }
+  ],
+  "loaders": [
+    { "name": "@core/sillytavern-loader", "path": "extensions/core/1-load-world-data/from-sillytavern", "status": "on" }
   ],
   "validators": [
     { "name": "@core/entity-exists", "path": "extensions/core/3-validate-consistency/entity-exists", "status": "on" }
@@ -82,9 +82,9 @@ type LorebookConfig = {
 - Security: Paths validated to stay within allowed boundaries
 
 **Config presence:**
-- `extensions.config.json` is checked into the repo as the default config
+- `extensions.json` is checked into the repo as the default config
 - No auto-discovery or init command for missing config
-- If missing, fail fast with: `Config missing: extensions.config.json. Restore the default file.`
+- If missing, fail fast with: `Config missing: extensions.json. Restore the default file.`
 
 **System-managed config:**
 The system writes back to the config file:
@@ -122,7 +122,7 @@ Extensions within a stage are loaded in parallel waves based on dependency DAG:
 **Decision:** Extensions are organized into 6 stages that execute in order. Stage determines when an extension runs, not complex dependency graphs.
 
 **Why:**
-- **Natural data flow:** loaders → stores → validators → contextBuilders → senders → ui
+- **Natural data flow:** stores → loaders → validators → contextBuilders → senders → ui
 - **Simple ordering:** Stage number = execution order
 - **No cross-stage dependencies:** Extensions in stage N can only depend on stages 1 to N-1
 - **DAG guaranteed:** No circular dependencies possible
@@ -131,8 +131,8 @@ Extensions within a stage are loaded in parallel waves based on dependency DAG:
 
 | Stage | Purpose | Model |
 |-------|---------|-------|
-| 1. loaders | Import data (SillyTavern, CSV, DB) | Additive (all run) |
-| 2. stores | Storage backends (memory, postgres) | Slot-based (last wins) |
+| 1. stores | Storage backends (memory, postgres) | Slot-based (last wins) |
+| 2. loaders | Import data (SillyTavern, CSV, DB) | Additive (all run) |
 | 3. validators | Validation rules (entity exists, etc.) | Additive (all run) |
 | 4. contextBuilders | Build LLM context (keywords, graphs) | Additive (all run) |
 | 5. senders | Send to LLM or export | Slot-based (primary) |

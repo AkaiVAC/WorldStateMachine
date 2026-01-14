@@ -1476,9 +1476,9 @@ We redesigned the extension system to be simpler and more explicit. Key changes:
 6. **Parallel loading** via dependency DAG
 
 **Config presence:**
-- Default `extensions.config.json` is checked into the repo
+- Default `extensions.json` is checked into the repo
 - No auto-discovery or init command when config is missing
-- Missing config fails fast with: `Config missing: extensions.config.json. Restore the default file.`
+- Missing config fails fast with: `Config missing: extensions.json. Restore the default file.`
 
 See [decisions.md](decisions.md) for full rationale.
 
@@ -1497,8 +1497,8 @@ type ExtensionEntry = {
 }
 
 type LorebookConfig = {
-  loaders: ExtensionEntry[]
   stores: ExtensionEntry[]
+  loaders: ExtensionEntry[]
   validators: ExtensionEntry[]
   contextBuilders: ExtensionEntry[]
   senders: ExtensionEntry[]
@@ -1506,15 +1506,15 @@ type LorebookConfig = {
 }
 ```
 
-#### Example Config (`extensions.config.json`)
+#### Example Config (`extensions.json`)
 
 ```json
 {
-  "loaders": [
-    { "name": "@core/sillytavern-loader", "path": "extensions/core/1-load-world-data/from-sillytavern", "status": "on" }
-  ],
   "stores": [
     { "name": "@core/memory-store", "path": "extensions/core/2-store-timeline/memory-store", "status": "on" }
+  ],
+  "loaders": [
+    { "name": "@core/sillytavern-loader", "path": "extensions/core/1-load-world-data/from-sillytavern", "status": "on" }
   ],
   "validators": [
     { "name": "@core/entity-exists", "path": "extensions/core/3-validate-consistency/entity-exists", "status": "on" }
@@ -1579,7 +1579,7 @@ type ExtensionContext = {
 
 #### Phase 2: Migrate Extensions
 - Update existing extensions to new format
-- Create `extensions.config.json`
+- Create `extensions.json`
 - Ensure all tests pass
 
 #### Phase 3: Documentation
