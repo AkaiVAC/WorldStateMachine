@@ -1,10 +1,10 @@
 # Current Implementation State
 
-**Current milestone:** M4 complete, Extension System Bootstrap complete
+**Current milestone:** M4 complete, Extension System Bootstrap complete, `needs:` logic in progress
 
 **Architecture:** Config-driven 6-stage extension pipeline with path aliases (`@core/*`, `@ext/*`)
 
-**Next:** Extension system `needs:` dependency status logic, then M5
+**Next:** Complete `needs:` dependency status logic, then M5
 
 **Run tests:** `bun test`
 
@@ -18,15 +18,16 @@ The project uses a **config-driven extension architecture** where extensions are
 src/
 ├── core-types/           # Fundamental contracts (Event, Fact, Entity, Relationship)
 └── extension-system/     # Extension loading and activation
-    ├── types.ts                    # Config and extension types
-    ├── config-loader.ts            # Load and validate extensions.config.json
-    ├── config-loader/              # Validation helpers
-    ├── import-extension.ts         # Load and validate extension modules
-    ├── build-dependency-graph.ts   # Build DAG with cycle detection
-    ├── topological-sort.ts         # Sort into parallel activation waves
-    ├── validate-required-slots.ts  # Validate required stores
-    ├── activate-extensions.ts      # Parallel extension activation
-    └── bootstrap.ts                # Orchestrate full bootstrap process
+    ├── types.ts                       # Config and extension types
+    ├── config-loader.ts               # Load and validate extensions.config.json
+    ├── config-loader/                 # Validation helpers
+    ├── import-extension.ts            # Load and validate extension modules
+    ├── build-dependency-graph.ts      # Build DAG with cycle detection
+    ├── topological-sort.ts            # Sort into parallel activation waves
+    ├── validate-required-slots.ts     # Validate required stores
+    ├── activate-extensions.ts         # Parallel extension activation
+    ├── compute-dependency-status.ts   # Compute needs: status from dependencies
+    └── bootstrap.ts                   # Orchestrate full bootstrap process
 
 extensions/
 └── core/                 # Standard implementation (split by stage)
@@ -60,7 +61,7 @@ Execution order: stores → loaders → validators → contextBuilders → sende
 ### Extension System Bootstrap (Complete)
 **Location:** `src/extension-system/`
 
-**Status:** ✅ Bootstrap fully implemented and tested (59 tests, 94 assertions)
+**Status:** ✅ Bootstrap fully implemented and tested (60 tests, 96 assertions)
 
 **Components:**
 - **Config Loader** - Load and validate `extensions.config.json`
@@ -82,13 +83,18 @@ Execution order: stores → loaders → validators → contextBuilders → sende
 **Features:**
 - Stages execute in order (no cross-stage dependency graphs)
 - Within-stage parallel activation via `after` field dependencies
-- Status filtering: `"on"`, `"off"`, or `"needs:<dependency>"` (needs: logic pending)
-- ExtensionContext is plain object with arbitrary property support
+- Status filtering: `"on"`, `"off"`, or `"needs:<dependency>"`
+- ExtensionContext is plain object (type-safe, no index signatures)
 - Comprehensive test coverage (unit + integration)
+- Clean, refactored codebase following SOLID principles
 
-**Still needed:**
-- `needs:` dependency status auto-disable/enable logic
-- Config writer to persist status updates
+**Dependency Status Logic (In Progress):**
+- ✅ **computeDependencyStatus** - Detect and mark extensions with unavailable dependencies
+- ⏳ **Still needed:**
+  - Respect user-disabled extensions (off stays off)
+  - Re-enable when dependencies become available
+  - Handle multiple and chained dependencies
+  - Config writer to persist status updates back to disk
 
 **See [decisions.md](decisions.md) for full design rationale.**
 
