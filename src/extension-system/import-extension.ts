@@ -2,9 +2,9 @@ import type { Extension, ExtensionKind } from "./types";
 
 const validKinds: ExtensionKind[] = ["loader", "store", "validator", "contextBuilder", "sender", "ui"];
 
-const isValidExtension = (value: unknown): value is Extension => {
+const validateExtension = (value: unknown): Extension => {
 	if (!value || typeof value !== "object") {
-		return false;
+		throw new Error("Extension invalid");
 	}
 
 	const ext = value as Record<string, unknown>;
@@ -29,16 +29,10 @@ const isValidExtension = (value: unknown): value is Extension => {
 		throw new Error("Extension missing required field: activate");
 	}
 
-	return true;
+	return ext as Extension;
 };
 
 export const importExtension = async (path: string): Promise<Extension> => {
 	const module = await import(path);
-	const extension = module.default;
-
-	if (!isValidExtension(extension)) {
-		throw new Error("Extension invalid");
-	}
-
-	return extension;
+	return validateExtension(module.default);
 };
