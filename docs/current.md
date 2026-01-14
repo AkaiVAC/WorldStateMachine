@@ -19,7 +19,7 @@ src/
 ├── core-types/           # Fundamental contracts (Event, Fact, Entity, Relationship)
 └── extension-system/     # Extension loading and activation
     ├── types.ts          # Config and extension types
-    ├── config-loader.ts  # Load and validate extensions.config.json
+    ├── config-loader.ts  # Load and validate extensions.json
     ├── config-loader/    # Validation helpers
     └── runtime.ts        # Activate in order, validate required slots
 
@@ -32,15 +32,15 @@ extensions/
     ├── 5-send-scene-context/    # OpenRouter / LLM clients
     └── 6-provide-ui/            # Dev Chat interface
 
-extensions.config.json      # Central config listing enabled extensions per stage
+extensions.json             # Central config listing enabled extensions per stage
 ```
 
 ### The 6 Stages
 
 | Stage | Purpose | Model |
 |-------|---------|-------|
-| 1. loaders | Import data (SillyTavern, CSV, DB) | Additive |
-| 2. stores | Storage backends (memory, postgres) | Slot-based |
+| 1. stores | Storage backends (memory, postgres) | Slot-based |
+| 2. loaders | Import data (SillyTavern, CSV, DB) | Additive |
 | 3. validators | Validation rules | Additive |
 | 4. contextBuilders | Build LLM context | Additive |
 | 5. senders | Send to LLM or export | Slot-based |
@@ -56,7 +56,7 @@ extensions.config.json      # Central config listing enabled extensions per stag
 **Status:** Config loader and validation implemented. Runtime activation next.
 
 **Design (2026-01-10):**
-- Config file (`extensions.config.json`) lists extensions per stage
+- Config file (`extensions.json`) lists extensions per stage
 - Stable `name` field identifies each extension and matches the export
 - Path-based references (forward slashes, relative to project root)
 - Status field: `"on"`, `"off"`, or `"needs:<dependency>"`
@@ -145,7 +145,7 @@ extensions.config.json      # Central config listing enabled extensions per stag
 ### Six-Stage Pipeline (2026-01-10)
 
 Extensions organized into 6 ordered stages:
-1. loaders → 2. stores → 3. validators → 4. contextBuilders → 5. senders → 6. ui
+1. stores → 2. loaders → 3. validators → 4. contextBuilders → 5. senders → 6. ui
 
 **Benefits:**
 - Natural data flow, simple ordering

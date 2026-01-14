@@ -30,12 +30,12 @@ describe("loadConfig", () => {
     describe("Zero inputs", () => {
         test("throws when config is missing", () => {
             expect(() => loadConfig(TEST_DIR)).toThrow(
-                "Config missing: extensions.config.json. Restore the default file.",
+                "Config missing: extensions.json. Restore the default file.",
             );
         });
 
         test("throws when required stage arrays are missing", () => {
-            const configPath = join(TEST_DIR, "extensions.config.json");
+            const configPath = join(TEST_DIR, "extensions.json");
             writeFileSync(configPath, JSON.stringify({ loaders: [] }, null, 2));
 
             expect(() => loadConfig(TEST_DIR)).toThrow(
@@ -46,7 +46,7 @@ describe("loadConfig", () => {
 
     describe("Single entry behavior", () => {
         test("accepts config with one entry in a stage", () => {
-            const configPath = join(TEST_DIR, "extensions.config.json");
+            const configPath = join(TEST_DIR, "extensions.json");
             const config = {
                 ...createBaseConfig(),
                 loaders: [
@@ -66,7 +66,7 @@ describe("loadConfig", () => {
 
     describe("Multiple entries", () => {
         test("accepts multiple entries in a stage", () => {
-            const configPath = join(TEST_DIR, "extensions.config.json");
+            const configPath = join(TEST_DIR, "extensions.json");
             const config = {
                 ...createBaseConfig(),
                 loaders: [
@@ -91,7 +91,7 @@ describe("loadConfig", () => {
 
     describe("Boundary cases", () => {
         test("throws when a stage value is not an array", () => {
-            const configPath = join(TEST_DIR, "extensions.config.json");
+            const configPath = join(TEST_DIR, "extensions.json");
             const config = {
                 ...createBaseConfig(),
                 loaders: {},
@@ -104,7 +104,7 @@ describe("loadConfig", () => {
             );
         });
         test("throws when an entry is missing required fields", () => {
-            const configPath = join(TEST_DIR, "extensions.config.json");
+            const configPath = join(TEST_DIR, "extensions.json");
             const config = {
                 ...createBaseConfig(),
                 validators: [
@@ -122,7 +122,7 @@ describe("loadConfig", () => {
             );
         });
         test("throws when an entry is null", () => {
-            const configPath = join(TEST_DIR, "extensions.config.json");
+            const configPath = join(TEST_DIR, "extensions.json");
             const config = {
                 ...createBaseConfig(),
                 loaders: [null],
@@ -135,7 +135,7 @@ describe("loadConfig", () => {
             );
         });
         test("throws when status has empty needs list", () => {
-            const configPath = join(TEST_DIR, "extensions.config.json");
+            const configPath = join(TEST_DIR, "extensions.json");
             const config = {
                 ...createBaseConfig(),
                 loaders: [
@@ -154,7 +154,7 @@ describe("loadConfig", () => {
             );
         });
         test("throws when needs list contains empty dependency names", () => {
-            const configPath = join(TEST_DIR, "extensions.config.json");
+            const configPath = join(TEST_DIR, "extensions.json");
             const config = {
                 ...createBaseConfig(),
                 loaders: [
@@ -173,7 +173,7 @@ describe("loadConfig", () => {
             );
         });
         test("throws when status is invalid", () => {
-            const configPath = join(TEST_DIR, "extensions.config.json");
+            const configPath = join(TEST_DIR, "extensions.json");
             const config = {
                 ...createBaseConfig(),
                 loaders: [
@@ -195,7 +195,7 @@ describe("loadConfig", () => {
 
     describe("Interface ergonomics", () => {
         test("returns a helpful error message for invalid config", () => {
-            const configPath = join(TEST_DIR, "extensions.config.json");
+            const configPath = join(TEST_DIR, "extensions.json");
             const config = {
                 ...createBaseConfig(),
                 loaders: [
@@ -216,7 +216,7 @@ describe("loadConfig", () => {
 
     describe("Exceptions", () => {
         test("throws when the config JSON is invalid", () => {
-            const configPath = join(TEST_DIR, "extensions.config.json");
+            const configPath = join(TEST_DIR, "extensions.json");
             writeFileSync(configPath, "{ this is not json }");
 
             expect(() => loadConfig(TEST_DIR)).toThrow(
@@ -227,7 +227,7 @@ describe("loadConfig", () => {
 
     describe("Simple happy path", () => {
         test("loads and parses valid config", () => {
-            const configPath = join(TEST_DIR, "extensions.config.json");
+            const configPath = join(TEST_DIR, "extensions.json");
             const config = createBaseConfig();
 
             writeFileSync(configPath, JSON.stringify(config, null, 2));
