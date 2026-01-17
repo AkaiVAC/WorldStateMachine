@@ -16,18 +16,18 @@
 - Activated ExtensionContext with required store slots populated and collections filled.
 - Updated `extensions.json` reflecting normalized paths and dependency status changes.
 
-## Runtime Activation
+## Bootstrap Activation
 ### Stage execution
 - Execute stages strictly in order: stores → loaders → validators → contextBuilders → senders → ui.
 
 ### Within-stage ordering
 - Primary order matches config list order.
 - `after` dependencies override ordering with a within-stage DAG.
-- Dependency cycles or unknown dependencies must surface as runtime errors.
+- Dependency cycles or unknown dependencies must surface as bootstrap errors.
 
 ### Extension kind validation
 - Extension `kind` must match the stage it appears in.
-- Mismatches must surface as runtime errors.
+- Mismatches must surface as bootstrap errors.
 
 ### Parallelization
 - Extensions within a stage may be activated in dependency-resolved waves.
@@ -43,7 +43,7 @@
 
 ## Required Store Slots
 - `factStore`, `eventStore`, and `entityStore` must be set after activation.
-- Missing required slots must surface as runtime errors.
+- Missing required slots must surface as bootstrap errors.
 
 ## Error Handling
 - Missing config must fail fast with a direct error from the loader.

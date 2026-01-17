@@ -4,7 +4,7 @@
 
 **Architecture:** Config-driven 6-stage extension pipeline with path aliases (`@core/*`, `@ext/*`)
 
-**Next:** Finish extension system runtime + config writer, then M5
+**Next:** Finish extension system bootstrap + config writer, then M5
 
 **Run tests:** `bun test`
 
@@ -21,7 +21,7 @@ src/
     ├── types.ts          # Config and extension types
     ├── config-loader.ts  # Load and validate extensions.json
     ├── config-loader/    # Validation helpers
-    └── runtime.ts        # Activate in order, validate required slots
+    └── bootstrap.ts      # Activate in order, validate required slots
 
 extensions/
 └── core/                 # Standard implementation (split by stage)
@@ -53,7 +53,7 @@ extensions.json             # Central config listing enabled extensions per stag
 ### Extension System (Config Loader Implemented)
 **Location:** `src/extension-system/`
 
-**Status:** Config loader and validation implemented. Runtime activation next.
+**Status:** Config loader and validation implemented. Bootstrap activation next.
 
 **Design (2026-01-10):**
 - Config file (`extensions.json`) lists extensions per stage
