@@ -1,3 +1,22 @@
+---
+title: "Epistemic State"
+status: "core"
+keywords:
+  - "epistemic state"
+  - "knowledge isolation"
+  - "event visibility"
+  - "character knowledge"
+  - "POV filtering"
+  - "secret handling"
+related:
+  - "./02-timeline-centric.md"
+  - "../future/09-scene-execution.md"
+  - "../../roadmap.md"
+  - "../../vision.md"
+  - "../../decisions.md"
+---
+# Epistemic State
+
 ## 9. Epistemic State (Who Knows What)
 
 ### 9.1 The Problem
@@ -142,3 +161,10 @@ EXCLUDED:
 ```
 
 The LLM literally cannot reference excluded information—it's not in the context.
+
+## See also
+- [02-timeline-centric.md](./02-timeline-centric.md)
+- [09-scene-execution.md](../future/09-scene-execution.md)
+- [roadmap.md](../../roadmap.md)
+- [vision.md](../../vision.md)
+- [decisions.md](../../decisions.md)

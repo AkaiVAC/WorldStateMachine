@@ -1,3 +1,21 @@
+---
+title: "MVP Scope"
+status: "core"
+keywords:
+  - "MVP scope"
+  - "minimum viable product"
+  - "scope boundaries"
+  - "initial milestones"
+  - "feature exclusions"
+  - "project constraints"
+related:
+  - "../../roadmap.md"
+  - "../../vision.md"
+  - "../../decisions.md"
+  - "./01-problem.md"
+---
+# MVP Scope
+
 ## 14. MVP Scope
 
 > **Historical Document:** This describes the original MVP scope and progress as of December 2025 (M1 completion). The project has since progressed through M4 and adopted a plugin-first architecture. See [current.md](../../current.md) for current status.
@@ -444,3 +462,9 @@ MVP is complete when:
 **MVP COMPLETE** ✅
 
 ---
+
+## See also
+- [roadmap.md](../../roadmap.md)
+- [vision.md](../../vision.md)
+- [decisions.md](../../decisions.md)
+- [01-problem.md](./01-problem.md)

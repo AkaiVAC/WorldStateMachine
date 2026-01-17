@@ -1,3 +1,22 @@
+---
+title: "Open Questions"
+status: "reference"
+keywords:
+  - "open questions"
+  - "design tradeoffs"
+  - "unresolved decisions"
+  - "future investigation"
+  - "architecture risks"
+  - "research backlog"
+related:
+  - "../../roadmap.md"
+  - "../../decisions.md"
+  - "../../vision.md"
+  - "../core/02-timeline-centric.md"
+  - "../future/09-scene-execution.md"
+---
+# Open Questions
+
 ## 13. Open Questions
 
 ### 13.1 Resolved
@@ -45,3 +64,10 @@
 - **Constraint prioritization:** When multiple constraints conflict, which takes precedence? (§17)
 
 ---
+
+## See also
+- [roadmap.md](../../roadmap.md)
+- [decisions.md](../../decisions.md)
+- [vision.md](../../vision.md)
+- [02-timeline-centric.md](../core/02-timeline-centric.md)
+- [09-scene-execution.md](../future/09-scene-execution.md)

@@ -1,3 +1,21 @@
+---
+title: "Storage Format"
+status: "core"
+keywords:
+  - "storage format"
+  - "verbose storage"
+  - "compact rendering"
+  - "fact schema"
+  - "event storage"
+  - "context serialization"
+related:
+  - "./02-timeline-centric.md"
+  - "./11-query-pipeline.md"
+  - "../../decisions.md"
+  - "../future/09-scene-execution.md"
+---
+# Storage Format
+
 ## 6. Storage vs. Context Format
 
 ### 6.1 Store Verbose, Render Compact
@@ -82,3 +100,8 @@ Event {
 
 ---
 
+## See also
+- [02-timeline-centric.md](./02-timeline-centric.md)
+- [11-query-pipeline.md](./11-query-pipeline.md)
+- [decisions.md](../../decisions.md)
+- [09-scene-execution.md](../future/09-scene-execution.md)

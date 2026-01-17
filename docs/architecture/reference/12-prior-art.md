@@ -1,3 +1,21 @@
+---
+title: "Prior Art"
+status: "reference"
+keywords:
+  - "prior art"
+  - "related systems"
+  - "temporal knowledge graphs"
+  - "multi-agent narratives"
+  - "tool-calling comparison"
+  - "research references"
+related:
+  - "../../vision.md"
+  - "../../roadmap.md"
+  - "../../decisions.md"
+  - "../core/01-problem.md"
+---
+# Prior Art
+
 ## 12. Relationship to Prior Art
 
 ### 12.1 Foundational Concepts
@@ -290,3 +308,8 @@ We're building a digital continuity system for AI-assisted storytelling.
 
 ---
 
+## See also
+- [vision.md](../../vision.md)
+- [roadmap.md](../../roadmap.md)
+- [decisions.md](../../decisions.md)
+- [01-problem.md](../core/01-problem.md)

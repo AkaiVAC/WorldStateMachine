@@ -1,3 +1,21 @@
+---
+title: "Context Injection Analysis"
+status: "notes"
+keywords:
+  - "context injection analysis"
+  - "keyword matching failures"
+  - "entity extraction"
+  - "relationship graph retrieval"
+  - "prompt analysis"
+  - "lorebook matching"
+  - "Sunnarian princess test"
+related:
+  - "../current.md"
+  - "../vision.md"
+  - "../roadmap.md"
+  - "../decisions.md"
+  - "../architecture/core/11-query-pipeline.md"
+---
 # Context Injection Analysis
 
 ## Date: 2025-12-28
@@ -201,3 +219,10 @@ Manual testing recommended with prompts like:
 - "Princess Aradia meets Princess Isabella"
 
 Should now see related entries expanded via graph and no invented kingdoms.
+
+## See also
+- [current.md](../current.md)
+- [vision.md](../vision.md)
+- [roadmap.md](../roadmap.md)
+- [decisions.md](../decisions.md)
+- [11-query-pipeline.md](../architecture/core/11-query-pipeline.md)

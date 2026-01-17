@@ -1,3 +1,21 @@
+---
+title: "World Scene State"
+status: "future"
+keywords:
+  - "world scene state"
+  - "persistent vs ephemeral"
+  - "scene assembly"
+  - "context packaging"
+  - "state transitions"
+  - "scene lifecycle"
+related:
+  - "./09-scene-execution.md"
+  - "../core/02-timeline-centric.md"
+  - "../core/08-epistemic-state.md"
+  - "../../vision.md"
+---
+# World Scene State
+
 ## 5. World State vs. Scene State
 
 ### 5.1 The Distinction
@@ -63,3 +81,8 @@ This is **git for world state**.
 
 ---
 
+## See also
+- [09-scene-execution.md](./09-scene-execution.md)
+- [02-timeline-centric.md](../core/02-timeline-centric.md)
+- [08-epistemic-state.md](../core/08-epistemic-state.md)
+- [vision.md](../../vision.md)

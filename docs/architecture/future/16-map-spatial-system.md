@@ -1,3 +1,22 @@
+---
+title: "Map and Spatial System"
+status: "future"
+keywords:
+  - "map system"
+  - "spatial validation"
+  - "travel time"
+  - "geography constraints"
+  - "routes and proximity"
+  - "environmental context"
+related:
+  - "../../vision.md"
+  - "../../roadmap.md"
+  - "../core/04-containment.md"
+  - "./15-calendar-time-system.md"
+  - "./09-scene-execution.md"
+---
+# Map and Spatial System
+
 ## 16. Map and Spatial System
 
 ### 16.1 Map as First-Class World State
@@ -206,3 +225,10 @@ Both provide value:
 - Map: Calculate distances, validate travel, provide geography
 
 ---
+
+## See also
+- [vision.md](../../vision.md)
+- [roadmap.md](../../roadmap.md)
+- [04-containment.md](../core/04-containment.md)
+- [15-calendar-time-system.md](./15-calendar-time-system.md)
+- [09-scene-execution.md](./09-scene-execution.md)

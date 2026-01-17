@@ -1,3 +1,21 @@
+---
+title: "Problem Statement"
+status: "core"
+keywords:
+  - "problem statement"
+  - "LLM consistency constraints"
+  - "world state management"
+  - "constraint engine goals"
+  - "context reliability"
+  - "hallucination prevention"
+related:
+  - "../../vision.md"
+  - "../../roadmap.md"
+  - "./02-timeline-centric.md"
+  - "./17-constraint-validation-system.md"
+---
+# Problem Statement
+
 ## 1. Problem Statement
 
 ### 1.1 The Core Problem: Constraining LLM Generation
@@ -52,3 +70,8 @@ Approved output becomes new events/facts (committed to timeline)
 
 ---
 
+## See also
+- [vision.md](../../vision.md)
+- [roadmap.md](../../roadmap.md)
+- [02-timeline-centric.md](./02-timeline-centric.md)
+- [17-constraint-validation-system.md](./17-constraint-validation-system.md)
