@@ -1,5 +1,9 @@
 # Code Style & Quality
 
+Stack: Bun, TypeScript, Biome, vis.js
+
+Use native project tools where possible (Bun over npm).
+
 ## Essential Context for Each Session
 
 **Read these docs to understand the project:**
