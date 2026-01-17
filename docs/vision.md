@@ -1,3 +1,21 @@
+---
+title: "Vision: World State Constraint Engine"
+status: "current"
+keywords:
+  - "world state constraint engine"
+  - "timeline map calendar"
+  - "epistemic isolation"
+  - "multi-agent orchestration"
+  - "constraint package"
+  - "tool-calling architecture"
+  - "validation pipeline"
+related:
+  - "./roadmap.md"
+  - "./current.md"
+  - "./decisions.md"
+  - "./architecture/core/01-problem.md"
+  - "./architecture/future/09-scene-execution.md"
+---
 # Vision: World State Constraint Engine
 
 **Last updated:** 2026-01-01
@@ -438,3 +456,10 @@ See **CURRENT.md** for where we are now.
 See **DECISIONS.md** for why we made key design choices.
 
 Detailed architecture: `/architecture/` folder.
+
+## See also
+- [roadmap.md](./roadmap.md)
+- [current.md](./current.md)
+- [decisions.md](./decisions.md)
+- [01-problem.md](./architecture/core/01-problem.md)
+- [09-scene-execution.md](./architecture/future/09-scene-execution.md)

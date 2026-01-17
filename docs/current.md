@@ -1,3 +1,21 @@
+---
+title: "Current Implementation State"
+status: "current"
+keywords:
+  - "current implementation status"
+  - "project status"
+  - "extension system redesign"
+  - "config-driven extensions"
+  - "milestone M4 complete"
+  - "runtime activation next"
+  - "timeline stores"
+related:
+  - "./roadmap.md"
+  - "./vision.md"
+  - "./decisions.md"
+  - "./README.md"
+  - "./architecture/core/02-timeline-centric.md"
+---
 # Current Implementation State
 
 **Current milestone:** M4 complete, Extension System Redesign in progress
@@ -195,8 +213,9 @@ LLMs query facts via tools rather than receiving massive context packages:
 
 ---
 
-## See Also
-
-- [vision.md](vision.md) - The full picture
-- [roadmap.md](roadmap.md) - Step-by-step path
-- [decisions.md](decisions.md) - Design rationale
+## See also
+- [roadmap.md](./roadmap.md)
+- [vision.md](./vision.md)
+- [decisions.md](./decisions.md)
+- [README.md](./README.md)
+- [02-timeline-centric.md](./architecture/core/02-timeline-centric.md)

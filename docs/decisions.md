@@ -1,3 +1,21 @@
+---
+title: "Design Decisions"
+status: "current"
+keywords:
+  - "design decisions"
+  - "architecture rationale"
+  - "config-driven extension system"
+  - "tool-calling over context"
+  - "timeline facts"
+  - "epistemic isolation"
+  - "validation framework"
+related:
+  - "./vision.md"
+  - "./roadmap.md"
+  - "./current.md"
+  - "./architecture/core/02-timeline-centric.md"
+  - "./architecture/core/17-constraint-validation-system.md"
+---
 # Design Decisions
 
 This document captures the "why" behind key architectural decisions.
@@ -1189,3 +1207,10 @@ const createEntityStore = () => {
 - `current.md` - Where we are
 - `roadmap.md` - How we get there
 - `architecture/` - Detailed design docs
+
+## See also
+- [vision.md](./vision.md)
+- [roadmap.md](./roadmap.md)
+- [current.md](./current.md)
+- [02-timeline-centric.md](./architecture/core/02-timeline-centric.md)
+- [17-constraint-validation-system.md](./architecture/core/17-constraint-validation-system.md)

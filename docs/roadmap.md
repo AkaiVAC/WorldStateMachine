@@ -1,3 +1,21 @@
+---
+title: "Roadmap: From Current to Vision"
+status: "current"
+keywords:
+  - "project roadmap"
+  - "milestones M1-M11"
+  - "epistemic state M5"
+  - "multi-agent orchestration M6"
+  - "extension system redesign"
+  - "proof of concept"
+  - "implementation plan"
+related:
+  - "./current.md"
+  - "./vision.md"
+  - "./decisions.md"
+  - "./architecture/core/08-epistemic-state.md"
+  - "./architecture/future/16-map-spatial-system.md"
+---
 # Roadmap: From Current to Vision
 
 **Current position:** M4 complete, ready for M5
@@ -1618,3 +1636,10 @@ The extension system was previously designed with auto-discovery and complex dep
 - `vision.md` - What we're building toward
 - `current.md` - Where we are now
 - `decisions.md` - Why we made key design choices
+
+## See also
+- [current.md](./current.md)
+- [vision.md](./vision.md)
+- [decisions.md](./decisions.md)
+- [08-epistemic-state.md](./architecture/core/08-epistemic-state.md)
+- [16-map-spatial-system.md](./architecture/future/16-map-spatial-system.md)

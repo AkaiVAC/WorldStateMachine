@@ -1,3 +1,22 @@
+---
+title: "Timeline-Centric World State"
+status: "core"
+keywords:
+  - "timeline-centric design"
+  - "facts with temporal bounds"
+  - "event sourcing"
+  - "world state queries"
+  - "temporal consistency"
+  - "fact validity"
+related:
+  - "./06-storage-format.md"
+  - "./08-epistemic-state.md"
+  - "../../decisions.md"
+  - "../../roadmap.md"
+  - "../future/09-scene-execution.md"
+---
+# Timeline-Centric World State
+
 ## 2. Core Principle: Timeline-Centric
 
 **The Timeline is the database. Entities are derived views.**
@@ -157,3 +176,9 @@ validation:
 
 ---
 
+## See also
+- [06-storage-format.md](./06-storage-format.md)
+- [08-epistemic-state.md](./08-epistemic-state.md)
+- [decisions.md](../../decisions.md)
+- [roadmap.md](../../roadmap.md)
+- [09-scene-execution.md](../future/09-scene-execution.md)

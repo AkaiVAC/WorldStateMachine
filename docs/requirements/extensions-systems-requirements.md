@@ -1,3 +1,20 @@
+---
+title: "Extension Systems Requirements"
+status: "requirements"
+keywords:
+  - "extension system requirements"
+  - "config-driven extensions"
+  - "activation runtime"
+  - "dependency handling"
+  - "extension context"
+  - "stage pipeline"
+  - "validation rules"
+related:
+  - "../current.md"
+  - "../decisions.md"
+  - "../roadmap.md"
+  - "../architecture/core/11-query-pipeline.md"
+---
 # Extension Systems Requirements
 
 ## Goals
@@ -73,3 +90,9 @@
 ## Naming and Structure
 - Folder and file names must follow existing directory patterns.
 - Variable and method names must be explicit and purpose-driven.
+
+## See also
+- [current.md](../current.md)
+- [decisions.md](../decisions.md)
+- [roadmap.md](../roadmap.md)
+- [11-query-pipeline.md](../architecture/core/11-query-pipeline.md)

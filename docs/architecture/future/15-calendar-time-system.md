@@ -1,3 +1,21 @@
+---
+title: "Calendar and Time System"
+status: "future"
+keywords:
+  - "calendar system"
+  - "time granularity"
+  - "chapter chronology"
+  - "temporal context"
+  - "seasons and time of day"
+  - "custom calendars"
+related:
+  - "../../vision.md"
+  - "../../roadmap.md"
+  - "../core/02-timeline-centric.md"
+  - "./16-map-spatial-system.md"
+---
+# Calendar and Time System
+
 ## 15. Calendar and Time System
 
 ### 15.1 Time Granularity
@@ -119,3 +137,9 @@ Season mapping:
 System converts between calendar display (Month 7, Day 15) and internal linear time for calculations.
 
 ---
+
+## See also
+- [vision.md](../../vision.md)
+- [roadmap.md](../../roadmap.md)
+- [02-timeline-centric.md](../core/02-timeline-centric.md)
+- [16-map-spatial-system.md](./16-map-spatial-system.md)

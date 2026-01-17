@@ -1,3 +1,21 @@
+---
+title: "Import Pipeline"
+status: "future"
+keywords:
+  - "import pipeline"
+  - "lorebook ETL"
+  - "fact extraction"
+  - "relationship extraction"
+  - "entity categorization"
+  - "schema discovery"
+related:
+  - "../core/02-timeline-centric.md"
+  - "../core/06-storage-format.md"
+  - "../../vision.md"
+  - "../../roadmap.md"
+---
+# Import Pipeline
+
 ## 10. Import Pipeline (Determinism Preference)
 
 ### 8.1 Guiding Principle
@@ -94,3 +112,8 @@ This reduces friction for obvious relationships while keeping humans in control 
 
 ---
 
+## See also
+- [02-timeline-centric.md](../core/02-timeline-centric.md)
+- [06-storage-format.md](../core/06-storage-format.md)
+- [vision.md](../../vision.md)
+- [roadmap.md](../../roadmap.md)

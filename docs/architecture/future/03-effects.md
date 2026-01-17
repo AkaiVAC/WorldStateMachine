@@ -1,3 +1,21 @@
+---
+title: "Effects and Propagation"
+status: "future"
+keywords:
+  - "effects propagation"
+  - "sticky effects"
+  - "cascading effects"
+  - "world simulation"
+  - "event consequences"
+  - "branching outcomes"
+related:
+  - "../../vision.md"
+  - "../../roadmap.md"
+  - "../core/02-timeline-centric.md"
+  - "./09-scene-execution.md"
+---
+# Effects and Propagation
+
 ## 3. Key Insight: Effects Are Data, Not Inference
 
 ### 3.1 The Problem with Runtime Inference
@@ -177,3 +195,8 @@ Both approaches coexist: sticky facts for mechanical propagation, cascading for 
 
 ---
 
+## See also
+- [vision.md](../../vision.md)
+- [roadmap.md](../../roadmap.md)
+- [02-timeline-centric.md](../core/02-timeline-centric.md)
+- [09-scene-execution.md](./09-scene-execution.md)

@@ -1,3 +1,21 @@
+---
+title: "Containment and Spatial Relationships"
+status: "core"
+keywords:
+  - "containment hierarchy"
+  - "spatial relationships"
+  - "location graph"
+  - "map constraints"
+  - "place containment"
+  - "geographic queries"
+related:
+  - "../future/16-map-spatial-system.md"
+  - "../future/09-scene-execution.md"
+  - "./11-query-pipeline.md"
+  - "../../vision.md"
+---
+# Containment and Spatial Relationships
+
 ## 4. Containment Hierarchy (Automatic Proximity)
 
 ### 4.1 Geographic Inheritance
@@ -81,3 +99,8 @@ That retrieval only works if the system *knows* it was raining. Terrain, flora, 
 
 ---
 
+## See also
+- [16-map-spatial-system.md](../future/16-map-spatial-system.md)
+- [09-scene-execution.md](../future/09-scene-execution.md)
+- [11-query-pipeline.md](./11-query-pipeline.md)
+- [vision.md](../../vision.md)

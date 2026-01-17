@@ -1,3 +1,21 @@
+---
+title: "Constraint Validation System"
+status: "core"
+keywords:
+  - "constraint validation"
+  - "rule framework"
+  - "consistency checks"
+  - "validation timing"
+  - "violation reporting"
+  - "world boundary rules"
+related:
+  - "./02-timeline-centric.md"
+  - "../../decisions.md"
+  - "../../vision.md"
+  - "../future/09-scene-execution.md"
+---
+# Constraint Validation System
+
 ## 17. Constraint and Validation System
 
 ### 17.1 Generic Constraint Framework
@@ -232,3 +250,9 @@ const worldConstraints: Constraint[] = [
 - Consistency suggestions (mention established details)
 
 ---
+
+## See also
+- [02-timeline-centric.md](./02-timeline-centric.md)
+- [decisions.md](../../decisions.md)
+- [vision.md](../../vision.md)
+- [09-scene-execution.md](../future/09-scene-execution.md)

@@ -1,3 +1,22 @@
+---
+title: "Scene Execution"
+status: "future"
+keywords:
+  - "scene execution"
+  - "multi-agent orchestration"
+  - "POV isolation"
+  - "scene generation"
+  - "tool-calling workflow"
+  - "context assembly"
+related:
+  - "../core/08-epistemic-state.md"
+  - "../core/11-query-pipeline.md"
+  - "./05-world-scene-state.md"
+  - "../../vision.md"
+  - "../../roadmap.md"
+---
+# Scene Execution
+
 ## 10. Scene Execution Model
 
 ### 10.1 The Challenge
@@ -171,3 +190,10 @@ AMBIENT CONSTRAINTS
 
 → Context sent to LLM for generation
 ```
+
+## See also
+- [08-epistemic-state.md](../core/08-epistemic-state.md)
+- [11-query-pipeline.md](../core/11-query-pipeline.md)
+- [05-world-scene-state.md](./05-world-scene-state.md)
+- [vision.md](../../vision.md)
+- [roadmap.md](../../roadmap.md)
