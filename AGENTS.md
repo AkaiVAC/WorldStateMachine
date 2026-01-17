@@ -1,16 +1,4 @@
-# Lorebook Manager
-
-## 🚨 NEXT SESSION START HERE
-
-User prefers the AI to take the role of a friendly, sincere, and inquisitive brainstormer using informal language. Always have a lively discourse with the user about the requirements and get their full perspective and approval before moving on to the next step. Be incessant about ensuring that knowledge is captured in the docs. The goal is to facilitate robust, scalable software through discussion, requirement definition, and risk identification. You must be a stickler for quality, strictly enforcing code quality, test coverage, documentation standards, and performance metrics.
-
-You should agree with the user if they're right and disagree and provide alternatives if they're wrong. The goal is not to implement anything. Remember that the goal is to have a discussion and come to an agreement on the approach—not writing code. Don't just ask questions, but present approaches with clear examples and invite discussion.
-
-The user is easily overwhelmed by fast-paced changes, so make sure to get a clear understanding of what you need to do next and only do that. The user is also a stickler for code quality and expects strict adherence to all standards described in this doc without fail. If they don't understand this code, then it is useless to them.
-
-We're implementing a **config-driven extension system** with 6 stages (loaders → stores → validators → contextBuilders → senders → ui). Read the docs to understand the new structure!
-
----
+# Code Style & Quality
 
 ## Essential Context for Each Session
 
@@ -32,24 +20,11 @@ We're implementing a **config-driven extension system** with 6 stages (loaders �
 
 1. **TDD is mandatory.** Failing test first → minimum code to pass → refactor. No exceptions.
 2. **No comments.** Code must be self-documenting through naming and structure.
-3. **One step at a time.** Complete one thing, confirm it works, then move to the next.
-4. **Ask before modifications.** Ask before file edits and state-changing commands. Read-only commands and test runs are pre-approved. Read the project greedily to stay current without asking each time.
-5. **Zero TypeScript errors.** The project must always pass `bun run tsc --noEmit` and `bun run check`.
-6. **Stay in scope.** No future features unless explicitly requested.
-7. **No "helpful" additions.** No extra features, refactoring, error handling for impossible cases, or abstractions "for later."
-8. **Clean code is non-negotiable.** Strict adherence to SOLID principles and the Four Rules of Simple Design:
+3. **Zero TypeScript errors.** The project must always pass `bun run tsc --noEmit` and `bun run check`.
+4. **Clean code is non-negotiable.** Strict adherence to SOLID principles and the Four Rules of Simple Design:
     - **SOLID:** Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion
     - **Simple Design:** Passes tests, reveals intention, no duplication, fewest elements
     - No placeholder code or TODO comments. Either implement it or delete it.
-
----
-
-## Git & Commits
-
--   **Conventional Commits:** Use the format `<type>(<scope>): <subject>` (e.g., `feat(core):`, `refactor(tests):`, `docs:`).
--   **Logical Grouping:** Group similar changes into distinct commits rather than one giant blob.
--   **Verify before Commit:** Ensure all tests pass and types are clean before committing.
--   **Push support:** If asked to push but lacking environment access, propose micro-commit command sequences for the user to run.
 
 ---
 
@@ -126,7 +101,14 @@ bun run check         # Lint + format (auto-fix)
 bun run tsc --noEmit  # Type check
 ```
 
-Stack: Bun, TypeScript, Biome, vis.js
+---
+
+## Git & Commits
+
+-   **Conventional Commits:** Use the format `<type>(<scope>): <subject>` (e.g., `feat(core):`, `refactor(tests):`, `docs:`).
+-   **Logical Grouping:** Group similar changes into distinct commits rather than one giant blob.
+-   **Verify before Commit:** Ensure all tests pass and types are clean before committing.
+-   **Push support:** If asked to push but lacking environment access, propose micro-commit command sequences for the user to run.
 
 ---
 
@@ -146,16 +128,6 @@ Test data: `Excelsia/` (11 JSON files)
 ### Architecture
 
 See **ARCHITECTURE.md** for the full design (timeline-centric model, facts, retrieval, etc.)
-
----
-
-## Working Style
-
-This is a collaboration. Discuss approaches, explain reasoning, consider alternatives. The user wants to understand _why_, not just _what_.
-
-**Ask** rather than assume. **Confirm** before implementing file edits. When asking for a decision, be thorough: include concrete examples, code snippets, and tradeoffs so the next step is clear.
-
-When pairing on TDD, the assistant may implement the failing test step, and the user may implement the minimum code to pass it. Agree on error messages upfront to avoid churn.
 
 ---
 
