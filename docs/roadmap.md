@@ -1565,6 +1565,10 @@ export default defineExtension({
     context.entityStore = createMemoryEntityStore()
   }
 })
+
+// Optional: return contributions to aggregate into collections
+// return { validators: [myValidator] }
+
 ```
 
 #### ExtensionContext (Simple Object)
@@ -1582,6 +1586,8 @@ type ExtensionContext = {
   senders: Sender[]
   uiComponents: UIComponent[]
 }
+
+// Bootstrap aggregates ExtensionContribution returns into these arrays.
 ```
 
 ---

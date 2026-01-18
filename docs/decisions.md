@@ -183,7 +183,7 @@ type ExtensionContext = {
   entityStore?: EntityStore
   relationshipStore?: RelationshipStore
 
-  // Collections (pushed to by extensions)
+  // Collections (aggregated from extension returns)
   loaders: WorldDataLoader[]
   validators: Validator[]
   contextBuilders: ContextBuilder[]
@@ -248,13 +248,28 @@ type Extension = {
   kind: ExtensionKind
   after?: string[]  // within-stage dependencies (by name)
 
-  activate: (context: ExtensionContext, options?: unknown) => Promise<void> | void
+  activate: (
+    context: ExtensionContext,
+    options?: unknown,
+  ) => Promise<ExtensionContribution | void> | ExtensionContribution | void
   deactivate?: () => Promise<void> | void
 }
+
+type ExtensionContribution = {
+  loaders?: WorldDataLoader[]
+  validators?: Validator[]
+  contextBuilders?: ContextBuilder[]
+  senders?: Sender[]
+  uiComponents?: UIComponent[]
+}
+
+// Bootstrap aggregates ExtensionContribution returns into the context arrays.
 
 // Helper for type inference
 const defineExtension = (ext: Extension): Extension => ext
 ```
+
+**Contribution aggregation:** If `activate` returns an `ExtensionContribution`, bootstrap appends those items to the matching `context` arrays. Extensions can still mutate store slots directly. Return `void` when there is nothing to add.
 
 **Kind validation:** If extension's `kind` doesn't match the stage it's placed in (config), bootstrap errors.
 

@@ -29,9 +29,10 @@ related:
 - Extension modules referenced by config paths.
 - Extension paths must resolve to module files with default exports.
 - Extension exports with `name`, `kind`, `version`, `activate`, optional `after`, and optional `deactivate`.
+- `activate` may return an ExtensionContribution object to append items to context collections.
 
 ## Outputs
-- Activated ExtensionContext with required store slots populated and collections filled.
+- Activated ExtensionContext with required store slots populated and collections aggregated from extension returns.
 - Updated `extensions.json` reflecting normalized paths and dependency status changes, even when bootstrap fails.
 
 ## Bootstrap Activation
