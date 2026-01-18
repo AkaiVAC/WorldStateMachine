@@ -88,7 +88,30 @@ export const bootstrapExtensions = async (
                 })
                 .filter((result) => result !== null);
 
-            await Promise.all(activated);
+            const contributions = await Promise.all(activated);
+
+            for (const contribution of contributions) {
+                if (!contribution) {
+                    continue;
+                }
+                if (contribution.loaders) {
+                    context.loaders.push(...contribution.loaders);
+                }
+                if (contribution.validators) {
+                    context.validators.push(...contribution.validators);
+                }
+                if (contribution.contextBuilders) {
+                    context.contextBuilders.push(
+                        ...contribution.contextBuilders,
+                    );
+                }
+                if (contribution.senders) {
+                    context.senders.push(...contribution.senders);
+                }
+                if (contribution.uiComponents) {
+                    context.uiComponents.push(...contribution.uiComponents);
+                }
+            }
         }
     }
 

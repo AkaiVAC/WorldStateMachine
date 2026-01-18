@@ -72,9 +72,158 @@ const writeDelayedActivationExtension = (name: string, delayMs: number) => {
     );
 };
 
+const writeContributionExtension = (name: string, content: string) => {
+    writeExtensionModule(
+        `extensions/core/3-validate-consistency/${name}.ts`,
+        content,
+    );
+};
+
 describe("bootstrapExtensions", () => {
     beforeEach(createTestDir);
     afterEach(cleanupTestDir);
+
+    test("aggregates contribution arrays into the context", async () => {
+        writeContributionExtension(
+            "validator-alpha",
+            "export default { name: '@core/validator-alpha', version: '1.0.0', kind: 'validator', activate: () => ({ validators: [{ name: 'alpha' }] }) };",
+        );
+        writeExtensionModule(
+            "extensions/core/2-store-timeline/required-store.ts",
+            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; } };",
+        );
+
+        const config = {
+            ...createBaseConfig(),
+            stores: [
+                {
+                    name: "@core/required-store",
+                    path: "extensions/core/2-store-timeline/required-store.ts",
+                    status: "on",
+                },
+            ],
+            validators: [
+                {
+                    name: "@core/validator-alpha",
+                    path: "extensions/core/3-validate-consistency/validator-alpha.ts",
+                    status: "on",
+                },
+            ],
+        } satisfies ExtensionsConfig;
+
+        writeConfig(config);
+
+        const context = await bootstrapExtensions(TEST_DIR);
+
+        expect(context.validators).toEqual([{ name: "alpha" }]);
+    });
+
+    test("aggregates multiple contribution collections from one extension", async () => {
+        writeContributionExtension(
+            "validator-beta",
+            "export default { name: '@core/validator-beta', version: '1.0.0', kind: 'validator', activate: () => ({ validators: [{ name: 'beta' }], contextBuilders: [{ name: 'builder' }] }) };",
+        );
+        writeExtensionModule(
+            "extensions/core/2-store-timeline/required-store.ts",
+            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; } };",
+        );
+
+        const config = {
+            ...createBaseConfig(),
+            stores: [
+                {
+                    name: "@core/required-store",
+                    path: "extensions/core/2-store-timeline/required-store.ts",
+                    status: "on",
+                },
+            ],
+            validators: [
+                {
+                    name: "@core/validator-beta",
+                    path: "extensions/core/3-validate-consistency/validator-beta.ts",
+                    status: "on",
+                },
+            ],
+        } satisfies ExtensionsConfig;
+
+        writeConfig(config);
+
+        const context = await bootstrapExtensions(TEST_DIR);
+
+        expect(context.validators).toEqual([{ name: "beta" }]);
+        expect(context.contextBuilders).toEqual([{ name: "builder" }]);
+    });
+
+    test("ignores empty contributions", async () => {
+        writeContributionExtension(
+            "validator-empty",
+            "export default { name: '@core/validator-empty', version: '1.0.0', kind: 'validator', activate: () => ({}) };",
+        );
+        writeExtensionModule(
+            "extensions/core/2-store-timeline/required-store.ts",
+            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; } };",
+        );
+
+        const config = {
+            ...createBaseConfig(),
+            stores: [
+                {
+                    name: "@core/required-store",
+                    path: "extensions/core/2-store-timeline/required-store.ts",
+                    status: "on",
+                },
+            ],
+            validators: [
+                {
+                    name: "@core/validator-empty",
+                    path: "extensions/core/3-validate-consistency/validator-empty.ts",
+                    status: "on",
+                },
+            ],
+        } satisfies ExtensionsConfig;
+
+        writeConfig(config);
+
+        const context = await bootstrapExtensions(TEST_DIR);
+
+        expect(context.validators).toEqual([]);
+        expect(context.contextBuilders).toEqual([]);
+    });
+
+    test("supports async contribution returns", async () => {
+        writeContributionExtension(
+            "validator-async",
+            "export default { name: '@core/validator-async', version: '1.0.0', kind: 'validator', activate: async () => ({ validators: [{ name: 'async' }] }) };",
+        );
+        writeExtensionModule(
+            "extensions/core/2-store-timeline/required-store.ts",
+            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; } };",
+        );
+
+        const config = {
+            ...createBaseConfig(),
+            stores: [
+                {
+                    name: "@core/required-store",
+                    path: "extensions/core/2-store-timeline/required-store.ts",
+                    status: "on",
+                },
+            ],
+            validators: [
+                {
+                    name: "@core/validator-async",
+                    path: "extensions/core/3-validate-consistency/validator-async.ts",
+                    status: "on",
+                },
+            ],
+        } satisfies ExtensionsConfig;
+
+        writeConfig(config);
+
+        const context = await bootstrapExtensions(TEST_DIR);
+
+        expect(context.validators).toEqual([{ name: "async" }]);
+    });
 
     test("fails fast when an extension module is missing", async () => {
         const config = {

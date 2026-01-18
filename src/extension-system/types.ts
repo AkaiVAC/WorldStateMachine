@@ -38,6 +38,14 @@ export type ExtensionContext = {
     uiComponents: unknown[];
 };
 
+export type ExtensionContribution = {
+    loaders?: unknown[];
+    validators?: unknown[];
+    contextBuilders?: unknown[];
+    senders?: unknown[];
+    uiComponents?: unknown[];
+};
+
 export type Extension = {
     name: string;
     version: string;
@@ -46,7 +54,7 @@ export type Extension = {
     activate: (
         context: ExtensionContext,
         options?: unknown,
-    ) => Promise<void> | void;
+    ) => Promise<ExtensionContribution | void> | ExtensionContribution | void;
     deactivate?: () => Promise<void> | void;
 };
 
