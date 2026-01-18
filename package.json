@@ -9,6 +9,7 @@
         "lint": "biome lint .",
         "format": "biome format --write .",
         "bootstrap": "bun run src/extension-system/bootstrap-runner.ts",
+        "start": "bun run bootstrap",
         "ui": "bun run src/ui/main.ts",
         "prepare": "husky"
     },
