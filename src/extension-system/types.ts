@@ -16,6 +16,26 @@ export type ExtensionsConfig = {
     ui: ExtensionEntry[];
 };
 
+export type ExtensionKind =
+    | "store"
+    | "loader"
+    | "validator"
+    | "contextBuilder"
+    | "sender"
+    | "ui";
+
+export type ExtensionContext = {
+    factStore?: unknown;
+    eventStore?: unknown;
+    entityStore?: unknown;
+    relationshipStore?: unknown;
+    loaders: unknown[];
+    validators: unknown[];
+    contextBuilders: unknown[];
+    senders: unknown[];
+    uiComponents: unknown[];
+};
+
 export type EntryWithStage<T> = {
     stage: keyof ExtensionsConfig;
     index: number;
