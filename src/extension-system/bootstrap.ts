@@ -55,9 +55,12 @@ export const bootstrapExtensions = async (
     }
 
     const activationOrder = new Map<Stage, string[]>();
+    const activationWaves = new Map<Stage, string[][]>();
 
     for (const [stage, extensions] of stagedExtensions.entries()) {
-        activationOrder.set(stage, buildActivationOrder(stage, extensions));
+        const result = buildActivationOrder(stage, extensions);
+        activationOrder.set(stage, result.order);
+        activationWaves.set(stage, result.waves);
     }
 
     for (const [stage, extensions] of stagedExtensions.entries()) {
@@ -65,7 +68,7 @@ export const bootstrapExtensions = async (
             stagedEntries.get(stage) ?? [],
             dependencies,
         );
-        const order = activationOrder.get(stage) ?? [];
+        const waves = activationWaves.get(stage) ?? [];
         const extensionByName = new Map(
             extensions.map((extension) => [extension.name, extension]),
         );
@@ -73,13 +76,19 @@ export const bootstrapExtensions = async (
             entriesForStage.map((entry) => [entry.name, entry]),
         );
 
-        for (const name of order) {
-            const entry = entryByName.get(name);
-            const extension = extensionByName.get(name);
-            if (!entry || !extension || !shouldActivate(entry)) {
-                continue;
-            }
-            await extension.activate(context, entry.options);
+        for (const wave of waves) {
+            const activated = wave
+                .map((name) => {
+                    const entry = entryByName.get(name);
+                    const extension = extensionByName.get(name);
+                    if (!entry || !extension || !shouldActivate(entry)) {
+                        return null;
+                    }
+                    return extension.activate(context, entry.options);
+                })
+                .filter((result) => result !== null);
+
+            await Promise.all(activated);
         }
     }
 

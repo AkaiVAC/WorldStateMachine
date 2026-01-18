@@ -65,6 +65,13 @@ const writeActivationExtension = (
     );
 };
 
+const writeDelayedActivationExtension = (name: string, delayMs: number) => {
+    writeExtensionModule(
+        `extensions/core/4-build-scene-context/${name}.ts`,
+        `const activationKey = "${activationKey}"; export default { name: "${name}", version: "1.0.0", kind: "contextBuilder", activate: async () => { const log = globalThis[activationKey] ?? []; log.push("start-${name}"); globalThis[activationKey] = log; await new Promise((resolve) => setTimeout(resolve, ${delayMs})); log.push("finish-${name}"); } };`,
+    );
+};
+
 describe("bootstrapExtensions", () => {
     beforeEach(createTestDir);
     afterEach(cleanupTestDir);
@@ -318,8 +325,9 @@ describe("bootstrapExtensions", () => {
     });
 
     test("activates extensions in within-stage waves", async () => {
-        writeActivationExtension("wave-alpha", "wave-alpha");
-        writeActivationExtension("wave-beta", "wave-beta", ["wave-alpha"]);
+        writeDelayedActivationExtension("wave-alpha", 40);
+        writeDelayedActivationExtension("wave-beta", 5);
+        writeDelayedActivationExtension("wave-gamma", 10);
         writeExtensionModule(
             "extensions/core/2-store-timeline/required-store.ts",
             "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; } };",
@@ -336,13 +344,18 @@ describe("bootstrapExtensions", () => {
             ],
             contextBuilders: [
                 {
+                    name: "wave-alpha",
+                    path: "extensions/core/4-build-scene-context/wave-alpha.ts",
+                    status: "on",
+                },
+                {
                     name: "wave-beta",
                     path: "extensions/core/4-build-scene-context/wave-beta.ts",
                     status: "on",
                 },
                 {
-                    name: "wave-alpha",
-                    path: "extensions/core/4-build-scene-context/wave-alpha.ts",
+                    name: "wave-gamma",
+                    path: "extensions/core/4-build-scene-context/wave-gamma.ts",
                     status: "on",
                 },
             ],
@@ -352,6 +365,13 @@ describe("bootstrapExtensions", () => {
 
         await bootstrapExtensions(TEST_DIR);
 
-        expect(getActivationLog()).toEqual(["wave-alpha", "wave-beta"]);
+        expect(getActivationLog()).toEqual([
+            "start-wave-alpha",
+            "start-wave-beta",
+            "start-wave-gamma",
+            "finish-wave-beta",
+            "finish-wave-gamma",
+            "finish-wave-alpha",
+        ]);
     });
 });

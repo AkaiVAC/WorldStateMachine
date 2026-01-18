@@ -1,9 +1,14 @@
 import type { Extension, Stage } from "../types";
 
+export type ActivationWaves = {
+    order: string[];
+    waves: string[][];
+};
+
 export const buildActivationOrder = (
     stage: Stage,
     extensions: Extension[],
-): string[] => {
+): ActivationWaves => {
     const names = new Set(extensions.map((extension) => extension.name));
     const order = new Map(
         extensions.map((extension, index) => [extension.name, index]),
@@ -27,6 +32,7 @@ export const buildActivationOrder = (
 
     const resolved = new Set<string>();
     const ordered: string[] = [];
+    const waves: string[][] = [];
 
     while (resolved.size < remaining.size) {
         const ready = [...remaining.entries()]
@@ -43,6 +49,8 @@ export const buildActivationOrder = (
             );
         }
 
+        waves.push(ready);
+
         for (const name of ready) {
             resolved.add(name);
             ordered.push(name);
@@ -52,5 +60,5 @@ export const buildActivationOrder = (
         }
     }
 
-    return ordered;
+    return { order: ordered, waves };
 };
