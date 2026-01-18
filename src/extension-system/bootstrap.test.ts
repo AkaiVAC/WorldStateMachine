@@ -83,6 +83,10 @@ describe("bootstrapExtensions", () => {
     beforeEach(createTestDir);
     afterEach(cleanupTestDir);
 
+    test("boots real extensions config end to end", async () => {
+        await expect(bootstrapExtensions(process.cwd())).resolves.toBeDefined();
+    });
+
     test("aggregates contribution arrays into the context", async () => {
         writeContributionExtension(
             "validator-alpha",
