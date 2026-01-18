@@ -1,4 +1,6 @@
 import type { Entity } from "@core/entity";
+import { defineExtension } from "@ext-system/define-extension";
+
 
 export type SkippedEntry = {
 	uid?: number;
@@ -67,3 +69,15 @@ export const importSillyTavernLorebook = async (
 
 	return { entities, lexiconTerms, skipped };
 };
+
+export default defineExtension({
+	name: "@core/sillytavern-loader",
+	version: "1.0.0",
+	kind: "loader",
+	activate: () => {
+		return {
+			loaders: [importSillyTavernLorebook],
+		};
+	},
+});
+
