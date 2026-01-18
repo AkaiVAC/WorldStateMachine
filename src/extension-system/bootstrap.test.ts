@@ -52,10 +52,16 @@ const getActivationLog = (): string[] => {
     return [];
 };
 
-const writeActivationExtension = (name: string, status: string) => {
+const writeActivationExtension = (
+    name: string,
+    status: string,
+    after: string[] = [],
+) => {
+    const afterList =
+        after.length > 0 ? `after: ${JSON.stringify(after)},` : "";
     writeExtensionModule(
         `extensions/core/4-build-scene-context/${name}.ts`,
-        `const activationKey = "${activationKey}"; export default { name: "${name}", version: "1.0.0", kind: "contextBuilder", activate: () => { const log = globalThis[activationKey] ?? []; log.push("${status}"); globalThis[activationKey] = log; } };`,
+        `const activationKey = "${activationKey}"; export default { name: "${name}", version: "1.0.0", kind: "contextBuilder", ${afterList} activate: () => { const log = globalThis[activationKey] ?? []; log.push("${status}"); globalThis[activationKey] = log; } };`,
     );
 };
 
@@ -63,7 +69,7 @@ describe("bootstrapExtensions", () => {
     beforeEach(createTestDir);
     afterEach(cleanupTestDir);
 
-    test("fails fast when an extension module is missing", () => {
+    test("fails fast when an extension module is missing", async () => {
         const config = {
             ...createBaseConfig(),
             stores: [
@@ -77,12 +83,12 @@ describe("bootstrapExtensions", () => {
 
         writeConfig(config);
 
-        expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
+        await expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
             "Bootstrap error: extension module missing: extensions/core/2-store-timeline/missing-store.ts.",
         );
     });
 
-    test("fails fast on kind mismatch for a stage", () => {
+    test("fails fast on kind mismatch for a stage", async () => {
         writeExtensionModule(
             "extensions/core/2-store-timeline/memory-store.ts",
             "export default { name: '@core/memory-store', version: '1.0.0', kind: 'loader', activate: () => {} };",
@@ -101,12 +107,12 @@ describe("bootstrapExtensions", () => {
 
         writeConfig(config);
 
-        expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
+        await expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
             "Bootstrap error: extension kind mismatch for stores: @core/memory-store is loader.",
         );
     });
 
-    test("fails fast on unknown after dependency", () => {
+    test("fails fast on unknown after dependency", async () => {
         writeExtensionModule(
             "extensions/core/4-build-scene-context/keyword-matcher.ts",
             "export default { name: '@core/keyword-matcher', version: '1.0.0', kind: 'contextBuilder', after: ['@core/missing'], activate: () => {} };",
@@ -125,12 +131,12 @@ describe("bootstrapExtensions", () => {
 
         writeConfig(config);
 
-        expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
+        await expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
             "Bootstrap error: unknown dependency @core/missing for @core/keyword-matcher.",
         );
     });
 
-    test("fails fast on dependency cycle", () => {
+    test("fails fast on dependency cycle", async () => {
         writeExtensionModule(
             "extensions/core/4-build-scene-context/cycle-alpha.ts",
             "export default { name: '@core/cycle-alpha', version: '1.0.0', kind: 'contextBuilder', after: ['@core/cycle-beta'], activate: () => {} };",
@@ -158,7 +164,7 @@ describe("bootstrapExtensions", () => {
 
         writeConfig(config);
 
-        expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
+        await expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
             "Bootstrap error: dependency cycle detected in contextBuilders.",
         );
     });
@@ -166,9 +172,20 @@ describe("bootstrapExtensions", () => {
     test("activates only entries with status on", async () => {
         writeActivationExtension("alpha", "alpha");
         writeActivationExtension("beta", "beta");
+        writeExtensionModule(
+            "extensions/core/2-store-timeline/required-store.ts",
+            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; } };",
+        );
 
         const config = {
             ...createBaseConfig(),
+            stores: [
+                {
+                    name: "@core/required-store",
+                    path: "extensions/core/2-store-timeline/required-store.ts",
+                    status: "on",
+                },
+            ],
             contextBuilders: [
                 {
                     name: "alpha",
@@ -190,8 +207,151 @@ describe("bootstrapExtensions", () => {
         expect(getActivationLog()).toEqual(["alpha"]);
     });
 
-    test.todo("writes normalized paths before activation", () => {});
-    test.todo("writes needs status updates before activation", () => {});
-    test.todo("validates required store slots after activation", () => {});
-    test.todo("activates extensions in within-stage waves", () => {});
+    test("writes normalized paths before activation", async () => {
+        writeActivationExtension("normalize", "normalize");
+        writeExtensionModule(
+            "extensions/core/2-store-timeline/required-store.ts",
+            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; } };",
+        );
+
+        const config = {
+            ...createBaseConfig(),
+            stores: [
+                {
+                    name: "@core/required-store",
+                    path: "extensions/core/2-store-timeline/required-store.ts",
+                    status: "on",
+                },
+            ],
+            contextBuilders: [
+                {
+                    name: "normalize",
+                    path: "extensions\\core\\4-build-scene-context\\normalize.ts",
+                    status: "on",
+                },
+            ],
+        } satisfies ExtensionsConfig;
+
+        writeConfig(config);
+
+        await expect(bootstrapExtensions(TEST_DIR)).resolves.toBeDefined();
+
+        const result = (await Bun.file(
+            join(TEST_DIR, "extensions.json"),
+        ).json()) as ExtensionsConfig;
+
+        expect(result.contextBuilders[0]?.path).toBe(
+            "extensions/core/4-build-scene-context/normalize.ts",
+        );
+    });
+
+    test("writes needs status updates before activation", async () => {
+        writeActivationExtension("needs-alpha", "needs-alpha");
+        writeActivationExtension("needs-beta", "needs-beta", ["needs-alpha"]);
+        writeExtensionModule(
+            "extensions/core/2-store-timeline/required-store.ts",
+            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; } };",
+        );
+
+        const config = {
+            ...createBaseConfig(),
+            stores: [
+                {
+                    name: "@core/required-store",
+                    path: "extensions/core/2-store-timeline/required-store.ts",
+                    status: "on",
+                },
+            ],
+            contextBuilders: [
+                {
+                    name: "needs-alpha",
+                    path: "extensions/core/4-build-scene-context/needs-alpha.ts",
+                    status: "off",
+                },
+                {
+                    name: "needs-beta",
+                    path: "extensions/core/4-build-scene-context/needs-beta.ts",
+                    status: "on",
+                },
+            ],
+        } satisfies ExtensionsConfig;
+
+        writeConfig(config);
+
+        const before = (await Bun.file(
+            join(TEST_DIR, "extensions.json"),
+        ).json()) as ExtensionsConfig;
+
+        expect(before.contextBuilders[1]?.status).toBe("on");
+
+        await bootstrapExtensions(TEST_DIR);
+
+        const result = (await Bun.file(
+            join(TEST_DIR, "extensions.json"),
+        ).json()) as ExtensionsConfig;
+
+        expect(result.contextBuilders[1]?.status).toBe("needs:needs-alpha");
+    });
+
+    test("validates required store slots after activation", async () => {
+        writeExtensionModule(
+            "extensions/core/2-store-timeline/partial-store.ts",
+            "export default { name: '@core/partial-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; } };",
+        );
+
+        const config = {
+            ...createBaseConfig(),
+            stores: [
+                {
+                    name: "@core/partial-store",
+                    path: "extensions/core/2-store-timeline/partial-store.ts",
+                    status: "on",
+                },
+            ],
+        } satisfies ExtensionsConfig;
+
+        writeConfig(config);
+
+        await expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
+            "Bootstrap error: missing required store slots: eventStore, entityStore.",
+        );
+    });
+
+    test("activates extensions in within-stage waves", async () => {
+        writeActivationExtension("wave-alpha", "wave-alpha");
+        writeActivationExtension("wave-beta", "wave-beta", ["wave-alpha"]);
+        writeExtensionModule(
+            "extensions/core/2-store-timeline/required-store.ts",
+            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; } };",
+        );
+
+        const config = {
+            ...createBaseConfig(),
+            stores: [
+                {
+                    name: "@core/required-store",
+                    path: "extensions/core/2-store-timeline/required-store.ts",
+                    status: "on",
+                },
+            ],
+            contextBuilders: [
+                {
+                    name: "wave-beta",
+                    path: "extensions/core/4-build-scene-context/wave-beta.ts",
+                    status: "on",
+                },
+                {
+                    name: "wave-alpha",
+                    path: "extensions/core/4-build-scene-context/wave-alpha.ts",
+                    status: "on",
+                },
+            ],
+        } satisfies ExtensionsConfig;
+
+        writeConfig(config);
+
+        await bootstrapExtensions(TEST_DIR);
+
+        expect(getActivationLog()).toEqual(["wave-alpha", "wave-beta"]);
+    });
 });
