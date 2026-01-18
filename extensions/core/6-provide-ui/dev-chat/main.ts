@@ -1,3 +1,4 @@
+import { defineExtension } from "@ext-system/define-extension";
 import { chatHandler } from "./routes/chat";
 import { lorebookHandler } from "./routes/lorebook";
 import { modelsHandler } from "./routes/models";
@@ -31,6 +32,16 @@ const routes: Routes = {
 	},
 };
 
-const server = createServer(routes);
+export const createDevChatServer = () => createServer(routes);
 
-console.log(`Lorebook Chat running at http://localhost:${server.port}`);
+export default defineExtension({
+	name: "@core/dev-chat",
+	version: "1.0.0",
+	kind: "ui",
+	activate: () => {
+		const server = createDevChatServer();
+		console.log(`Lorebook Chat running at http://localhost:${server.port}`);
+		return { uiComponents: [server] };
+	},
+});
+
