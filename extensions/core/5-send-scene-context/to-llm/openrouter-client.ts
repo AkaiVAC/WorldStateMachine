@@ -1,5 +1,8 @@
+import { defineExtension } from "@ext-system/define-extension";
+
 const DEFAULT_MODEL = "xiaomi/mimo-v2-flash:free";
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+
 
 export type FetchFn = (url: string, options: RequestInit) => Promise<Response>;
 
@@ -78,3 +81,13 @@ export const chat = async (
 
 	return data.choices[0].message.content;
 };
+
+export default defineExtension({
+	name: "@core/openrouter",
+	version: "1.0.0",
+	kind: "sender",
+	activate: () => ({
+		senders: [chat],
+	}),
+});
+
