@@ -83,7 +83,7 @@ describe("bootstrapExtensions", () => {
 
         writeConfig(config);
 
-        await expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
+        return expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
             "Bootstrap error: extension module missing: extensions/core/2-store-timeline/missing-store.ts.",
         );
     });
@@ -107,7 +107,7 @@ describe("bootstrapExtensions", () => {
 
         writeConfig(config);
 
-        await expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
+        return expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
             "Bootstrap error: extension kind mismatch for stores: @core/memory-store is loader.",
         );
     });
@@ -131,7 +131,7 @@ describe("bootstrapExtensions", () => {
 
         writeConfig(config);
 
-        await expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
+        return expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
             "Bootstrap error: unknown dependency @core/missing for @core/keyword-matcher.",
         );
     });
@@ -164,7 +164,7 @@ describe("bootstrapExtensions", () => {
 
         writeConfig(config);
 
-        await expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
+        return expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
             "Bootstrap error: dependency cycle detected in contextBuilders.",
         );
     });
@@ -312,7 +312,7 @@ describe("bootstrapExtensions", () => {
 
         writeConfig(config);
 
-        await expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
+        return expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
             "Bootstrap error: missing required store slots: eventStore, entityStore.",
         );
     });
