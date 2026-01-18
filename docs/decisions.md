@@ -251,7 +251,10 @@ type Extension = {
   activate: (
     context: ExtensionContext,
     options?: unknown,
-  ) => Promise<ExtensionContribution | void> | ExtensionContribution | void
+  ) =>
+    | Promise<ExtensionContribution | undefined>
+    | ExtensionContribution
+    | undefined
   deactivate?: () => Promise<void> | void
 }
 
@@ -266,7 +269,7 @@ type ExtensionContribution = {
 // Bootstrap aggregates ExtensionContribution returns into the context arrays.
 
 // Helper for type inference
-const defineExtension = (ext: Extension): Extension => ext
+const defineExtension = <T extends Extension>(ext: T): T => ext
 ```
 
 **Contribution aggregation:** If `activate` returns an `ExtensionContribution`, bootstrap appends those items to the matching `context` arrays. Extensions can still mutate store slots directly. Return `void` when there is nothing to add.
