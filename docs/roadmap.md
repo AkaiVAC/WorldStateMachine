@@ -1529,23 +1529,56 @@ type LorebookConfig = {
 ```json
 {
   "stores": [
-    { "name": "@core/memory-store", "path": "extensions/core/2-store-timeline/memory-store", "status": "on" }
+    {
+      "name": "@core/memory-fact-store",
+      "path": "extensions/core/2-store-timeline/memory-fact-store/fact-store.ts",
+      "status": "on"
+    },
+    {
+      "name": "@core/memory-event-store",
+      "path": "extensions/core/2-store-timeline/memory-event-store/event-store.ts",
+      "status": "on"
+    },
+    {
+      "name": "@core/memory-entity-store",
+      "path": "extensions/core/2-store-timeline/memory-entity-store/entity-store.ts",
+      "status": "on"
+    }
   ],
   "loaders": [
-    { "name": "@core/sillytavern-loader", "path": "extensions/core/1-load-world-data/from-sillytavern", "status": "on" }
+    {
+      "name": "@core/sillytavern-loader",
+      "path": "extensions/core/1-load-world-data/from-sillytavern/sillytavern-loader.ts",
+      "status": "on"
+    }
   ],
   "validators": [
-    { "name": "@core/entity-exists", "path": "extensions/core/3-validate-consistency/entity-exists", "status": "on" }
+    {
+      "name": "@core/entity-exists-validator",
+      "path": "extensions/core/3-validate-consistency/check-entity-exists/entity-exists-rule.ts",
+      "status": "off"
+    }
   ],
   "contextBuilders": [
-    { "name": "@core/keyword-matcher", "path": "extensions/core/4-build-scene-context/keyword-matcher", "status": "off" },
-    { "name": "@core/relationship-expander", "path": "extensions/core/4-build-scene-context/relationship-expander", "status": "needs:@core/keyword-matcher" }
+    {
+      "name": "@core/keyword-matcher",
+      "path": "extensions/core/4-build-scene-context/match-keywords/keyword-matcher.ts",
+      "status": "off"
+    }
   ],
   "senders": [
-    { "name": "@core/openrouter", "path": "extensions/core/5-send-scene-context/openrouter", "status": "on" }
+    {
+      "name": "@core/openrouter",
+      "path": "extensions/core/5-send-scene-context/to-llm/openrouter-client.ts",
+      "status": "off"
+    }
   ],
   "ui": [
-    { "name": "@core/dev-chat", "path": "extensions/core/6-provide-ui/dev-chat", "status": "on" }
+    {
+      "name": "@core/dev-chat",
+      "path": "extensions/core/6-provide-ui/dev-chat/main.ts",
+      "status": "off"
+    }
   ]
 }
 ```
@@ -1554,17 +1587,18 @@ type LorebookConfig = {
 
 ```typescript
 export default defineExtension({
-  name: '@core/memory-store',
+  name: '@core/memory-fact-store',
   version: '1.0.0',
   kind: 'store',
   after: [],  // within-stage dependencies (by name)
 
   activate: (context, options) => {
     context.factStore = createMemoryFactStore()
-    context.eventStore = createMemoryEventStore()
-    context.entityStore = createMemoryEntityStore()
+    return undefined
   }
 })
+
+// Run bootstrap with: bun run start
 
 // Optional: return contributions to aggregate into collections
 // return { validators: [myValidator] }
@@ -1597,18 +1631,19 @@ type ExtensionContext = {
 #### Phase 1: Core Types and Runtime
 - ✅ Create `src/extension-system/types.ts` (config types)
 - ✅ Create `src/extension-system/config-loader.ts` (load config, validate schema)
-- 🎯 Create `src/extension-system/bootstrap.ts` (build DAG, parallel activation, validate required slots)
-- 🎯 Create `src/extension-system/config-writer.ts` (write back normalizations, dependency status)
-- 🎯 Tests for DAG building, parallel activation, config write-back
+- ✅ Create `src/extension-system/bootstrap.ts` (build DAG, parallel activation, validate required slots)
+- ✅ Create `src/extension-system/config-writer.ts` (write back normalizations, dependency status)
+- ✅ Tests for DAG building, parallel activation, config write-back
 
 #### Phase 2: Migrate Extensions
-- Update existing extensions to new format
-- Create `extensions.json`
-- Ensure all tests pass
+- ✅ Update existing extensions to new format
+- ✅ Create `extensions.json`
+- ✅ Ensure all tests pass
 
 #### Phase 3: Documentation
 - Update extension authoring guide
 - Add example extensions
+- Update core docs for extension bootstrap state
 
 ### Previous Implementation (Superseded)
 

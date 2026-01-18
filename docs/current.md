@@ -18,13 +18,17 @@ related:
 ---
 # Current Implementation State
 
-**Current milestone:** M4 complete, Extension System Redesign in progress
+**Current milestone:** M4 complete, Extension System Redesign near completion
 
-**Architecture:** Config-driven 6-stage extension pipeline with path aliases (`@core/*`, `@ext/*`)
+**Architecture:** Config-driven 6-stage extension pipeline with path aliases (`@core/*`, `@ext/*`, `@ext-system/*`)
 
-**Next:** Finish extension system bootstrap + config writer, then M5
+**Next:** Wire extension bootstrap into runtime flows and finish config writer integration usage, then M5
 
 **Run tests:** `bun test`
+
+**Run bootstrap:** `bun run start`
+
+**Last updated:** 2026-01-18
 
 ---
 
@@ -68,10 +72,10 @@ extensions.json             # Central config listing enabled extensions per stag
 
 ## What Works
 
-### Extension System (Config Loader Implemented)
+### Extension System (Bootstrap Implemented)
 **Location:** `src/extension-system/`
 
-**Status:** Config loader and validation implemented. Runtime activation next.
+**Status:** Bootstrap activation, config write-back, and contribution aggregation are implemented.
 
 **Design (2026-01-10):**
 - Config file (`extensions.json`) lists extensions per stage
@@ -80,7 +84,8 @@ extensions.json             # Central config listing enabled extensions per stag
 - Status field: `"on"`, `"off"`, or `"needs:<dependency>"`
 - Default config checked into repo; missing config fails fast with a direct error
 - System-managed config (writes back normalizations, dependency status)
-- Parallel loading via dependency DAG
+- Parallel activation within dependency-resolved waves
+- Extension contributions aggregate into context collections
 - Simple ExtensionContext as plain object (no registry)
 - Within-stage ordering via `after` field in extension definitions
 - Required slots validation (stores must be present)
@@ -110,18 +115,20 @@ extensions.json             # Central config listing enabled extensions per stag
 
 ### Scene Context Building
 **Location:** `extensions/core/4-build-scene-context/`
-- **Keyword Matcher** - Match lorebook entries by keywords
-- **Entity Matcher** - Fuzzy matching with similarity scoring
-- **Prompt Analyzer** - LLM-powered entity extraction
-- **Relationship Expander** - Graph-based context expansion
+- **Keyword Matcher** - Match lorebook entries by keywords (extension)
+- **Entity Matcher** - Fuzzy matching with similarity scoring (extension)
+- **Prompt Analyzer** - LLM-powered entity extraction (extension)
+- **Relationship Expander** - Graph-based context expansion (extension)
+- **Lorebook Loader** - Load lorebooks from directory (extension)
 
 ### LLM Integration
 **Location:** `extensions/core/5-send-scene-context/`
-- OpenRouter API client with configurable models
+- OpenRouter API client with configurable models (extension)
 - Used by validators and analyzers
 
 ### Dev Chat UI
 **Location:** `extensions/core/6-provide-ui/dev-chat/`
+- Extension entrypoint in `main.ts`
 - HTTP server with routing and session management
 - Chat interface with context injection
 - Lorebook and session management routes
@@ -143,6 +150,15 @@ extensions.json             # Central config listing enabled extensions per stag
 - ❌ **M7-M9** - Geography, maps, spatial validation
 - ❌ **M10** - Calendar system
 - ❌ **M11** - Effect propagation, scene execution
+
+### Recent Extension System Work (2026-01-18)
+- Bootstrap activation with within-stage dependency waves
+- Contribution aggregation into context collections
+- Config write-back for path normalization and needs status
+- `defineExtension` helper and new `@ext-system/*` alias
+- Core extensions migrated to default export format
+- `extensions.json` added with default statuses
+- Bootstrap runner + `bun run start` entrypoint
 
 **See [roadmap.md](roadmap.md) for milestone details.**
 

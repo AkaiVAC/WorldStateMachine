@@ -77,12 +77,12 @@ The response invented:
 
 | Component | Status | Location |
 |-----------|--------|----------|
-| Keyword Matching | Implemented, integrated | `src/retrieval/keyword-matcher.ts` |
-| LLM Entity Extraction | Implemented, integrated | `src/analysis/prompt-analyzer.ts` |
-| Fuzzy Entity Matching | Implemented, integrated | `src/retrieval/entity-matcher.ts` |
-| Chat Integration | Implemented | `src/ui/routes/chat.ts` |
-| Graph Traversal | Designed, not implemented | `ARCHITECTURE.md` |
-| Token Budget | Designed, not implemented | `ARCHITECTURE.md` |
+| Keyword Matching | Implemented (extension) | `extensions/core/4-build-scene-context/match-keywords/keyword-matcher.ts` |
+| LLM Entity Extraction | Implemented (extension) | `extensions/core/4-build-scene-context/analyze-prompt/prompt-analyzer.ts` |
+| Fuzzy Entity Matching | Implemented (extension) | `extensions/core/4-build-scene-context/match-entities/entity-matcher.ts` |
+| Chat Integration | Implemented | `extensions/core/6-provide-ui/dev-chat/routes/chat.ts` |
+| Graph Traversal | Implemented (extension) | `extensions/core/2-store-timeline/memory-relationship-store/graph-traversal.ts` |
+| Token Budget | Designed, not implemented | `docs/architecture/core/11-query-pipeline.md` |
 
 ---
 
@@ -208,8 +208,8 @@ Drakemoor, Verdania, Aetheria, Solmere, Pyrathi
 ### Files Changed
 
 - `src/example/Excelsia/relationships.ts` - Hardcoded relationships
-- `src/ui/routes/lorebook.ts` - Added `getRelationshipStore()`, `getWorldSummary()`
-- `src/ui/routes/chat.ts` - Integrated relationship retrieval and world summary
+- `extensions/core/6-provide-ui/dev-chat/routes/lorebook.ts` - Added `getRelationshipStore()`, `getWorldSummary()`
+- `extensions/core/6-provide-ui/dev-chat/routes/chat.ts` - Integrated relationship retrieval and world summary
 
 ### Testing Needed
 

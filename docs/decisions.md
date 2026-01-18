@@ -231,7 +231,7 @@ type ExtensionContext = {
 
 ### Extension Definition (2026-01-10)
 
-**Decision:** Extensions export a simple object with metadata and an `activate` function.
+**Decision:** Extensions export a simple object with metadata and an `activate` function (using `defineExtension`).
 
 **Why:**
 - **Single file:** Everything in one place
@@ -280,14 +280,13 @@ const defineExtension = <T extends Extension>(ext: T): T => ext
 ```typescript
 // extensions/memory-store/index.ts
 export default defineExtension({
-  name: '@core/memory-store',
+  name: '@core/memory-fact-store',
   version: '1.0.0',
   kind: 'store',
 
   activate: (context) => {
     context.factStore = createMemoryFactStore()
-    context.eventStore = createMemoryEventStore()
-    context.entityStore = createMemoryEntityStore()
+    return undefined
   }
 })
 ```

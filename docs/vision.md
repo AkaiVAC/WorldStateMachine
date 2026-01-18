@@ -18,7 +18,7 @@ related:
 ---
 # Vision: World State Constraint Engine
 
-**Last updated:** 2026-01-01
+**Last updated:** 2026-01-18
 
 ## The Goal
 

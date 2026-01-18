@@ -6,7 +6,7 @@ The docs are organized by core architecture, future design, reference materials,
 
 ## Getting Started
 - [vision.md](vision.md) - Full end-state vision for the constraint engine and its core pillars.
-- [current.md](current.md) - Current implementation status and what is working today.
+- [current.md](current.md) - Current implementation status and what is working today (extension bootstrap now active).
 - [roadmap.md](roadmap.md) - Milestone-by-milestone path from M1 through M11.
 - [decisions.md](decisions.md) - Design rationale and key architectural choices.
 
