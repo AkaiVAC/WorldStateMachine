@@ -1,105 +1,22 @@
-import { existsSync } from "node:fs";
-import { join } from "node:path";
-import { pathToFileURL } from "node:url";
+import {
+    getActivationEntries,
+    shouldActivate,
+} from "./bootstrap/activation-entry";
+import { buildActivationOrder } from "./bootstrap/build-activation-order";
+import { registerStagedExtension } from "./bootstrap/collect-staged-data";
+import { createEmptyContext } from "./bootstrap/create-empty-context";
+import { loadExtensionModule } from "./bootstrap/load-extension-module";
+import { validateExtensionKind } from "./bootstrap/validate-extension-kind";
+import { validateRequiredSlots } from "./bootstrap/validate-required-slots";
 import { loadConfig } from "./config-loader";
 import { getEntriesWithStage } from "./config-loader/get-entries-with-stage";
+import { writeConfig } from "./config-writer";
 import type {
     Extension,
     ExtensionContext,
     ExtensionEntry,
-    ExtensionKind,
     Stage,
 } from "./types";
-
-const buildAfterLookup = (stage: Stage, extensions: Extension[]) => {
-    const names = new Set(extensions.map((extension) => extension.name));
-    const remaining = new Map(
-        extensions.map((extension) => [
-            extension.name,
-            new Set(extension.after ?? []),
-        ]),
-    );
-
-    for (const [name, dependencies] of remaining) {
-        for (const dependency of dependencies) {
-            if (!names.has(dependency)) {
-                throw new Error(
-                    `Bootstrap error: unknown dependency ${dependency} for ${name}.`,
-                );
-            }
-        }
-    }
-
-    const resolved = new Set<string>();
-    while (resolved.size < remaining.size) {
-        const ready = [...remaining.entries()]
-            .filter(([name, deps]) => !resolved.has(name) && deps.size === 0)
-            .map(([name]) => name);
-
-        if (ready.length === 0) {
-            throw new Error(
-                `Bootstrap error: dependency cycle detected in ${stage}.`,
-            );
-        }
-
-        for (const name of ready) {
-            resolved.add(name);
-            for (const deps of remaining.values()) {
-                deps.delete(name);
-            }
-        }
-    }
-};
-
-const stageKinds: Record<Stage, ExtensionKind> = {
-    stores: "store",
-    loaders: "loader",
-    validators: "validator",
-    contextBuilders: "contextBuilder",
-    senders: "sender",
-    ui: "ui",
-};
-
-const createEmptyContext = (): ExtensionContext => ({
-    loaders: [],
-    validators: [],
-    contextBuilders: [],
-    senders: [],
-    uiComponents: [],
-});
-
-const loadExtensionModule = async (
-    rootDir: string,
-    entry: ExtensionEntry,
-): Promise<Extension> => {
-    const modulePath = join(rootDir, entry.path);
-    if (!existsSync(modulePath)) {
-        throw new Error(
-            `Bootstrap error: extension module missing: ${entry.path}.`,
-        );
-    }
-
-    const moduleUrl = pathToFileURL(modulePath).href;
-    const module = (await import(moduleUrl)) as { default?: Extension };
-    if (!module.default) {
-        throw new Error(
-            `Bootstrap error: extension module missing default export: ${entry.path}.`,
-        );
-    }
-
-    return module.default;
-};
-
-const shouldActivate = (entry: ExtensionEntry) => entry.status === "on";
-
-const validateExtensionKind = (stage: Stage, extension: Extension) => {
-    const expectedKind = stageKinds[stage];
-    if (extension.kind !== expectedKind) {
-        throw new Error(
-            `Bootstrap error: extension kind mismatch for ${stage}: ${extension.name} is ${extension.kind}.`,
-        );
-    }
-};
 
 export const bootstrapExtensions = async (
     rootDir: string,
@@ -110,33 +27,63 @@ export const bootstrapExtensions = async (
 
     const stagedExtensions = new Map<Stage, Extension[]>();
     const stagedEntries = new Map<Stage, ExtensionEntry[]>();
+    const dependencies: Record<string, string[]> = {};
 
     for (const { stage, entry } of entries) {
         const extensionEntry = entry as ExtensionEntry;
         const extension = await loadExtensionModule(rootDir, extensionEntry);
         validateExtensionKind(stage, extension);
-        const existingExtensions = stagedExtensions.get(stage) ?? [];
-        existingExtensions.push(extension);
-        stagedExtensions.set(stage, existingExtensions);
+        registerStagedExtension(
+            stagedExtensions,
+            stagedEntries,
+            stage,
+            extension,
+            extensionEntry,
+        );
+        dependencies[extension.name] = extension.after ?? [];
+    }
+
+    const normalizedConfig = writeConfig(rootDir, config, dependencies);
+    const normalizedEntries = getEntriesWithStage(normalizedConfig);
+    stagedEntries.clear();
+
+    for (const { stage, entry } of normalizedEntries) {
+        const extensionEntry = entry as ExtensionEntry;
         const existingEntries = stagedEntries.get(stage) ?? [];
         existingEntries.push(extensionEntry);
         stagedEntries.set(stage, existingEntries);
     }
 
+    const activationOrder = new Map<Stage, string[]>();
+
     for (const [stage, extensions] of stagedExtensions.entries()) {
-        buildAfterLookup(stage, extensions);
+        activationOrder.set(stage, buildActivationOrder(stage, extensions));
     }
 
     for (const [stage, extensions] of stagedExtensions.entries()) {
-        const entriesForStage = stagedEntries.get(stage) ?? [];
-        for (const [index, extension] of extensions.entries()) {
-            const entry = entriesForStage[index];
-            if (!entry || !shouldActivate(entry)) {
+        const entriesForStage = getActivationEntries(
+            stagedEntries.get(stage) ?? [],
+            dependencies,
+        );
+        const order = activationOrder.get(stage) ?? [];
+        const extensionByName = new Map(
+            extensions.map((extension) => [extension.name, extension]),
+        );
+        const entryByName = new Map(
+            entriesForStage.map((entry) => [entry.name, entry]),
+        );
+
+        for (const name of order) {
+            const entry = entryByName.get(name);
+            const extension = extensionByName.get(name);
+            if (!entry || !extension || !shouldActivate(entry)) {
                 continue;
             }
             await extension.activate(context, entry.options);
         }
     }
+
+    validateRequiredSlots(context);
 
     return context;
 };
