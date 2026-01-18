@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+
 import { bootstrapExtensions } from "./bootstrap";
 import type { ExtensionsConfig } from "./types";
 
@@ -30,6 +31,12 @@ const writeConfig = (config: ExtensionsConfig) => {
     );
 };
 
+const writeExtensionModule = (relativePath: string, contents: string) => {
+    const fullPath = join(TEST_DIR, relativePath);
+    mkdirSync(dirname(fullPath), { recursive: true });
+    writeFileSync(fullPath, contents);
+};
+
 describe("bootstrapExtensions", () => {
     beforeEach(createTestDir);
     afterEach(cleanupTestDir);
@@ -48,12 +55,35 @@ describe("bootstrapExtensions", () => {
 
         writeConfig(config);
 
-        expect(() => bootstrapExtensions(TEST_DIR)).toThrow(
+        expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
             "Bootstrap error: extension module missing: extensions/core/2-store-timeline/missing-store.ts.",
         );
     });
 
-    test.todo("fails fast on kind mismatch for a stage", () => {});
+    test("fails fast on kind mismatch for a stage", () => {
+        writeExtensionModule(
+            "extensions/core/2-store-timeline/memory-store.ts",
+            "export default { name: '@core/memory-store', version: '1.0.0', kind: 'loader', activate: () => {} };",
+        );
+
+        const config = {
+            ...createBaseConfig(),
+            stores: [
+                {
+                    name: "@core/memory-store",
+                    path: "extensions/core/2-store-timeline/memory-store.ts",
+                    status: "on",
+                },
+            ],
+        } satisfies ExtensionsConfig;
+
+        writeConfig(config);
+
+        expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
+            "Bootstrap error: extension kind mismatch for stores: @core/memory-store is loader.",
+        );
+    });
+
     test.todo("fails fast on unknown after dependency", () => {});
     test.todo("fails fast on dependency cycle", () => {});
     test.todo("activates only entries with status on", () => {});

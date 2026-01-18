@@ -24,6 +24,8 @@ export type ExtensionKind =
     | "sender"
     | "ui";
 
+export type Stage = keyof ExtensionsConfig;
+
 export type ExtensionContext = {
     factStore?: unknown;
     eventStore?: unknown;
@@ -34,6 +36,18 @@ export type ExtensionContext = {
     contextBuilders: unknown[];
     senders: unknown[];
     uiComponents: unknown[];
+};
+
+export type Extension = {
+    name: string;
+    version: string;
+    kind: ExtensionKind;
+    after?: string[];
+    activate: (
+        context: ExtensionContext,
+        options?: unknown,
+    ) => Promise<void> | void;
+    deactivate?: () => Promise<void> | void;
 };
 
 export type EntryWithStage<T> = {
