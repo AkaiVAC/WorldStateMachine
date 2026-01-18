@@ -1,6 +1,9 @@
 import type { PromptAnalyzer } from "@ext/core/4-build-scene-context/analyze-prompt/prompt-analyzer";
 import type { EntityStore } from "@ext/core/2-store-timeline/memory-entity-store/entity-store";
 import type { Rule, Violation } from "@ext/core/3-validate-consistency/validation-framework/validator";
+import { createValidator } from "@ext/core/3-validate-consistency/validation-framework/validator";
+import { defineExtension } from "@ext-system/define-extension";
+
 
 const isFuzzyMatch = (term: string, candidate: string): boolean => {
 	if (candidate.includes(term)) return true;
@@ -67,3 +70,19 @@ export const createEntityExistsRule = (
 		},
 	};
 };
+
+export type EntityExistsValidatorOptions = EntityExistsRuleOptions;
+
+export const createEntityExistsValidator = (
+	options: EntityExistsValidatorOptions,
+) => createValidator([createEntityExistsRule(options)]);
+
+export default defineExtension({
+	name: "@core/entity-exists-validator",
+	version: "1.0.0",
+	kind: "validator",
+	activate: () => ({
+		validators: [createEntityExistsValidator],
+	}),
+});
+

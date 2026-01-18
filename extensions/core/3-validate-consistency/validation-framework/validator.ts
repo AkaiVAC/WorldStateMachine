@@ -1,3 +1,5 @@
+import { defineExtension } from "@ext-system/define-extension";
+
 export type Violation = {
 	type: string;
 	term: string;
@@ -9,6 +11,10 @@ export type Rule = {
 	check: (prompt: string) => Promise<Violation[]>;
 };
 
+export type Validator = {
+	validate: (prompt: string) => Promise<Violation[]>;
+};
+
 export const validate = async (
 	prompt: string,
 	rules: Rule[],
@@ -16,3 +22,17 @@ export const validate = async (
 	const results = await Promise.all(rules.map((rule) => rule.check(prompt)));
 	return results.flat();
 };
+
+export const createValidator = (rules: Rule[]): Validator => ({
+	validate: (prompt) => validate(prompt, rules),
+});
+
+export default defineExtension({
+	name: "@core/validation-framework",
+	version: "1.0.0",
+	kind: "validator",
+	activate: () => ({
+		validators: [createValidator([])],
+	}),
+});
+
