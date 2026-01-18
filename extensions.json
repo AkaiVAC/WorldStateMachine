@@ -1,0 +1,89 @@
+{
+    "stores": [
+        {
+            "name": "@core/memory-fact-store",
+            "path": "extensions/core/2-store-timeline/memory-fact-store/fact-store.ts",
+            "status": "on"
+        },
+        {
+            "name": "@core/memory-event-store",
+            "path": "extensions/core/2-store-timeline/memory-event-store/event-store.ts",
+            "status": "on"
+        },
+        {
+            "name": "@core/memory-entity-store",
+            "path": "extensions/core/2-store-timeline/memory-entity-store/entity-store.ts",
+            "status": "on"
+        },
+        {
+            "name": "@core/memory-relationship-store",
+            "path": "extensions/core/2-store-timeline/memory-relationship-store/relationship-store.ts",
+            "status": "on"
+        }
+    ],
+    "loaders": [
+        {
+            "name": "@core/sillytavern-loader",
+            "path": "extensions/core/1-load-world-data/from-sillytavern/sillytavern-loader.ts",
+            "status": "on"
+        }
+    ],
+    "validators": [
+        {
+            "name": "@core/validation-framework",
+            "path": "extensions/core/3-validate-consistency/validation-framework/validator.ts",
+            "status": "off"
+        },
+        {
+            "name": "@core/entity-exists-validator",
+            "path": "extensions/core/3-validate-consistency/check-entity-exists/entity-exists-rule.ts",
+            "status": "off"
+        },
+        {
+            "name": "@core/world-boundary-validator",
+            "path": "extensions/core/3-validate-consistency/check-world-boundary/world-boundary-rule.ts",
+            "status": "off"
+        }
+    ],
+    "contextBuilders": [
+        {
+            "name": "@core/keyword-matcher",
+            "path": "extensions/core/4-build-scene-context/match-keywords/keyword-matcher.ts",
+            "status": "off"
+        },
+        {
+            "name": "@core/entity-matcher",
+            "path": "extensions/core/4-build-scene-context/match-entities/entity-matcher.ts",
+            "status": "off"
+        },
+        {
+            "name": "@core/prompt-analyzer",
+            "path": "extensions/core/4-build-scene-context/analyze-prompt/prompt-analyzer.ts",
+            "status": "off"
+        },
+        {
+            "name": "@core/relationship-retrieval",
+            "path": "extensions/core/4-build-scene-context/expand-relationships/relationship-retrieval.ts",
+            "status": "off"
+        },
+        {
+            "name": "@core/lorebook-loader",
+            "path": "extensions/core/4-build-scene-context/lorebook-loader.ts",
+            "status": "off"
+        }
+    ],
+    "senders": [
+        {
+            "name": "@core/openrouter",
+            "path": "extensions/core/5-send-scene-context/to-llm/openrouter-client.ts",
+            "status": "off"
+        }
+    ],
+    "ui": [
+        {
+            "name": "@core/dev-chat",
+            "path": "extensions/core/6-provide-ui/dev-chat/main.ts",
+            "status": "off"
+        }
+    ]
+}
