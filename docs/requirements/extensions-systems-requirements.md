@@ -4,7 +4,7 @@ status: "requirements"
 keywords:
   - "extension system requirements"
   - "config-driven extensions"
-  - "activation runtime"
+  - "activation bootstrap"
   - "dependency handling"
   - "extension context"
   - "stage pipeline"
@@ -27,46 +27,59 @@ related:
 ## Inputs
 - `extensions.json` at the project root.
 - Extension modules referenced by config paths.
-- Extension exports with `name`, `kind`, `activate`, and optional `after`.
+- Extension paths must resolve to module files with default exports.
+- Extension exports with `name`, `kind`, `version`, `activate`, optional `after`, and optional `deactivate`.
 
 ## Outputs
 - Activated ExtensionContext with required store slots populated and collections filled.
-- Updated `extensions.json` reflecting normalized paths and dependency status changes.
+- Updated `extensions.json` reflecting normalized paths and dependency status changes, even when bootstrap fails.
 
-## Runtime Activation
+## Bootstrap Activation
 ### Stage execution
 - Execute stages strictly in order: stores → loaders → validators → contextBuilders → senders → ui.
+- Build the within-stage dependency graph for all entries before activating any extension.
+- Activate only entries with `status: "on"`.
 
 ### Within-stage ordering
 - Primary order matches config list order.
 - `after` dependencies override ordering with a within-stage DAG.
-- Dependency cycles or unknown dependencies must surface as runtime errors.
+- Dependency cycles or unknown dependencies must surface as bootstrap errors.
+- Fail fast on the first ordering error.
 
 ### Extension kind validation
 - Extension `kind` must match the stage it appears in.
-- Mismatches must surface as runtime errors.
+- Mismatches must surface as bootstrap errors.
+- Fail fast on the first kind mismatch.
 
 ### Parallelization
 - Extensions within a stage may be activated in dependency-resolved waves.
 - Each wave must complete before the next wave begins.
+- Shared context mutation depends on the DAG order within the wave plan.
 
 ## Config Writer
 ### Path normalization
 - Normalize all config paths to forward slashes.
+- Write back normalization even when bootstrap fails.
 
 ### Dependency status updates
 - If an extension depends on a disabled dependency, set status to `needs:<dep>` or `needs:depA,depB`.
 - If dependencies are restored, reset status to `on` unless it was explicitly `off`.
+- Write back dependency status updates even when bootstrap fails.
 
 ## Required Store Slots
 - `factStore`, `eventStore`, and `entityStore` must be set after activation.
-- Missing required slots must surface as runtime errors.
+- Missing required slots must surface as bootstrap errors.
 
 ## Error Handling
 - Missing config must fail fast with a direct error from the loader.
 - Invalid extension path or missing entry point must surface as errors.
 - Dependency cycles or unknown `after` targets must surface as errors.
 - Stage and kind mismatches must surface as errors.
+- Fail fast on the first bootstrap error.
+
+## Bootstrap Contract
+- `path` points to a module file (no folder inference).
+- Extension modules must default-export the extension object.
 
 ## Testing
 - Tests must be comprehensive and focus on critical behaviors only.

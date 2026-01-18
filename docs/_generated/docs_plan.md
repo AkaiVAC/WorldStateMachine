@@ -57,7 +57,7 @@ keywords:
   - "extension system redesign"
   - "config-driven extensions"
   - "milestone M4 complete"
-  - "runtime activation next"
+  - "bootstrap activation next"
   - "timeline stores"
 related:
   - "./roadmap.md"

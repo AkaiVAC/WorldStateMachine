@@ -125,7 +125,7 @@ Extensions within a stage are loaded in parallel waves based on dependency DAG:
 **Alternative considered:** Auto-discovery (scan `extensions/` directory)
 - Rejected: Magic behavior, error-prone (random folders get loaded), harder to debug
 
-**Alternative considered:** `runtime.use()` calls in code
+**Alternative considered:** `bootstrap.use()` calls in code
 - Rejected: Requires code changes to add extensions, not accessible to non-technical users
 
 **Alternative considered:** Name/ref-based resolution instead of paths
@@ -205,7 +205,7 @@ type ExtensionContext = {
 
 ### Required Slots Validation (2026-01-10)
 
-**Decision:** The runtime validates that required slots are filled after all extensions activate.
+**Decision:** The bootstrap validates that required slots are filled after all extensions activate.
 
 **Why:**
 - **Fail fast:** Better to error on startup than crash later
@@ -256,7 +256,7 @@ type Extension = {
 const defineExtension = (ext: Extension): Extension => ext
 ```
 
-**Kind validation:** If extension's `kind` doesn't match the stage it's placed in (config), runtime errors.
+**Kind validation:** If extension's `kind` doesn't match the stage it's placed in (config), bootstrap errors.
 
 **Example:**
 ```typescript

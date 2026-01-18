@@ -7,7 +7,7 @@ keywords:
   - "extension system redesign"
   - "config-driven extensions"
   - "milestone M4 complete"
-  - "runtime activation next"
+  - "bootstrap activation next"
   - "timeline stores"
 related:
   - "./roadmap.md"
@@ -22,7 +22,7 @@ related:
 
 **Architecture:** Config-driven 6-stage extension pipeline with path aliases (`@core/*`, `@ext/*`)
 
-**Next:** Finish extension system runtime + config writer, then M5
+**Next:** Finish extension system bootstrap + config writer, then M5
 
 **Run tests:** `bun test`
 
@@ -39,7 +39,7 @@ src/
     ├── types.ts          # Config and extension types
     ├── config-loader.ts  # Load and validate extensions.json
     ├── config-loader/    # Validation helpers
-    └── runtime.ts        # Activate in order, validate required slots
+    └── bootstrap.ts      # Activate in order, validate required slots
 
 extensions/
 └── core/                 # Standard implementation (split by stage)
