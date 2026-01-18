@@ -1,4 +1,7 @@
+import { defineExtension } from "@ext-system/define-extension";
+
 type AskFn = (prompt: string) => Promise<string>;
+
 
 type PromptAnalyzerOptions = {
 	askFn: AskFn;
@@ -64,3 +67,13 @@ export const createPromptAnalyzer = (
 		},
 	};
 };
+
+export default defineExtension({
+	name: "@core/prompt-analyzer",
+	version: "1.0.0",
+	kind: "contextBuilder",
+	activate: () => ({
+		contextBuilders: [createPromptAnalyzer],
+	}),
+});
+

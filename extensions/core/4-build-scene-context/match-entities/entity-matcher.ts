@@ -1,4 +1,6 @@
 import type { LorebookEntry } from "../lorebook-entry";
+import { defineExtension } from "@ext-system/define-extension";
+
 
 export type EntityMatch = {
 	entry: LorebookEntry;
@@ -61,3 +63,13 @@ export const matchEntitiesFuzzy = (
 
 	return matches;
 };
+
+export default defineExtension({
+	name: "@core/entity-matcher",
+	version: "1.0.0",
+	kind: "contextBuilder",
+	activate: () => ({
+		contextBuilders: [matchEntitiesFuzzy],
+	}),
+});
+

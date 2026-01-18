@@ -1,4 +1,6 @@
 import type { LorebookEntry } from "./lorebook-entry";
+import { defineExtension } from "@ext-system/define-extension";
+
 
 type RawLorebookEntry = {
 	uid?: number;
@@ -60,3 +62,13 @@ export const loadLorebooksFromDir = async (
 
 	return allEntries;
 };
+
+export default defineExtension({
+	name: "@core/lorebook-loader",
+	version: "1.0.0",
+	kind: "contextBuilder",
+	activate: () => ({
+		contextBuilders: [loadLorebooksFromDir],
+	}),
+});
+

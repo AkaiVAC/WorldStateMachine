@@ -1,4 +1,6 @@
 import type { LorebookEntry } from "../lorebook-entry";
+import { defineExtension } from "@ext-system/define-extension";
+
 
 export type MatchResult = {
 	entry: LorebookEntry;
@@ -34,6 +36,16 @@ export const matchEntries = (
 
 	return results;
 };
+
+export default defineExtension({
+	name: "@core/keyword-matcher",
+	version: "1.0.0",
+	kind: "contextBuilder",
+	activate: () => ({
+		contextBuilders: [matchEntries],
+	}),
+});
+
 
 const escapeRegex = (str: string): string => {
 	return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

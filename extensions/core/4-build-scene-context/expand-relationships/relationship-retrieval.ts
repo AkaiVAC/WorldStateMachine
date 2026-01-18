@@ -1,6 +1,8 @@
 import type { GraphTraversal } from "@ext/core/2-store-timeline/memory-relationship-store/graph-traversal";
 import type { RelationshipStore } from "@ext/core/2-store-timeline/memory-relationship-store/relationship-store";
 import type { LorebookEntry } from "@ext/core/4-build-scene-context/lorebook-entry";
+import { defineExtension } from "@ext-system/define-extension";
+
 
 export type ExpansionOptions = {
 	maxDepth?: number;
@@ -61,3 +63,13 @@ export const createRelationshipRetrieval = (
 		expandViaRelationships,
 	};
 };
+
+export default defineExtension({
+	name: "@core/relationship-retrieval",
+	version: "1.0.0",
+	kind: "contextBuilder",
+	activate: () => ({
+		contextBuilders: [createRelationshipRetrieval],
+	}),
+});
+
