@@ -1,5 +1,6 @@
 import type { Fact } from "@core/fact";
 import type { Event, Visibility } from "@core/event";
+import { defineExtension } from "@ext-system/define-extension";
 
 export const getFactsFromEvent = (event: Event): Fact[] => {
 	if (!event.outcomes) {
@@ -40,3 +41,14 @@ export const createEventStore = (): EventStore => {
 			events.filter((e) => e.visibility === visibility),
 	};
 };
+
+export default defineExtension({
+	name: "@core/memory-event-store",
+	version: "1.0.0",
+	kind: "store",
+	activate: (context) => {
+		context.eventStore = createEventStore();
+		return undefined;
+	},
+});
+

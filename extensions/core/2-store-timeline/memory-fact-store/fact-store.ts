@@ -1,4 +1,5 @@
 import type { Fact } from "@core/fact";
+import { defineExtension } from "@ext-system/define-extension";
 
 export type FactStore = {
 	add: (fact: Fact) => void;
@@ -30,3 +31,14 @@ export const createFactStore = (): FactStore => {
 		},
 	};
 };
+
+export default defineExtension({
+	name: "@core/memory-fact-store",
+	version: "1.0.0",
+	kind: "store",
+	activate: (context) => {
+		context.factStore = createFactStore();
+		return undefined;
+	},
+});
+

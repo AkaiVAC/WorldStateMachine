@@ -1,4 +1,6 @@
 import type { Relationship } from "@core/relationship";
+import { defineExtension } from "@ext-system/define-extension";
+
 
 export type RelationshipStore = {
 	add: (relationship: Relationship) => void;
@@ -33,3 +35,14 @@ export const createRelationshipStore = (): RelationshipStore => {
 		getAll: () => [...relationships],
 	};
 };
+
+export default defineExtension({
+	name: "@core/memory-relationship-store",
+	version: "1.0.0",
+	kind: "store",
+	activate: (context) => {
+		context.relationshipStore = createRelationshipStore();
+		return undefined;
+	},
+});
+

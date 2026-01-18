@@ -18,7 +18,8 @@
         "noUnusedParameters": true,
         "paths": {
             "@core/*": ["./src/core-types/*"],
-            "@ext/*": ["./extensions/*"]
+            "@ext/*": ["./extensions/*"],
+            "@ext-system/*": ["./src/extension-system/*"]
         }
     },
     "include": ["src", "extensions"]

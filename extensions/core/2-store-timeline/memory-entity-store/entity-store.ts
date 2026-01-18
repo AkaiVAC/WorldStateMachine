@@ -1,4 +1,5 @@
 import type { Entity } from "@core/entity";
+import { defineExtension } from "@ext-system/define-extension";
 
 export type EntityStore = {
 	add: (entity: Entity) => void;
@@ -39,3 +40,14 @@ export const createEntityStore = (): EntityStore => {
 		},
 	};
 };
+
+export default defineExtension({
+	name: "@core/memory-entity-store",
+	version: "1.0.0",
+	kind: "store",
+	activate: (context) => {
+		context.entityStore = createEntityStore();
+		return undefined;
+	},
+});
+
