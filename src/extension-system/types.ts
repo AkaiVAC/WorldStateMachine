@@ -54,7 +54,10 @@ export type Extension = {
     activate: (
         context: ExtensionContext,
         options?: unknown,
-    ) => Promise<ExtensionContribution | void> | ExtensionContribution | void;
+    ) =>
+        | Promise<ExtensionContribution | undefined>
+        | ExtensionContribution
+        | undefined;
     deactivate?: () => Promise<void> | void;
 };
 
