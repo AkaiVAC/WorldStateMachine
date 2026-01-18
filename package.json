@@ -8,6 +8,7 @@
         "typecheck": "bun run tsc --noEmit",
         "lint": "biome lint .",
         "format": "biome format --write .",
+        "bootstrap": "bun run src/extension-system/bootstrap-runner.ts",
         "ui": "bun run src/ui/main.ts",
         "prepare": "husky"
     },

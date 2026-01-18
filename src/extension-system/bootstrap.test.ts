@@ -61,14 +61,14 @@ const writeActivationExtension = (
         after.length > 0 ? `after: ${JSON.stringify(after)},` : "";
     writeExtensionModule(
         `extensions/core/4-build-scene-context/${name}.ts`,
-        `const activationKey = "${activationKey}"; export default { name: "${name}", version: "1.0.0", kind: "contextBuilder", ${afterList} activate: () => { const log = globalThis[activationKey] ?? []; log.push("${status}"); globalThis[activationKey] = log; } };`,
+        `const activationKey = "${activationKey}"; export default { name: "${name}", version: "1.0.0", kind: "contextBuilder", ${afterList} activate: () => { const log = globalThis[activationKey] ?? []; log.push("${status}"); globalThis[activationKey] = log; return undefined; } };`,
     );
 };
 
 const writeDelayedActivationExtension = (name: string, delayMs: number) => {
     writeExtensionModule(
         `extensions/core/4-build-scene-context/${name}.ts`,
-        `const activationKey = "${activationKey}"; export default { name: "${name}", version: "1.0.0", kind: "contextBuilder", activate: async () => { const log = globalThis[activationKey] ?? []; log.push("start-${name}"); globalThis[activationKey] = log; await new Promise((resolve) => setTimeout(resolve, ${delayMs})); log.push("finish-${name}"); } };`,
+        `const activationKey = "${activationKey}"; export default { name: "${name}", version: "1.0.0", kind: "contextBuilder", activate: async () => { const log = globalThis[activationKey] ?? []; log.push("start-${name}"); globalThis[activationKey] = log; await new Promise((resolve) => setTimeout(resolve, ${delayMs})); log.push("finish-${name}"); return undefined; } };`,
     );
 };
 
@@ -90,7 +90,7 @@ describe("bootstrapExtensions", () => {
         );
         writeExtensionModule(
             "extensions/core/2-store-timeline/required-store.ts",
-            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; } };",
+            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; return undefined; } };",
         );
 
         const config = {
@@ -125,7 +125,7 @@ describe("bootstrapExtensions", () => {
         );
         writeExtensionModule(
             "extensions/core/2-store-timeline/required-store.ts",
-            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; } };",
+            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; return undefined; } };",
         );
 
         const config = {
@@ -161,7 +161,7 @@ describe("bootstrapExtensions", () => {
         );
         writeExtensionModule(
             "extensions/core/2-store-timeline/required-store.ts",
-            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; } };",
+            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; return undefined; } };",
         );
 
         const config = {
@@ -197,7 +197,7 @@ describe("bootstrapExtensions", () => {
         );
         writeExtensionModule(
             "extensions/core/2-store-timeline/required-store.ts",
-            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; } };",
+            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; return undefined; } };",
         );
 
         const config = {
@@ -247,7 +247,7 @@ describe("bootstrapExtensions", () => {
     test("fails fast on kind mismatch for a stage", async () => {
         writeExtensionModule(
             "extensions/core/2-store-timeline/memory-store.ts",
-            "export default { name: '@core/memory-store', version: '1.0.0', kind: 'loader', activate: () => {} };",
+            "export default { name: '@core/memory-store', version: '1.0.0', kind: 'loader', activate: () => undefined };",
         );
 
         const config = {
@@ -271,7 +271,7 @@ describe("bootstrapExtensions", () => {
     test("fails fast on unknown after dependency", async () => {
         writeExtensionModule(
             "extensions/core/4-build-scene-context/keyword-matcher.ts",
-            "export default { name: '@core/keyword-matcher', version: '1.0.0', kind: 'contextBuilder', after: ['@core/missing'], activate: () => {} };",
+            "export default { name: '@core/keyword-matcher', version: '1.0.0', kind: 'contextBuilder', after: ['@core/missing'], activate: () => undefined };",
         );
 
         const config = {
@@ -295,11 +295,11 @@ describe("bootstrapExtensions", () => {
     test("fails fast on dependency cycle", async () => {
         writeExtensionModule(
             "extensions/core/4-build-scene-context/cycle-alpha.ts",
-            "export default { name: '@core/cycle-alpha', version: '1.0.0', kind: 'contextBuilder', after: ['@core/cycle-beta'], activate: () => {} };",
+            "export default { name: '@core/cycle-alpha', version: '1.0.0', kind: 'contextBuilder', after: ['@core/cycle-beta'], activate: () => undefined };",
         );
         writeExtensionModule(
             "extensions/core/4-build-scene-context/cycle-beta.ts",
-            "export default { name: '@core/cycle-beta', version: '1.0.0', kind: 'contextBuilder', after: ['@core/cycle-alpha'], activate: () => {} };",
+            "export default { name: '@core/cycle-beta', version: '1.0.0', kind: 'contextBuilder', after: ['@core/cycle-alpha'], activate: () => undefined };",
         );
 
         const config = {
@@ -330,7 +330,7 @@ describe("bootstrapExtensions", () => {
         writeActivationExtension("beta", "beta");
         writeExtensionModule(
             "extensions/core/2-store-timeline/required-store.ts",
-            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; } };",
+            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; return undefined; } };",
         );
 
         const config = {
@@ -367,7 +367,7 @@ describe("bootstrapExtensions", () => {
         writeActivationExtension("normalize", "normalize");
         writeExtensionModule(
             "extensions/core/2-store-timeline/required-store.ts",
-            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; } };",
+            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; return undefined; } };",
         );
 
         const config = {
@@ -406,7 +406,7 @@ describe("bootstrapExtensions", () => {
         writeActivationExtension("needs-beta", "needs-beta", ["needs-alpha"]);
         writeExtensionModule(
             "extensions/core/2-store-timeline/required-store.ts",
-            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; } };",
+            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; return undefined; } };",
         );
 
         const config = {
@@ -452,7 +452,7 @@ describe("bootstrapExtensions", () => {
     test("validates required store slots after activation", async () => {
         writeExtensionModule(
             "extensions/core/2-store-timeline/partial-store.ts",
-            "export default { name: '@core/partial-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; } };",
+            "export default { name: '@core/partial-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; return undefined; } };",
         );
 
         const config = {
@@ -479,7 +479,7 @@ describe("bootstrapExtensions", () => {
         writeDelayedActivationExtension("wave-gamma", 10);
         writeExtensionModule(
             "extensions/core/2-store-timeline/required-store.ts",
-            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; } };",
+            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: (context) => { context.factStore = { ok: true }; context.eventStore = { ok: true }; context.entityStore = { ok: true }; return undefined; } };",
         );
 
         const config = {
