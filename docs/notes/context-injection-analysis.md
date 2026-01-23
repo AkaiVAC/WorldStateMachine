@@ -176,7 +176,7 @@ Drakemoor, Verdania, Aetheria, Solmere, Pyrathi
 
 ---
 
-## Update: Graph Traversal + World Summary Integrated
+## Update: Graph Traversal Integrated (World Summary Pending)
 
 ### Date: 2025-12-29
 
@@ -189,14 +189,13 @@ Drakemoor, Verdania, Aetheria, Solmere, Pyrathi
    - Geographic relationships: borders
    - Wired `createRelationshipRetrieval` into chat handler
 
-2. **World Summary Context**
-   - Added explicit kingdom list to system prompt:
-     > "The continent of Excelsia contains exactly these kingdoms: Sunnaria, Lunaria, Ilaria, Limaria, Lindward, Stuttgart, Aeldrin, Ironforge, Zyronia. Do not invent or reference any other kingdoms."
-
-3. **Chat Handler Updates**
+2. **Chat Handler Updates**
    - After entity+keyword matching, expand via relationship graph (maxDepth: 2)
    - Related entries marked with `reason: "related"` in injectedEntries
-   - World summary always included in system prompt
+
+### World Summary Status
+
+The chat handler currently sets a static world context prompt and injects lorebook entries, but it does not inject a dedicated world summary or explicit kingdom list yet. This keeps the documentation aligned with the current behavior; the world summary still needs to be implemented when ready.
 
 ### Expected Improvement
 
@@ -208,8 +207,8 @@ Drakemoor, Verdania, Aetheria, Solmere, Pyrathi
 ### Files Changed
 
 - `src/example/Excelsia/relationships.ts` - Hardcoded relationships
-- `extensions/core/6-provide-ui/dev-chat/routes/lorebook.ts` - Added `getRelationshipStore()`, `getWorldSummary()`
-- `extensions/core/6-provide-ui/dev-chat/routes/chat.ts` - Integrated relationship retrieval and world summary
+- `extensions/core/6-provide-ui/dev-chat/routes/lorebook.ts` - Added `getRelationshipStore()`
+- `extensions/core/6-provide-ui/dev-chat/routes/chat.ts` - Integrated relationship retrieval
 
 ### Testing Needed
 
@@ -218,7 +217,7 @@ Manual testing recommended with prompts like:
 - "A ball at the Lunarian palace"
 - "Princess Aradia meets Princess Isabella"
 
-Should now see related entries expanded via graph and no invented kingdoms.
+Should now see related entries expanded via graph; kingdom invention will still occur until a world summary is added.
 
 ## See also
 - [current.md](../current.md)
