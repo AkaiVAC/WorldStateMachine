@@ -248,6 +248,95 @@ describe("bootstrapExtensions", () => {
         );
     });
 
+    test("writes normalized paths when bootstrap fails to load an extension module", async () => {
+        writeExtensionModule(
+            "extensions/core/2-store-timeline/required-store.ts",
+            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: () => undefined };",
+        );
+
+        const config = {
+            ...createBaseConfig(),
+            stores: [
+                {
+                    name: "@core/required-store",
+                    path: "extensions\\core\\2-store-timeline\\required-store.ts",
+                    status: "on",
+                },
+            ],
+            ui: [
+                {
+                    name: "@core/missing-ui",
+                    path: "extensions/core/6-provide-ui/dev-chat/missing-ui.ts",
+                    status: "on",
+                },
+            ],
+        } satisfies ExtensionsConfig;
+
+        writeConfig(config);
+
+        await expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
+            "Bootstrap error: extension module missing: extensions/core/6-provide-ui/dev-chat/missing-ui.ts.",
+        );
+
+        const result = (await Bun.file(
+            join(TEST_DIR, "extensions.json"),
+        ).json()) as ExtensionsConfig;
+
+        expect(result.stores[0]?.path).toBe(
+            "extensions/core/2-store-timeline/required-store.ts",
+        );
+    });
+    test("writes needs status updates when bootstrap fails after dependencies are read", async () => {
+        writeActivationExtension("needs-alpha", "needs-alpha");
+        writeActivationExtension("needs-beta", "needs-beta", ["needs-alpha"]);
+        writeExtensionModule(
+            "extensions/core/2-store-timeline/required-store.ts",
+            "export default { name: '@core/required-store', version: '1.0.0', kind: 'store', activate: () => undefined };",
+        );
+
+        const config = {
+            ...createBaseConfig(),
+            stores: [
+                {
+                    name: "@core/required-store",
+                    path: "extensions/core/2-store-timeline/required-store.ts",
+                    status: "on",
+                },
+            ],
+            contextBuilders: [
+                {
+                    name: "needs-alpha",
+                    path: "extensions/core/4-build-scene-context/needs-alpha.ts",
+                    status: "off",
+                },
+                {
+                    name: "needs-beta",
+                    path: "extensions/core/4-build-scene-context/needs-beta.ts",
+                    status: "on",
+                },
+            ],
+            ui: [
+                {
+                    name: "@core/missing-ui",
+                    path: "extensions/core/6-provide-ui/dev-chat/missing-ui.ts",
+                    status: "on",
+                },
+            ],
+        } satisfies ExtensionsConfig;
+
+        writeConfig(config);
+
+        await expect(bootstrapExtensions(TEST_DIR)).rejects.toThrow(
+            "Bootstrap error: extension module missing: extensions/core/6-provide-ui/dev-chat/missing-ui.ts.",
+        );
+
+        const result = (await Bun.file(
+            join(TEST_DIR, "extensions.json"),
+        ).json()) as ExtensionsConfig;
+
+        expect(result.contextBuilders[1]?.status).toBe("needs:needs-alpha");
+    });
+
     test("fails fast on kind mismatch for a stage", async () => {
         writeExtensionModule(
             "extensions/core/2-store-timeline/memory-store.ts",
