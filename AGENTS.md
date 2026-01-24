@@ -15,8 +15,8 @@ Use native project tools where possible (Bun over npm).
 
 **Additional context:**
 
--   **[docs/README.md](docs/README.md)** - Architecture overview and index
--   **[docs/notes/context-injection-analysis.md](docs/notes/context-injection-analysis.md)** - Latest research and testing
+- **[docs/README.md](docs/README.md)** - Architecture overview and index
+- **[docs/notes/context-injection-analysis.md](docs/notes/context-injection-analysis.md)** - Latest research and testing
 
 ---
 
@@ -38,25 +38,25 @@ Use native project tools where possible (Bun over npm).
 
 Use ZOMBIES to determine what tests to write BEFORE implementation:
 
--   **Z**ero - Empty/null/zero inputs
--   **O**ne - Single item behavior
--   **M**any - Multiple items, collections
--   **B**oundary - Edge cases, limits
--   **I**nterface - Is the API ergonomic?
--   **E**xceptions - Error cases
--   **S**imple - Happy path scenarios
+- **Z**ero - Empty/null/zero inputs
+- **O**ne - Single item behavior
+- **M**any - Multiple items, collections
+- **B**oundary - Edge cases, limits
+- **I**nterface - Is the API ergonomic?
+- **E**xceptions - Error cases
+- **S**imple - Happy path scenarios
 
 ### What to Test
 
--   **Test behavior, not implementation.** If a test just verifies a function returns what you pass in, it's useless.
--   **Value objects (types with no behavior) don't need tests.** The type system handles that.
--   **Test things that USE data, not the data itself.** A `Fact` type needs no tests; a `FactStore` that queries facts does.
+- **Test behavior, not implementation.** If a test just verifies a function returns what you pass in, it's useless.
+- **Value objects (types with no behavior) don't need tests.** The type system handles that.
+- **Test things that USE data, not the data itself.** A `Fact` type needs no tests; a `FactStore` that queries facts does.
 
 ### What NOT to Test
 
--   Factory functions that just copy properties
--   Type definitions
--   Simple data transformations that TypeScript already validates
+- Factory functions that just copy properties
+- Type definitions
+- Simple data transformations that TypeScript already validates
 
 ### Test Workflow
 
@@ -68,10 +68,10 @@ Use ZOMBIES to determine what tests to write BEFORE implementation:
 
 ### Test Readability
 
--   Tests are documentation. Keep them readable.
--   Extract helpers if setup becomes repetitive (after 3+ similar setups)
--   Use descriptive test names that explain the scenario
--   Refactor tests alongside production code
+- Tests are documentation. Keep them readable.
+- Extract helpers if setup becomes repetitive (after 3+ similar setups)
+- Use descriptive test names that explain the scenario
+- Refactor tests alongside production code
 
 ---
 
@@ -79,21 +79,21 @@ Use ZOMBIES to determine what tests to write BEFORE implementation:
 
 ### TypeScript Conventions
 
--   **Arrow functions over function declarations**
--   **Types over interfaces** (use `type X = {...}` not `interface X {...}`)
--   **No ES6 classes** - use plain objects and functions
--   **No comments** - if code needs explanation, rename or restructure
--   **No default exports** - use named exports only
--   **Const by default** - use `let` only when reassignment is necessary
--   **Early returns** - avoid deep nesting with guard clauses
--   **Descriptive names** - longer names are fine if they're clearer
+- **Arrow functions over function declarations**
+- **Types over interfaces** (use `type X = {...}` not `interface X {...}`)
+- **No ES6 classes** - use plain objects and functions
+- **No comments** - if code needs explanation, rename or restructure
+- **No default exports** - use named exports only
+- **Const by default** - use `let` only when reassignment is necessary
+- **Early returns** - avoid deep nesting with guard clauses
+- **Descriptive names** - longer names are fine if they're clearer
 
 ### Philosophy
 
--   Simplest solution that works
--   Three similar lines beats a premature abstraction
--   Types are documentation
--   Build only what's needed now
+- Simplest solution that works
+- Three similar lines beats a premature abstraction
+- Types are documentation
+- Build only what's needed now
 
 ---
 
@@ -109,10 +109,10 @@ bun run tsc --noEmit  # Type check
 
 ## Git & Commits
 
--   **Conventional Commits:** Use the format `<type>(<scope>): <subject>` (e.g., `feat(core):`, `refactor(tests):`, `docs:`).
--   **Logical Grouping:** Group similar changes into distinct commits rather than one giant blob.
--   **Verify before Commit:** Ensure all tests pass and types are clean before committing.
--   **Push support:** If asked to push but lacking environment access, propose micro-commit command sequences for the user to run.
+- **Conventional Commits:** Use the format `<type>(<scope>): <subject>` (e.g., `feat(core):`, `refactor(tests):`, `docs:`).
+- **Logical Grouping:** Group similar changes into distinct commits rather than one giant blob.
+- **Verify before Commit:** Ensure all tests pass and types are clean before committing.
+- **Push support:** If asked to push but lacking environment access, propose micro-commit command sequences for the user to run.
 
 ---
 
@@ -120,18 +120,14 @@ bun run tsc --noEmit  # Type check
 
 ### SillyTavern Entry Fields
 
--   `uid` - unique identifier
--   `key` - trigger keywords array
--   `keysecondary` - secondary keywords
--   `comment` - entry name/title
--   `content` - lore text
--   `group` - category grouping
+- `uid` - unique identifier
+- `key` - trigger keywords array
+- `keysecondary` - secondary keywords
+- `comment` - entry name/title
+- `content` - lore text
+- `group` - category grouping
 
 Test data: `Excelsia/` (11 JSON files)
-
-### Architecture
-
-See **ARCHITECTURE.md** for the full design (timeline-centric model, facts, retrieval, etc.)
 
 ---
 
@@ -139,9 +135,9 @@ See **ARCHITECTURE.md** for the full design (timeline-centric model, facts, retr
 
 **Last updated:** 2026-01-10
 
--   **M4 complete** - Events with participants, visibility, fact generation
--   **Extension System Redesign** - Simplified to config-driven 6-stage pipeline
--   **Chat UI** with lorebook context injection
+- **M4 complete** - Events with participants, visibility, fact generation
+- **Extension System Redesign** - Simplified to config-driven 6-stage pipeline
+- **Chat UI** with lorebook context injection
 
 **For details:** See the Essential Context section above
 
@@ -149,5 +145,5 @@ See **ARCHITECTURE.md** for the full design (timeline-centric model, facts, retr
 
 Use these import aliases (defined in `tsconfig.json`):
 
--   `@core/*` → `src/core-types/*` (fundamental types: Event, Fact, Entity, Relationship)
--   `@ext/*` → `extensions/*` (all extensions including core)
+- `@core/*` → `src/core-types/*` (fundamental types: Event, Fact, Entity, Relationship)
+- `@ext/*` → `extensions/*` (all extensions including core)

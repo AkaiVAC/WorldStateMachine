@@ -41,7 +41,10 @@ export const bootstrapExtensions = async (
     try {
         for (const { stage, entry } of entries) {
             const extensionEntry = entry as ExtensionEntry;
-            const extension = await loadExtensionModule(rootDir, extensionEntry);
+            const extension = await loadExtensionModule(
+                rootDir,
+                extensionEntry,
+            );
             validateExtensionKind(stage, extension);
             registerStagedExtension(
                 stagedExtensions,
