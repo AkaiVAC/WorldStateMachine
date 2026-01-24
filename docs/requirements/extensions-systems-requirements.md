@@ -78,6 +78,11 @@ related:
 - Stage and kind mismatches must surface as errors.
 - Fail fast on the first bootstrap error.
 
+## Potential Gaps To Validate
+- Config `name` should match the extension's exported `name` and fail fast on mismatch.
+- Extension export should be validated for required fields (`name`, `version`, `kind`, `activate`) with clear errors.
+- `after` should be validated as an array of strings to avoid unclear ordering failures.
+
 ## Bootstrap Contract
 - `path` points to a module file (no folder inference).
 - Extension modules must default-export the extension object.
