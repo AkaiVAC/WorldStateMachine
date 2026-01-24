@@ -38,7 +38,7 @@ export const writeConfig = (
     };
 
     const configPath = join(rootDir, CONFIG_FILE_NAME);
-    writeFileSync(configPath, JSON.stringify(normalized, null, 2));
+    writeFileSync(configPath, JSON.stringify(normalized, null, 4));
 
     return normalized;
 };

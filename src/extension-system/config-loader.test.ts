@@ -36,7 +36,7 @@ describe("loadConfig", () => {
 
         test("throws when required stage arrays are missing", () => {
             const configPath = join(TEST_DIR, "extensions.json");
-            writeFileSync(configPath, JSON.stringify({ loaders: [] }, null, 2));
+            writeFileSync(configPath, JSON.stringify({ loaders: [] }, null, 4));
 
             expect(() => loadConfig(TEST_DIR)).toThrow(
                 "Config invalid: missing required stage arrays.",
@@ -58,7 +58,7 @@ describe("loadConfig", () => {
                 ],
             } satisfies ExtensionsConfig;
 
-            writeFileSync(configPath, JSON.stringify(config, null, 2));
+            writeFileSync(configPath, JSON.stringify(config, null, 4));
 
             expect(loadConfig(TEST_DIR)).toEqual(config);
         });
@@ -83,7 +83,7 @@ describe("loadConfig", () => {
                 ],
             } satisfies ExtensionsConfig;
 
-            writeFileSync(configPath, JSON.stringify(config, null, 2));
+            writeFileSync(configPath, JSON.stringify(config, null, 4));
 
             expect(loadConfig(TEST_DIR)).toEqual(config);
         });
@@ -97,7 +97,7 @@ describe("loadConfig", () => {
                 loaders: {},
             };
 
-            writeFileSync(configPath, JSON.stringify(config, null, 2));
+            writeFileSync(configPath, JSON.stringify(config, null, 4));
 
             expect(() => loadConfig(TEST_DIR)).toThrow(
                 "Config invalid: stage values must be arrays.",
@@ -115,7 +115,7 @@ describe("loadConfig", () => {
                 ],
             };
 
-            writeFileSync(configPath, JSON.stringify(config, null, 2));
+            writeFileSync(configPath, JSON.stringify(config, null, 4));
 
             expect(() => loadConfig(TEST_DIR)).toThrow(
                 "Config invalid: entry 0 in validators missing: name, path, status.",
@@ -128,7 +128,7 @@ describe("loadConfig", () => {
                 loaders: [null],
             };
 
-            writeFileSync(configPath, JSON.stringify(config, null, 2));
+            writeFileSync(configPath, JSON.stringify(config, null, 4));
 
             expect(() => loadConfig(TEST_DIR)).toThrow(
                 "Config invalid: entry 0 in loaders missing: name, path, status.",
@@ -147,7 +147,7 @@ describe("loadConfig", () => {
                 ],
             };
 
-            writeFileSync(configPath, JSON.stringify(config, null, 2));
+            writeFileSync(configPath, JSON.stringify(config, null, 4));
 
             expect(() => loadConfig(TEST_DIR)).toThrow(
                 "Config invalid: needs list cannot be empty.",
@@ -166,7 +166,7 @@ describe("loadConfig", () => {
                 ],
             };
 
-            writeFileSync(configPath, JSON.stringify(config, null, 2));
+            writeFileSync(configPath, JSON.stringify(config, null, 4));
 
             expect(() => loadConfig(TEST_DIR)).toThrow(
                 "Config invalid: needs list contains empty dependency names.",
@@ -185,7 +185,7 @@ describe("loadConfig", () => {
                 ],
             };
 
-            writeFileSync(configPath, JSON.stringify(config, null, 2));
+            writeFileSync(configPath, JSON.stringify(config, null, 4));
 
             expect(() => loadConfig(TEST_DIR)).toThrow(
                 "Config invalid: status must be on, off, or needs:<dependency>.",
@@ -206,7 +206,7 @@ describe("loadConfig", () => {
                 ],
             };
 
-            writeFileSync(configPath, JSON.stringify(config, null, 2));
+            writeFileSync(configPath, JSON.stringify(config, null, 4));
 
             expect(() => loadConfig(TEST_DIR)).toThrow(
                 "Config invalid: entry 0 in loaders missing: name, path, status.",
@@ -230,7 +230,7 @@ describe("loadConfig", () => {
             const configPath = join(TEST_DIR, "extensions.json");
             const config = createBaseConfig();
 
-            writeFileSync(configPath, JSON.stringify(config, null, 2));
+            writeFileSync(configPath, JSON.stringify(config, null, 4));
 
             expect(loadConfig(TEST_DIR)).toEqual(config);
         });
