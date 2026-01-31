@@ -1,0 +1,13 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  tests:
+    uses: ./.github/workflows/_tests.yml
+    with:
+      bun_version: "latest"
+      command: "bun test"
