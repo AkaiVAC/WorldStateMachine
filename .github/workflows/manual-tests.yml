@@ -1,28 +1,60 @@
-name: Manual Tests (on demand)
+name: Manual Checks (on demand)
 
 on:
   workflow_dispatch:
     inputs:
       ref:
-        description: "Branch/tag/SHA to test (leave blank to use selected branch)"
+        description: Branch/tag/SHA to run against (leave blank to use selected branch)
         required: false
         type: string
       bun_version:
-        description: "Bun version"
+        description: Bun version
         required: false
-        default: "latest"
+        default: latest
         type: string
-      command:
-        description: "Command to run"
+
+      run_biome:
+        description: Run Biome formatting + linting checks
         required: false
-        default: "bun test"
+        default: true
+        type: boolean
+      run_typecheck:
+        description: Run TypeScript typecheck
+        required: false
+        default: true
+        type: boolean
+      run_tests:
+        description: Run tests
+        required: false
+        default: true
+        type: boolean
+
+      biome_command:
+        description: Biome command
+        required: false
+        default: bunx\ biome ci ^.
+        type: string
+      typecheck_command:
+        description: Typecheck command
+        required: false
+        default: bun run typecheck
+        type: string
+      test_command:
+        description: Test command
+        required: false
+        default: bun test
         type: string
 
 
 jobs:
-  tests:
+  verify:
     uses: ./.github/workflows/_tests.yml
     with:
       ref: ${{ inputs.ref }}
       bun_version: ${{ inputs.bun_version }}
-      command: ${{ inputs.command }}
+      run_biome: ${{ inputs.run_biome }}
+      biome_command: ${{ inputs.biome_command }}
+      run_typecheck: ${{ inputs.run_typecheck }}
+      typecheck_command: ${{ inputs.typecheck_command }}
+      run_tests: ${{ inputs.run_tests }}
+      test_command: ${{ inputs.test_command }}
