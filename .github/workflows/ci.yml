@@ -5,9 +5,9 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 jobs:
   tests:
     uses: ./.github/workflows/_tests.yml
-    with:
-      bun_version: "latest"
-      command: "bun test"
