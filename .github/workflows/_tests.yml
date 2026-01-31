@@ -23,7 +23,8 @@ on:
         description: Command to run Biome checks
         required: false
         type: string
-        default: "bunx biome ci ."
+        # Use the installed @biomejs/biome binary via bunx.
+        default: "bunx @biomejs/biome ci ."
 
       run_typecheck:
         description: Run TypeScript typecheck
@@ -75,18 +76,14 @@ jobs:
       - name: Install
         run: bun install --frozen-lockfile
 
-      - name: Install Biome
-        if: ${{ inputs.run_biome }}
-        run: bun add -D- @biome/js
-
       - name: Biome (lint + format)
         if: ${{ inputs.run_biome }}
         run: ${{ inputs.biome_command }}
 
-       - name: Typecheck
+      - name: Typecheck
         if: ${{ inputs.run_typecheck }}
         run: ${{ inputs.typecheck_command }}
 
-       - name: Tests
+      - name: Tests
         if: ${{ inputs.run_tests }}
         run: ${{ inputs.test_command }}
