@@ -4,22 +4,51 @@ on:
   workflow_call:
     inputs:
       ref:
-        description: "Git ref (branch/tag/SHA) to test"
+        description: Git ref (branch/tag/SHA) to test
         required: false
         type: string
+
       bun_version:
-        description: "Bun version (e.g. 'latest' or '1.1.0')"
+        description: Bun version (e.g. latest or 1.1.0)
         required: false
         type: string
-        default: "latest"
-      command:
-        description: "Command to run tests"
+        default: latest
+
+      run_biome:
+        description: Run Biome formatting + linting checks (biome ci)
+        required: false
+        type: boolean
+        default: true
+      biome_command:
+        description: Command to run Biome checks
         required: false
         type: string
-        default: "bun test"
+        default: bunx\ biome ci ^.
+
+      run_typecheck:
+        description: Run TypeScript typecheck
+        required: false
+        type: boolean
+        default: true
+      typecheck_command:
+        description: Command to run typecheck
+        required: false
+        type: string
+        default: bun run typecheck
+
+      run_tests:
+        description: Run tests
+        required: false
+        type: boolean
+        default: true
+      test_command:
+        description: Command to run tests
+        required: false
+        type: string
+        default: bun test
 
 jobs:
-  test:
+  verify:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,7 +58,7 @@ jobs:
           ref: ${{ inputs.ref || github.ref }}
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ inputs.bun_version }}
 
@@ -39,12 +68,21 @@ jobs:
           path: |
             ~/.bun/install/cache
             node_modules
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
 
       - name: Install
         run: bun install --frozen-lockfile
 
-      - name: Test
-        run: ${{ inputs.command }}
+      - name: Biome (lint + format)
+        if: ${{ inputs.run_biome }}
+        run: ${{ inputs.biome_command }}
+
+      - name: Typecheck
+        if: ${{ inputs.run_typecheck }}
+        run: ${{ inputs.typecheck_command }}
+
+      - name: Tests
+        if: ${{ inputs.run_tests }}
+        run: ${{ inputs.test_command }}
