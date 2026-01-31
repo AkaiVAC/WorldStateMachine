@@ -10,6 +10,7 @@ The docs are organized by core architecture, future design, reference materials,
 - [current.md](current.md) - Current implementation status and what is working today (extension bootstrap now active).
 - [roadmap.md](roadmap.md) - Milestone-by-milestone path from M1 through M11.
 - [decisions.md](decisions.md) - Design rationale and key architectural choices.
+- [requirements/README.md](requirements/README.md) - Requirements overview for constraints and extension systems.
 
 ## Architecture
 
