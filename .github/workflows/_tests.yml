@@ -1,0 +1,50 @@
+name: _tests (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: "Git ref (branch/tag/SHA) to test"
+        required: false
+        type: string
+      bun_version:
+        description: "Bun version (e.g. 'latest' or '1.1.0')"
+        required: false
+        type: string
+        default: "latest"
+      command:
+        description: "Command to run tests"
+        required: false
+        type: string
+        default: "bun test"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: ${{ inputs.bun_version }}
+
+      - name: Cache Bun + node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Test
+        run: ${{ inputs.command }}
