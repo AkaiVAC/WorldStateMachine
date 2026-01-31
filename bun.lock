@@ -13,6 +13,7 @@
         "@biomejs/biome": "^2.3.11",
         "@types/bun": "latest",
         "husky": "^9.1.7",
+        "typescript": "^5.9.3",
       },
       "peerDependencies": {
         "typescript": "^5",
