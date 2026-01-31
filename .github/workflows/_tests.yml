@@ -23,7 +23,8 @@ on:
         description: Command to run Biome checks
         required: false
         type: string
-        default: bunx biome ci ^
+        default: "bunx biome ci ."
+
       run_typecheck:
         description: Run TypeScript typecheck
         required: false
@@ -78,7 +79,6 @@ jobs:
         if: ${{ inputs.run_biome }}
         run: bun add -D- @biome/js
 
-        
       - name: Biome (lint + format)
         if: ${{ inputs.run_biome }}
         run: ${{ inputs.biome_command }}
