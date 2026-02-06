@@ -248,7 +248,7 @@ describe("EventStore", () => {
       });
       const facts = getFactsFromEvent(event);
       expect(facts).toHaveLength(1);
-      expect(facts[0]!.validFrom).toBe(5);
+      expect(facts[0]?.validFrom).toBe(5);
     });
 
     test("getFactsFromEvent preserves existing validFrom if specified", () => {
@@ -265,7 +265,7 @@ describe("EventStore", () => {
         ],
       });
       const facts = getFactsFromEvent(event);
-      expect(facts[0]!.validFrom).toBe(3);
+      expect(facts[0]?.validFrom).toBe(3);
     });
 
     test("getFactsFromEvent handles multiple outcomes", () => {
@@ -288,8 +288,8 @@ describe("EventStore", () => {
       });
       const facts = getFactsFromEvent(event);
       expect(facts).toHaveLength(2);
-      expect(facts[0]!.validFrom).toBe(10);
-      expect(facts[1]!.validFrom).toBe(10);
+      expect(facts[0]?.validFrom).toBe(10);
+      expect(facts[1]?.validFrom).toBe(10);
     });
   });
 });
