@@ -1,75 +1,73 @@
-import type { LorebookEntry } from "../lorebook-entry";
 import { defineExtension } from "@ext-system/define-extension";
-
+import type { LorebookEntry } from "../lorebook-entry";
 
 export type EntityMatch = {
-	entry: LorebookEntry;
-	matchedTerm: string;
+  entry: LorebookEntry;
+  matchedTerm: string;
 };
 
 const isFuzzyMatch = (term: string, candidate: string): boolean => {
-	const lowerTerm = term.toLowerCase();
-	const lowerCandidate = candidate.toLowerCase();
+  const lowerTerm = term.toLowerCase();
+  const lowerCandidate = candidate.toLowerCase();
 
-	if (lowerCandidate === lowerTerm) return true;
-	if (lowerCandidate.includes(lowerTerm)) return true;
-	if (lowerTerm.includes(lowerCandidate) && lowerCandidate.length > 3) {
-		return true;
-	}
+  if (lowerCandidate === lowerTerm) return true;
+  if (lowerCandidate.includes(lowerTerm)) return true;
+  if (lowerTerm.includes(lowerCandidate) && lowerCandidate.length > 3) {
+    return true;
+  }
 
-	const stemmedTerm = lowerTerm.replace(/n$|ian$|an$|s$/, "");
-	const stemmedCandidate = lowerCandidate.replace(/n$|ian$|an$|s$/, "");
-	if (stemmedCandidate.includes(stemmedTerm) && stemmedTerm.length > 3) {
-		return true;
-	}
-	if (stemmedTerm.includes(stemmedCandidate) && stemmedCandidate.length > 3) {
-		return true;
-	}
+  const stemmedTerm = lowerTerm.replace(/n$|ian$|an$|s$/, "");
+  const stemmedCandidate = lowerCandidate.replace(/n$|ian$|an$|s$/, "");
+  if (stemmedCandidate.includes(stemmedTerm) && stemmedTerm.length > 3) {
+    return true;
+  }
+  if (stemmedTerm.includes(stemmedCandidate) && stemmedCandidate.length > 3) {
+    return true;
+  }
 
-	return false;
+  return false;
 };
 
 const findMatchingEntry = (
-	term: string,
-	entries: LorebookEntry[],
+  term: string,
+  entries: LorebookEntry[],
 ): LorebookEntry | undefined => {
-	for (const entry of entries) {
-		if (isFuzzyMatch(term, entry.name)) {
-			return entry;
-		}
-		for (const key of entry.keys) {
-			if (isFuzzyMatch(term, key)) {
-				return entry;
-			}
-		}
-	}
-	return undefined;
+  for (const entry of entries) {
+    if (isFuzzyMatch(term, entry.name)) {
+      return entry;
+    }
+    for (const key of entry.keys) {
+      if (isFuzzyMatch(term, key)) {
+        return entry;
+      }
+    }
+  }
+  return undefined;
 };
 
 export const matchEntitiesFuzzy = (
-	entityTerms: string[],
-	entries: LorebookEntry[],
+  entityTerms: string[],
+  entries: LorebookEntry[],
 ): EntityMatch[] => {
-	const matches: EntityMatch[] = [];
-	const matchedIds = new Set<string>();
+  const matches: EntityMatch[] = [];
+  const matchedIds = new Set<string>();
 
-	for (const term of entityTerms) {
-		const entry = findMatchingEntry(term, entries);
-		if (entry && !matchedIds.has(entry.id)) {
-			matchedIds.add(entry.id);
-			matches.push({ entry, matchedTerm: term });
-		}
-	}
+  for (const term of entityTerms) {
+    const entry = findMatchingEntry(term, entries);
+    if (entry && !matchedIds.has(entry.id)) {
+      matchedIds.add(entry.id);
+      matches.push({ entry, matchedTerm: term });
+    }
+  }
 
-	return matches;
+  return matches;
 };
 
 export default defineExtension({
-	name: "@core/entity-matcher",
-	version: "1.0.0",
-	kind: "contextBuilder",
-	activate: () => ({
-		contextBuilders: [matchEntitiesFuzzy],
-	}),
+  name: "@core/entity-matcher",
+  version: "1.0.0",
+  kind: "contextBuilder",
+  activate: () => ({
+    contextBuilders: [matchEntitiesFuzzy],
+  }),
 });
-

@@ -110,14 +110,14 @@ Extensions use `defineExtension` and are registered in `extensions.json`:
 
 ```typescript
 export default defineExtension({
-    name: "@core/memory-fact-store",
-    version: "1.0.0",
-    kind: "store",
-    after: [],  // within-stage ordering dependencies
-    activate: (context, options?) => {
-        context.factStore = createFactStore();
-        return undefined;
-    },
+  name: "@core/memory-fact-store",
+  version: "1.0.0",
+  kind: "store",
+  after: [],
+  activate: (context, options?) => {
+    context.factStore = createFactStore();
+    return undefined;
+  },
 });
 ```
 
@@ -149,7 +149,7 @@ export default defineExtension({
 
 ### Formatting (Biome)
 
-- 4-space indentation
+- 2-space indentation
 - 80-character line width
 - Double quotes for strings
 - Organized imports (auto-sorted)

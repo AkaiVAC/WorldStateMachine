@@ -1,52 +1,50 @@
-import type { LorebookEntry } from "../lorebook-entry";
 import { defineExtension } from "@ext-system/define-extension";
-
+import type { LorebookEntry } from "../lorebook-entry";
 
 export type MatchResult = {
-	entry: LorebookEntry;
-	matchedKeyword: string;
+  entry: LorebookEntry;
+  matchedKeyword: string;
 };
 
 export const matchEntries = (
-	message: string,
-	entries: LorebookEntry[],
+  message: string,
+  entries: LorebookEntry[],
 ): MatchResult[] => {
-	if (!message) {
-		return [];
-	}
+  if (!message) {
+    return [];
+  }
 
-	const results: MatchResult[] = [];
-	const messageLower = message.toLowerCase();
+  const results: MatchResult[] = [];
+  const messageLower = message.toLowerCase();
 
-	for (const entry of entries) {
-		for (const keyword of entry.keys) {
-			if (!keyword) {
-				continue;
-			}
+  for (const entry of entries) {
+    for (const keyword of entry.keys) {
+      if (!keyword) {
+        continue;
+      }
 
-			const keywordLower = keyword.toLowerCase();
-			const pattern = new RegExp(`\\b${escapeRegex(keywordLower)}\\b`, "i");
+      const keywordLower = keyword.toLowerCase();
+      const pattern = new RegExp(`\\b${escapeRegex(keywordLower)}\\b`, "i");
 
-			if (pattern.test(messageLower)) {
-				results.push({ entry, matchedKeyword: keyword });
-				break;
-			}
-		}
-	}
+      if (pattern.test(messageLower)) {
+        results.push({ entry, matchedKeyword: keyword });
+        break;
+      }
+    }
+  }
 
-	return results;
+  return results;
 };
 
 export default defineExtension({
-	name: "@core/keyword-matcher",
-	version: "1.0.0",
-	kind: "contextBuilder",
-	activate: () => ({
-		contextBuilders: [matchEntries],
-	}),
+  name: "@core/keyword-matcher",
+  version: "1.0.0",
+  kind: "contextBuilder",
+  activate: () => ({
+    contextBuilders: [matchEntries],
+  }),
 });
 
-
 const escapeRegex = (str: string): string => {
-	return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 };

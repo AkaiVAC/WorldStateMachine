@@ -1,13 +1,13 @@
 {
-	"entries": {
-		"1": {
-			"uid": 1,
-			"key": [],
-			"keysecondary": [],
-			"comment": "",
-			"content": "This entry has no name.",
-			"group": "Test",
-			"disable": false
-		}
-	}
+  "entries": {
+    "1": {
+      "uid": 1,
+      "key": [],
+      "keysecondary": [],
+      "comment": "",
+      "content": "This entry has no name.",
+      "group": "Test",
+      "disable": false
+    }
+  }
 }
