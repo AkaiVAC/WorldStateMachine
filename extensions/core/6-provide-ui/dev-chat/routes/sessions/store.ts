@@ -115,5 +115,5 @@ const saveSession = async (
   session: Session,
 ): Promise<void> => {
   const filePath = getSessionPath(sessionsDir, session.id);
-  await Bun.write(filePath, JSON.stringify(session, null, 4));
+  await Bun.write(filePath, `${JSON.stringify(session, null, 2)}\n`);
 };

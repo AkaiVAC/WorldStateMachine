@@ -30,7 +30,7 @@ const createBaseConfig = (): ExtensionsConfig => ({
 const writeConfig = (config: ExtensionsConfig) => {
   writeFileSync(
     join(TEST_DIR, "extensions.json"),
-    JSON.stringify(config, null, 4),
+    `${JSON.stringify(config, null, 2)}\n`,
   );
 };
 
