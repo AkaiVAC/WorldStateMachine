@@ -2,23 +2,22 @@ import { defineExtension } from "@ext-system/define-extension";
 
 type AskFn = (prompt: string) => Promise<string>;
 
-
 type PromptAnalyzerOptions = {
-	askFn: AskFn;
-	worldSetting: string;
+  askFn: AskFn;
+  worldSetting: string;
 };
 
 type AnalysisResult = {
-	entityReferences: string[];
-	anachronisms: string[];
+  entityReferences: string[];
+  anachronisms: string[];
 };
 
 export type PromptAnalyzer = {
-	analyze: (text: string) => Promise<AnalysisResult>;
+  analyze: (text: string) => Promise<AnalysisResult>;
 };
 
 const buildPrompt = (text: string, worldSetting: string): string => {
-	return `Analyze the text below for a "${worldSetting}" setting.
+  return `Analyze the text below for a "${worldSetting}" setting.
 
 Tasks:
 1. Extract "entityReferences": specific people, places, organizations, or titles mentioned.
@@ -34,46 +33,45 @@ Text: "${text}"`;
 };
 
 const parseResponse = (response: string): AnalysisResult => {
-	try {
-		const cleanResponse = response.replace(/```json\n?|\n?```/g, "").trim();
-		const parsed = JSON.parse(cleanResponse);
-		return {
-			entityReferences: Array.isArray(parsed.entityReferences)
-				? parsed.entityReferences
-				: [],
-			anachronisms: Array.isArray(parsed.anachronisms)
-				? parsed.anachronisms
-				: [],
-		};
-	} catch {
-		return { entityReferences: [], anachronisms: [] };
-	}
+  try {
+    const cleanResponse = response.replace(/```json\n?|\n?```/g, "").trim();
+    const parsed = JSON.parse(cleanResponse);
+    return {
+      entityReferences: Array.isArray(parsed.entityReferences)
+        ? parsed.entityReferences
+        : [],
+      anachronisms: Array.isArray(parsed.anachronisms)
+        ? parsed.anachronisms
+        : [],
+    };
+  } catch {
+    return { entityReferences: [], anachronisms: [] };
+  }
 };
 
 export const createPromptAnalyzer = (
-	options: PromptAnalyzerOptions,
+  options: PromptAnalyzerOptions,
 ): PromptAnalyzer => {
-	const { askFn, worldSetting } = options;
+  const { askFn, worldSetting } = options;
 
-	return {
-		analyze: async (text: string): Promise<AnalysisResult> => {
-			if (!text.trim()) {
-				return { entityReferences: [], anachronisms: [] };
-			}
+  return {
+    analyze: async (text: string): Promise<AnalysisResult> => {
+      if (!text.trim()) {
+        return { entityReferences: [], anachronisms: [] };
+      }
 
-			const prompt = buildPrompt(text, worldSetting);
-			const response = await askFn(prompt);
-			return parseResponse(response);
-		},
-	};
+      const prompt = buildPrompt(text, worldSetting);
+      const response = await askFn(prompt);
+      return parseResponse(response);
+    },
+  };
 };
 
 export default defineExtension({
-	name: "@core/prompt-analyzer",
-	version: "1.0.0",
-	kind: "contextBuilder",
-	activate: () => ({
-		contextBuilders: [createPromptAnalyzer],
-	}),
+  name: "@core/prompt-analyzer",
+  version: "1.0.0",
+  kind: "contextBuilder",
+  activate: () => ({
+    contextBuilders: [createPromptAnalyzer],
+  }),
 });
-

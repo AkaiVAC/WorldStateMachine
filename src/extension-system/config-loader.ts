@@ -8,21 +8,21 @@ import { validateStageValues } from "./config-loader/validate-stage-values";
 import type { ExtensionsConfig } from "./types";
 
 export const loadConfig = (rootDir: string): ExtensionsConfig => {
-    const configPath = getConfigPath(rootDir);
-    const raw = readFileSync(configPath, "utf-8");
+  const configPath = getConfigPath(rootDir);
+  const raw = readFileSync(configPath, "utf-8");
 
-    let config: ExtensionsConfig;
-    try {
-        config = JSON.parse(raw) as ExtensionsConfig;
-    } catch {
-        throw new Error("Config invalid: JSON parse error.");
-    }
+  let config: ExtensionsConfig;
+  try {
+    config = JSON.parse(raw) as ExtensionsConfig;
+  } catch {
+    throw new Error("Config invalid: JSON parse error.");
+  }
 
-    validateAllStagesExist(config);
-    validateStageValues(config);
-    const entries = getEntriesWithStage(config);
-    const validatedEntries = validateEntryFields(entries);
-    validateExtensionStatus(validatedEntries);
+  validateAllStagesExist(config);
+  validateStageValues(config);
+  const entries = getEntriesWithStage(config);
+  const validatedEntries = validateEntryFields(entries);
+  validateExtensionStatus(validatedEntries);
 
-    return config;
+  return config;
 };
