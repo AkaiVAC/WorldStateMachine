@@ -1,4 +1,10 @@
 import { createGraphTraversal } from "@ext/core/2-store-timeline/memory-relationship-store/graph-traversal";
+import { createEntityExistsRule } from "@ext/core/3-validate-consistency/check-entity-exists/entity-exists-rule";
+import { createWorldBoundaryRule } from "@ext/core/3-validate-consistency/check-world-boundary/world-boundary-rule";
+import {
+  type Violation,
+  validate,
+} from "@ext/core/3-validate-consistency/validation-framework/validator";
 import { createPromptAnalyzer } from "@ext/core/4-build-scene-context/analyze-prompt/prompt-analyzer";
 import { createRelationshipRetrieval } from "@ext/core/4-build-scene-context/expand-relationships/relationship-retrieval";
 import type { LorebookEntry } from "@ext/core/4-build-scene-context/lorebook-entry";
@@ -9,10 +15,16 @@ import {
   type ChatMessage,
   chat,
 } from "@ext/core/5-send-scene-context/to-llm/openrouter-client";
-import { getLorebookEntries, getRelationshipStore } from "./lorebook";
+import {
+  getEntityStore,
+  getLorebookEntries,
+  getRelationshipStore,
+  WORLD_ID,
+} from "./lorebook";
 
 const DEFAULT_MODEL = "anthropic/claude-sonnet-4";
 const ENTITY_EXTRACTION_MODEL = "xiaomi/mimo-v2-flash:free";
+const WORLD_SETTING = "medieval fantasy";
 
 type ChatRequest = {
   message: string;
@@ -34,15 +46,16 @@ type ChatResponse = {
   response: string;
   injectedEntries: InjectedEntry[];
   systemPrompt: string;
+  violations: Violation[];
 };
 
-const WORLD_CONTEXT = `You are roleplaying in Excelsia, a medieval fantasy world with eight kingdoms.
+const WORLD_CONTEXT = `You are roleplaying in Excelsia, a ${WORLD_SETTING} world with eight kingdoms.
 Stay in character. Respond as the characters would, using their knowledge and personality.
 Do not break character or reference the real world.`;
 
 const analyzer = createPromptAnalyzer({
   askFn: (prompt) => ask(prompt, { model: ENTITY_EXTRACTION_MODEL }),
-  worldSetting: "medieval fantasy",
+  worldSetting: WORLD_SETTING,
 });
 
 export const chatHandler = async (req: Request): Promise<Response> => {
@@ -73,7 +86,24 @@ export const chatHandler = async (req: Request): Promise<Response> => {
     }
   }
 
-  const { entityReferences } = await analyzer.analyze(message);
+  const { entityReferences, anachronisms } = await analyzer.analyze(message);
+
+  const cachedAnalyzer = {
+    analyze: async () => ({ entityReferences, anachronisms }),
+  };
+
+  const entityStore = await getEntityStore();
+  const entityRule = createEntityExistsRule({
+    analyzer: cachedAnalyzer,
+    entityStore,
+    worldId: WORLD_ID,
+  });
+  const worldBoundaryRule = createWorldBoundaryRule({
+    analyzer: cachedAnalyzer,
+    worldSetting: WORLD_SETTING,
+  });
+  const violations = await validate(message, [entityRule, worldBoundaryRule]);
+
   const entityMatches = matchEntitiesFuzzy(entityReferences, allEntries);
 
   for (const match of entityMatches) {
@@ -166,6 +196,7 @@ export const chatHandler = async (req: Request): Promise<Response> => {
     response,
     injectedEntries,
     systemPrompt,
+    violations,
   };
 
   return Response.json(chatResponse);

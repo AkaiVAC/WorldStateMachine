@@ -28,23 +28,7 @@
       "status": "on"
     }
   ],
-  "validators": [
-    {
-      "name": "@core/validation-framework",
-      "path": "extensions/core/3-validate-consistency/validation-framework/validator.ts",
-      "status": "on"
-    },
-    {
-      "name": "@core/entity-exists-validator",
-      "path": "extensions/core/3-validate-consistency/check-entity-exists/entity-exists-rule.ts",
-      "status": "on"
-    },
-    {
-      "name": "@core/world-boundary-validator",
-      "path": "extensions/core/3-validate-consistency/check-world-boundary/world-boundary-rule.ts",
-      "status": "on"
-    }
-  ],
+  "validators": [],
   "contextBuilders": [
     {
       "name": "@core/keyword-matcher",

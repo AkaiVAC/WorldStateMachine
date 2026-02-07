@@ -4,7 +4,6 @@ import type {
 } from "@ext/core/3-validate-consistency/validation-framework/validator";
 import { createValidator } from "@ext/core/3-validate-consistency/validation-framework/validator";
 import type { PromptAnalyzer } from "@ext/core/4-build-scene-context/analyze-prompt/prompt-analyzer";
-import { defineExtension } from "@ext-system/define-extension";
 
 type WorldBoundaryRuleOptions = {
   analyzer: PromptAnalyzer;
@@ -34,12 +33,3 @@ export type WorldBoundaryValidatorOptions = WorldBoundaryRuleOptions;
 export const createWorldBoundaryValidator = (
   options: WorldBoundaryValidatorOptions,
 ) => createValidator([createWorldBoundaryRule(options)]);
-
-export default defineExtension({
-  name: "@core/world-boundary-validator",
-  version: "1.0.0",
-  kind: "validator",
-  activate: () => ({
-    validators: [createWorldBoundaryValidator],
-  }),
-});

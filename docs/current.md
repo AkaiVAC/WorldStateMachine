@@ -39,13 +39,13 @@ Four fundamental types in `src/core-types/`:
 
 ### Extension System (Complete)
 
-Config-driven 6-stage pipeline with 15 extensions:
+Config-driven 6-stage pipeline with 12 extensions:
 
 | Stage | Extensions | Status |
 |-------|-----------|--------|
 | 1. stores | memory-fact-store, memory-entity-store, memory-event-store, memory-relationship-store | ✅ |
 | 2. loaders | sillytavern-loader | ✅ |
-| 3. validators | validation-framework, entity-exists-validator, world-boundary-validator | ✅ |
+| 3. validators | (wired directly in chat handler — see below) | ✅ |
 | 4. contextBuilders | prompt-analyzer, entity-matcher, keyword-matcher, lorebook-loader, relationship-retrieval | ✅ |
 | 5. senders | openrouter-client | ✅ |
 | 6. ui | dev-chat | ✅ |
@@ -110,15 +110,11 @@ Imports SillyTavern lorebook JSON format:
 
 ## What Doesn't Work Yet
 
-### Validator Wiring Gap
+### Validators Are Libraries, Not Extensions
 
-The validation framework and rules exist but aren't wired into the live system:
-- `validation-framework` activates with an empty rule list
-- `entity-exists-validator` and `world-boundary-validator` contribute factory functions, not instances
-- The chat handler (`routes/chat.ts`) bypasses the extension-contributed validators entirely
-- Validation is tested in isolation but not integrated into the chat pipeline
+The validation framework, entity-exists rule, and world-boundary rule are pure library code, not extensions. They can't participate in the extension system because validators (stage 3) need the prompt analyzer (stage 4) — a cross-stage dependency that the pipeline architecture doesn't support.
 
-**Impact:** Validation works when manually constructed (as in integration tests) but not through the extension system.
+**Current wiring:** The chat handler (`routes/chat.ts`) directly constructs validators using factory functions, with a cached analyzer to avoid double LLM calls. Validation runs on every chat message and violations are returned in the response.
 
 ### No Persistence
 

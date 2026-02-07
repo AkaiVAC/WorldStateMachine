@@ -1,5 +1,3 @@
-import { defineExtension } from "@ext-system/define-extension";
-
 export type Violation = {
   type: string;
   term: string;
@@ -25,13 +23,4 @@ export const validate = async (
 
 export const createValidator = (rules: Rule[]): Validator => ({
   validate: (prompt) => validate(prompt, rules),
-});
-
-export default defineExtension({
-  name: "@core/validation-framework",
-  version: "1.0.0",
-  kind: "validator",
-  activate: () => ({
-    validators: [createValidator([])],
-  }),
 });
