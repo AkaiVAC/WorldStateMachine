@@ -1,237 +1,179 @@
 ---
-title: "Current Implementation State"
+title: "Current Implementation Status"
 status: "current"
 keywords:
-  - "current implementation status"
-  - "project status"
-  - "extension system redesign"
-  - "config-driven extensions"
-  - "milestone M4 complete"
-  - "bootstrap activation next"
-  - "timeline stores"
+  - "current status"
+  - "M4 complete"
+  - "extension system complete"
+  - "context building pipeline"
+  - "what works"
+  - "known issues"
 related:
   - "./roadmap.md"
   - "./vision.md"
   - "./decisions.md"
-  - "./README.md"
-  - "./architecture/core/02-timeline-centric.md"
 ---
-# Current Implementation State
+# Current Implementation Status
 
-**Current milestone:** M4 complete, Extension System Redesign near completion
+**Last updated:** 2026-02-07
 
-**Architecture:** Config-driven 6-stage extension pipeline with path aliases (`@core/*`, `@ext/*`, `@ext-system/*`)
-
-**Next:** Wire extension bootstrap into runtime flows and finish config writer integration usage, then M5
-
-**Run tests:** `bun test`
-
-**Run bootstrap:** `bun run start`
-
-**Last updated:** 2026-01-18
+**Milestones completed:** M1-M4 + Extension System
+**Next milestone:** M5 (Tool-Calling Spike)
+**Tests:** 221 passing, 0 failures
+**Lint:** Zero warnings, zero errors
 
 ---
 
-## Architecture Overview
+## What Works Today
 
-The project uses a **config-driven extension architecture** where extensions are organized into 6 stages.
+### Core Data Model
+
+Four fundamental types in `src/core-types/`:
+
+| Type | Purpose | Fields |
+|------|---------|--------|
+| Entity | World object with identity | id, worldId, name, aliases, group |
+| Fact | Temporal state assertion | subject, property, value, validFrom/validTo, causedBy |
+| Event | Timeline milestone | timestamp, participants, visibility, outcomes, prose |
+| Relationship | Typed entity connection | from, type, to, validFrom/validTo |
+
+### Extension System (Complete)
+
+Config-driven 6-stage pipeline with 15 extensions:
+
+| Stage | Extensions | Status |
+|-------|-----------|--------|
+| 1. stores | memory-fact-store, memory-entity-store, memory-event-store, memory-relationship-store | ✅ |
+| 2. loaders | sillytavern-loader | ✅ |
+| 3. validators | validation-framework, entity-exists-validator, world-boundary-validator | ✅ |
+| 4. contextBuilders | prompt-analyzer, entity-matcher, keyword-matcher, lorebook-loader, relationship-retrieval | ✅ |
+| 5. senders | openrouter-client | ✅ |
+| 6. ui | dev-chat | ✅ |
+
+**Features:**
+- Dependency-aware wave activation (parallel within stages)
+- Config write-back with normalization
+- Required slot validation (factStore, eventStore, entityStore)
+- `needs:dependency` status tracking
+
+### Context Building Pipeline (Working End-to-End)
+
+The core value proposition is implemented and integrated:
 
 ```
-src/
-├── core-types/           # Fundamental contracts (Event, Fact, Entity, Relationship)
-└── extension-system/     # Extension loading and activation
-    ├── types.ts          # Config and extension types
-    ├── config-loader.ts  # Load and validate extensions.json
-    ├── config-loader/    # Validation helpers
-    └── bootstrap.ts      # Activate in order, validate required slots
-
-extensions/
-└── core/                 # Standard implementation (split by stage)
-    ├── 1-load-world-data/       # SillyTavern and other data loaders
-    ├── 2-store-timeline/        # Fact, Event, Entity, Relationship stores
-    ├── 3-validate-consistency/  # Entity exists, world boundary validation
-    ├── 4-build-scene-context/   # Keyword/entity matching, graph expansion
-    ├── 5-send-scene-context/    # OpenRouter / LLM clients
-    └── 6-provide-ui/            # Dev Chat interface
-
-extensions.json             # Central config listing enabled extensions per stage
+User message: "The Sunnarian princess enters the garden"
+    ↓
+1. Prompt Analyzer (LLM) → extracts "princess" as entity reference
+2. Entity Matcher (fuzzy) → "princess" matches Princess Aradia
+3. Keyword Matcher (regex) → "Sunnarian" matches Sunnaria entry
+4. Relationship Expansion → Sunnaria → Alaric (rules), Aradia (member)
+5. Lorebook Injection → all matched entries added to system prompt
+6. LLM Generation → response with full world context
 ```
 
-### The 6 Stages
+**Tested with real scenarios** in `extensions/core/4-build-scene-context/integration-e2e.test.ts`.
 
-| Stage | Purpose | Model |
-|-------|---------|-------|
-| 1. stores | Storage backends (memory, postgres) | Slot-based |
-| 2. loaders | Import data (SillyTavern, CSV, DB) | Additive |
-| 3. validators | Validation rules | Additive |
-| 4. contextBuilders | Build LLM context | Additive |
-| 5. senders | Send to LLM or export | Slot-based |
-| 6. ui | User interface | Additive |
+### In-Memory Stores
 
----
+| Store | Capabilities |
+|-------|-------------|
+| FactStore | Temporal queries with half-open intervals, fact supercession |
+| EntityStore | Lookup by ID, name (case-insensitive), world filtering |
+| EventStore | Temporal queries, participant/visibility filtering |
+| RelationshipStore | Directional queries, type filtering |
+| GraphTraversal | BFS with depth limiting, cycle detection, type/direction filters |
+| Lexicon | Case-insensitive term matching |
 
-## What Works
+### Validation Framework
 
-### Extension System (Bootstrap Implemented)
-**Location:** `src/extension-system/`
-
-**Status:** Bootstrap activation, config write-back, and contribution aggregation are implemented.
-
-**Design (2026-01-10):**
-- Config file (`extensions.json`) lists extensions per stage
-- Stable `name` field identifies each extension and matches the export
-- Path-based references (forward slashes, relative to project root)
-- Status field: `"on"`, `"off"`, or `"needs:<dependency>"`
-- Default config checked into repo; missing config fails fast with a direct error
-- System-managed config (writes back normalizations, dependency status)
-- Parallel activation within dependency-resolved waves
-- Extension contributions aggregate into context collections
-- Simple ExtensionContext as plain object (no registry)
-- Within-stage ordering via `after` field in extension definitions
-- Required slots validation (stores must be present)
-
-**See [decisions.md](decisions.md) for full schema and rationale.**
-
-### Timeline Storage
-**Location:** `extensions/core/2-store-timeline/`
-- **Fact Store** - Store and query facts with temporal bounds (validFrom/validTo)
-- **Entity Store** - Entities with id/name/aliases/group, case-insensitive lookup
-- **Lexicon** - Valid terms per world for boundary validation
-- **Relationship Store** - Typed relationships between entities, bidirectional queries
-- **Graph Traversal** - BFS with configurable depth, type, and direction filters
-- **Event Store** - Events with participants, visibility, outcomes, fact generation
-
-### Data Loading
-**Location:** `extensions/core/1-load-world-data/`
-- SillyTavern lorebook JSON import
-- Entity creation, UUID generation, lexicon population
-- Skip tracking for disabled/invalid entries
-
-### Consistency Validation
-**Location:** `extensions/core/3-validate-consistency/`
-- **Validation Framework** - Generic rule interface, collect violations
-- **Entity Exists Check** - Unknown entity detection with fuzzy suggestions
-- **World Boundary Check** - LLM-powered anachronism detection
-
-### Scene Context Building
-**Location:** `extensions/core/4-build-scene-context/`
-- **Keyword Matcher** - Match lorebook entries by keywords (extension)
-- **Entity Matcher** - Fuzzy matching with similarity scoring (extension)
-- **Prompt Analyzer** - LLM-powered entity extraction (extension)
-- **Relationship Expander** - Graph-based context expansion (extension)
-- **Lorebook Loader** - Load lorebooks from directory (extension)
-
-### LLM Integration
-**Location:** `extensions/core/5-send-scene-context/`
-- OpenRouter API client with configurable models (extension)
-- Used by validators and analyzers
+Pluggable rule system with two rules:
+- **EntityExistsRule:** Fuzzy matching with stemming (Sunnarian → Sunnaria), suggestions for unknown entities
+- **WorldBoundaryRule:** LLM-powered anachronism detection
 
 ### Dev Chat UI
-**Location:** `extensions/core/6-provide-ui/dev-chat/`
-- Extension entrypoint in `main.ts`
-- HTTP server with routing and session management
-- Chat interface with context injection
-- Lorebook and session management routes
-- Vanilla JS/TS frontend
+
+Working web interface with:
+- Chat with lorebook context injection
+- Session persistence (filesystem-backed)
+- Model selection (OpenRouter)
+- Manual entry inclusion/exclusion
+- Lorebook browser with grouping
+
+### SillyTavern Loader
+
+Imports SillyTavern lorebook JSON format:
+- Comment → name, keys → aliases
+- Handles disabled entries, missing fields
+- 11 Excelsia lorebook files as test data (106 entries)
 
 ---
 
-## What's Missing (From Vision)
+## What Doesn't Work Yet
 
-### Completed Milestones
-- ✅ **M1** - Basic validation, import, UI
-- ✅ **M2** - Relationship graph with traversal
-- ✅ **M3** - Temporal bounds on facts
-- ✅ **M4** - Events with participants, visibility, fact generation
+### Validator Wiring Gap
 
-### Still Needed
-- ❌ **M5** - Epistemic state (POV-filtered knowledge)
-- ❌ **M6** - Multi-agent orchestration
-- ❌ **M7-M9** - Geography, maps, spatial validation
-- ❌ **M10** - Calendar system
-- ❌ **M11** - Effect propagation, scene execution
+The validation framework and rules exist but aren't wired into the live system:
+- `validation-framework` activates with an empty rule list
+- `entity-exists-validator` and `world-boundary-validator` contribute factory functions, not instances
+- The chat handler (`routes/chat.ts`) bypasses the extension-contributed validators entirely
+- Validation is tested in isolation but not integrated into the chat pipeline
 
-### Recent Extension System Work (2026-01-18)
-- Bootstrap activation with within-stage dependency waves
-- Contribution aggregation into context collections
-- Config write-back for path normalization and needs status
-- `defineExtension` helper and new `@ext-system/*` alias
-- Core extensions migrated to default export format
-- `extensions.json` added with default statuses
-- Bootstrap runner + `bun run start` entrypoint
+**Impact:** Validation works when manually constructed (as in integration tests) but not through the extension system.
 
-**See [roadmap.md](roadmap.md) for milestone details.**
+### No Persistence
 
----
+All stores are in-memory. Data is lost on restart. The SillyTavern loader re-imports on every bootstrap.
 
-## Key Architectural Decisions
+### No Epistemic State
 
-### Config-Driven Extensions (2026-01-10)
+Events track participants and visibility, but there's no `getKnowledge(characterId, timestamp)` query yet. This is M7.
 
-**Approach:** Extensions loaded via central config file, not auto-discovered.
+### No Tool-Calling
 
-**Benefits:**
-- Explicit over magic (see exactly what's loaded)
-- Non-technical users can edit JSON config
-- GUI can easily read/write config later
-- No custom directory scanning needed
+The LLM receives context via prompt injection, not via tools. The LLM can still hallucinate values. This is M8, pending the M5 spike.
 
-### Six-Stage Pipeline (2026-01-10)
+### No Fact Extraction from Scenes
 
-Extensions organized into 6 ordered stages:
-1. stores → 2. loaders → 3. validators → 4. contextBuilders → 5. senders → 6. ui
-
-**Benefits:**
-- Natural data flow, simple ordering
-- No cross-stage circular dependencies
-- Stage N only depends on stages 1 to N-1
-
-### Lorebook Is Import Format (2025-12-30)
-
-**Problem:** Keyword matching "Elara" can't distinguish Queen Elara from a student named Elara.
-
-**Solution:** Transform lorebook into structured data:
-- **Entities** with unique IDs (not names)
-- **Facts** with subject=entityId (structured, queryable, temporal)
-- **Relationships** linking entity IDs
-
-### World State as RPG Stats
-
-All entities have queryable numeric attributes:
-- Characters get comprehensive state (physical, equipment, conditions, skills)
-- Kingdoms have economies, military strength, etc.
-- No hardcoded schemas - facts adapt to any world
-
-### Tool-Calling Over Context-Stuffing
-
-LLMs query facts via tools rather than receiving massive context packages:
-- Deterministic values (grain-tariff is exactly 0.15)
-- Prevents hallucination
-- Scales to large worlds
+Generated prose creates no new facts or events. The generate → extract → commit loop doesn't exist yet. This is M11.
 
 ---
 
-## Known Issues
+## Test Coverage
 
-1. **No fact extraction from LLM output** - Generate → extract → commit loop not closed
-2. **Epistemic isolation not implemented** - All characters see all facts currently
+**221 tests across 23 test files:**
+
+| Area | Tests | Coverage |
+|------|-------|----------|
+| Core stores (fact, entity, event, relationship) | ~80 | Temporal queries, CRUD, edge cases |
+| Graph traversal | ~25 | Depth, filtering, cycles, multi-hop |
+| Context builders (analyzer, matcher, retrieval) | ~50 | Fuzzy matching, keyword extraction, expansion |
+| Validation rules | ~15 | Entity exists, fuzzy suggestions |
+| Extension system (bootstrap, config) | ~30 | Wave activation, config validation, write-back |
+| Integration (end-to-end) | ~15 | Full pipeline, import, retrieval |
+| UI (server, sessions, routes) | ~6 | Router, session CRUD |
+
+**Methodology:** ZOMBIES applied consistently (Zero, One, Many, Boundary, Interface, Exception, Simple).
+
+**Gaps:** No frontend DOM tests, no config-writer tests, no WorldBoundaryRule tests.
 
 ---
 
-## Tech Stack
+## Architecture Observations
 
-- **Runtime:** Bun
-- **Language:** TypeScript (strict mode)
-- **Testing:** Bun test
-- **Linting/Formatting:** Biome
-- **LLM:** OpenRouter API
-- **Frontend:** Vanilla JS/TS
+### Strengths
+- Clean 6-stage pipeline prevents architectural mistakes
+- Test discipline is excellent (behavior-focused, ZOMBIES)
+- Context building pipeline proves the concept works
+- Extension system is well-designed and thoroughly tested
+
+### Areas for Improvement
+- `ExtensionContext` uses `unknown[]` for collection types, losing type safety at integration boundaries
+- OpenRouter client lacks retry logic, timeouts, and streaming
+- No cost/latency model for epistemic isolation (separate LLM calls per character)
 
 ---
 
 ## See also
-- [roadmap.md](./roadmap.md)
-- [vision.md](./vision.md)
-- [decisions.md](./decisions.md)
-- [README.md](./README.md)
-- [02-timeline-centric.md](./architecture/core/02-timeline-centric.md)
+- [roadmap.md](./roadmap.md) — M5-M18 implementation plan
+- [vision.md](./vision.md) — Complete constraint engine vision
+- [decisions.md](./decisions.md) — Design rationale

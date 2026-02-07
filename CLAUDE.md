@@ -200,19 +200,22 @@ Apply ZOMBIES to determine what tests to write BEFORE implementation:
 
 ## Current Project Status
 
-**Last updated:** 2026-02-06
+**Last updated:** 2026-02-07
 
 - **Milestones M1-M4:** Complete (basic validation, relationship graph, temporal facts, events)
-- **Extension system redesign:** Complete (config-driven 6-stage pipeline, bootstrap, config write-back)
-- **Next milestone:** M5 - Epistemic State (POV-filtered knowledge, tool-calling architecture)
-- **Proof-of-concept target:** M6 - Multi-Agent Orchestration
+- **Extension system:** Complete (config-driven 6-stage pipeline, bootstrap, config write-back)
+- **Next milestone:** M5 - Tool-Calling Spike (validate LLM tool-calling reliability)
+- **Proof-of-concept target:** M13 - Multi-Agent Orchestration
 
 ### Milestone Dependency Chain
 
 ```
-M1 (Validation) -> M2 (Relationships) -> M3 (Timeline) -> M4 (Events)
-  -> M5 (Epistemic State) -> M6 (Multi-Agent) [proof-of-concept]
-  -> M7 (Geography) -> M8 (Travel) -> M9 (Map) -> M10 (Calendar) -> M11 (Effects)
+M1 ✅ -> M2 ✅ -> M3 ✅ -> M4 ✅
+  -> M5 (Tool-Calling Spike) -> M8 (Tool Infra) -\
+  -> M6 (Char Extraction Spike) -> M10 (ETL)      -> M11 (Scene Gen) -> M13 (Multi-Agent) [POC]
+  -> M7 (Epistemic Queries) -> M9 (SQLite) -------/
+  -> M14 (Geography) -> M15 (Travel)
+  -> M16 (Map) -> M17 (Calendar) -> M18 (World Tick)
 ```
 
 ## Essential Reading
@@ -221,6 +224,6 @@ Before starting significant work, read these docs:
 
 1. **[docs/vision.md](docs/vision.md)** - Complete constraint engine vision
 2. **[docs/current.md](docs/current.md)** - Current implementation status
-3. **[docs/roadmap.md](docs/roadmap.md)** - M1-M11 milestones (proof-of-concept at M6)
+3. **[docs/roadmap.md](docs/roadmap.md)** - M1-M18 milestones (proof-of-concept at M13)
 4. **[docs/decisions.md](docs/decisions.md)** - Design rationale and principles
 5. **[AGENTS.md](AGENTS.md)** - Detailed coding conventions and testing strategy

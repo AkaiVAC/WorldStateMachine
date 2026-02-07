@@ -3,10 +3,11 @@ title: "Roadmap: From Current to Vision"
 status: "current"
 keywords:
   - "project roadmap"
-  - "milestones M1-M11"
-  - "epistemic state M5"
-  - "multi-agent orchestration M6"
-  - "extension system redesign"
+  - "milestones M1-M18"
+  - "validation spikes"
+  - "epistemic state M7"
+  - "multi-agent orchestration M13"
+  - "tool-calling spike M5"
   - "proof of concept"
   - "implementation plan"
 related:
@@ -18,8 +19,10 @@ related:
 ---
 # Roadmap: From Current to Vision
 
-**Current position:** M4 complete, ready for M5
-**Proof-of-concept target:** M6 (epistemic state + multi-agent)
+**Last updated:** 2026-02-07
+
+**Current position:** M4 complete, extension system complete, ready for validation spikes
+**Proof-of-concept target:** M13 (multi-agent orchestration)
 
 ---
 
@@ -56,32 +59,30 @@ LOREBOOK (Import)              RUNTIME MODEL
 3. **Temporal bounds**: Facts have validFrom/validTo
 4. **True epistemic isolation**: Knowledge is per-entity-ID, not per-keyword
 
-**Implications for Retrieval:**
-- OLD: "Elara" in text → keyword search → inject matching prose
-- NEW: Entity ID in scene → query facts for that entity → construct context
-
-**Implications for Scene Setup:**
-- Entities in a scene are identified by ID (or unambiguous reference)
-- New entities (not in lorebook) get fresh IDs
-- The LLM/author maintains entity→ID bindings within a session
-
-**This enables M5 (Epistemic State):**
+**This enables M7 (Epistemic State Queries):**
 - `getKnowledge(entityId, timestamp)` → facts this entity knows
 - No ambiguity about "which Elara"
-- Clean foundation for multi-agent (M6)
+- Clean foundation for multi-agent (M13)
 
 ---
 
 ## Milestone Sequencing Strategy
 
-**Priority:** Realistic character knowledge first (epistemic state + multi-agent orchestration), then physical constraints (geography, travel), then advanced features.
+**Priority:** Validate risky assumptions first (spikes), then build epistemic state, then physical constraints.
+
+**Why spikes before building:**
+The roadmap previously treated the entire epistemic + tool-calling + ETL + scene generation stack as a single milestone. Analysis revealed two critical unvalidated assumptions that the entire architecture depends on:
+1. LLMs will reliably call tools instead of hallucinating values
+2. LLMs can reliably extract structured psychological attributes from prose
+
+If either assumption fails, the implementation approach needs fundamental rethinking. Cheap spikes (1-2 days each) validate these before committing months of architecture work. See `decisions.md` for full rationale.
 
 **Critical path to proof-of-concept:**
-1. M2: Relationship Graph (foundation)
-2. M3: Timeline Foundation (temporal ordering)
-3. M4: Events (track "who was there")
-4. M5: Epistemic State ⭐ **FIRST BIG WIN**
-5. M6: Multi-Agent Orchestration ⭐ **PROOF-OF-CONCEPT COMPLETE**
+1. M5: Tool-Calling Spike (validate architecture)
+2. M6: Character Extraction Spike (validate ETL quality)
+3. M7: Epistemic State Queries ⭐ **FIRST BIG WIN**
+4. M8-M12: Tool infrastructure, persistence, ETL, scene generation
+5. M13: Multi-Agent Orchestration ⭐ **PROOF-OF-CONCEPT COMPLETE**
 
 **After proof-of-concept:** Add physical constraints, then richness.
 
@@ -95,189 +96,211 @@ LOREBOOK (Import)              RUNTIME MODEL
 | 2 | Relationship Graph | Entity relationships, graph traversal | ✅ DONE |
 | 3 | Timeline Foundation | Chapter-based chronology | ✅ DONE |
 | 4 | Events | Source of truth, participation tracking | ✅ DONE |
-| 5 | Epistemic State | POV-filtered knowledge | 🎯 NEXT ⭐ |
-| 6 | Multi-Agent Orchestration | Separate contexts, secrets | 🔜 ⭐ |
-| 7 | Basic Geography | Containment, proximity | 🔜 |
-| 8 | Travel Validation | Routes, travel time | 🔜 |
-| 9 | Full Map System | 2D coordinates, terrain, weather | 🔜 |
-| 10 | Calendar System | Full temporal granularity | 🔜 |
-| 11 | Effect Propagation | Cascading effects, ambient | 🔜 |
+| 5 | Tool-Calling Spike | Validate LLM tool-calling reliability | 🎯 NEXT |
+| 6 | Character Extraction Spike | Validate structured extraction from prose | 🔜 |
+| 7 | Epistemic State Queries | POV-filtered knowledge | 🔜 ⭐ |
+| 8 | Tool-Calling Infrastructure | getFacts, getKnowledge tools | 🔜 |
+| 9 | SQLite Persistence | Durable storage for world state | 🔜 |
+| 10 | Lorebook ETL Pipeline | Multi-pass structured extraction | 🔜 |
+| 11 | Scene Generation Loop | Generate → validate → extract → commit | 🔜 |
+| 12 | Character State Extraction | Equipment, conditions, attitudes from prose | 🔜 |
+| 13 | Multi-Agent Orchestration | Separate POV contexts, secrets | 🔜 ⭐ |
+| 14 | Basic Geography | Containment, proximity | 🔜 |
+| 15 | Travel Validation | Routes, travel time | 🔜 |
+| 16 | Full Map System | 2D coordinates, terrain, weather | 🔜 |
+| 17 | Calendar System | Full temporal granularity | 🔜 |
+| 18 | Unified World Tick | Tiered simulation, ambient progression | 🔜 |
 
 ---
 
-## Phase 1: Character Knowledge (M2-M6)
+## Completed Milestones (M1-M4)
 
-**Goal:** Enable realistic character knowledge boundaries in roleplay scenarios.
+### M1: Basic Validation ✅ DONE
+
+Entity existence checking with fuzzy suggestions, world boundary (anachronism) detection via LLM, validation framework with pluggable rules.
 
 ### M2: Relationship Graph ✅ DONE
 
-**Goal:** Add relationships between entities and enable graph traversal for context retrieval.
-
-**What to build:**
-- `Relationship` type: `{from: entityId, type: RelationType, to: entityId}`
-- Relationship types: `daughter-of`, `son-of`, `rules`, `member-of`, `located-in`, etc.
-- `RelationshipStore` with bidirectional queries
-- Graph traversal: "Sunnaria" → `rules` → "Alaric", `member-of` → "Royal Family" → "Aradia"
-- Integration with context retrieval
-
-**Deliverables:**
-- `src/world-state/relationship/relationship.ts` - Relationship type
-- `src/world-state/relationship/relationship-store.ts` - Store and query
-- `src/world-state/relationship/relationship-store.test.ts` - Tests
-- `src/retrieval/graph-traversal.ts` - Context retrieval via graph
-- `src/retrieval/graph-traversal.test.ts` - Tests
-
-**Test cases (ZOMBIES):**
-- Zero: Query entity with no relationships
-- One: Single relationship lookup
-- Many: Multiple relationships, multi-hop traversal
-- Boundary: Circular relationships, deep graphs
-- Interface: API ergonomics
-- Exceptions: Unknown entity IDs
-- Simple: "Sunnaria" → "Princess Aradia" via graph
-
-**Success criteria:**
-- User prompt: "Sunnarian Princess Comedy"
-- Entity extraction: "Sunnarian" + "Princess"
-- Graph traversal: "Sunnaria" → Royal Family → Aradia
-- Context injection: ✅ Princess Aradia entry included
-
-**Enables:** Better context injection, foundation for epistemic state
-
-**Detailed design:** See `architecture/core/04-containment.md` (containment is a type of relationship)
-
----
+Bidirectional relationship store, BFS graph traversal with depth/type/direction filtering, integration with context retrieval.
 
 ### M3: Timeline Foundation ✅ DONE
 
-**Goal:** Add temporal ordering to facts (chapter-based chronology).
-
-**What to build:**
-- Add `timestamp` field to `Fact` type (string: "Chapter 1", "Chapter 5", etc.)
-- Add `validFrom` and `validTo` fields (nullable timestamps)
-- Update `FactStore` to support temporal queries
-- `getFactsAt(timestamp)` - query what was true at a specific time
-- Chapter-based timeline (simple chronology)
-
-**Deliverables:**
-- Update `src/world-state/fact/fact.ts` - Add temporal fields
-- Update `src/world-state/fact/fact-store.ts` - Temporal queries
-- Update `src/world-state/fact/fact-store.test.ts` - Temporal test cases
-
-**Test cases:**
-- Fact created at Chapter 1, valid until Chapter 5 (then superseded)
-- Query at Chapter 3: returns fact
-- Query at Chapter 6: doesn't return fact
-- Fact with validFrom but no validTo (still valid)
-- Overlapping facts (conflict detection)
-
-**Success criteria:**
-- Can track "Alaric is King" from Chapter 1 onward
-- Can track "Alaric is King" from Chapter 1 to Chapter 10 (then dies)
-- Query "What was Alaric's title at Chapter 5?" → "King"
-
-**Enables:** Events with temporal bounds, historical queries
-
-**Detailed design:** See `architecture/core/02-timeline-centric.md`
-
----
+Temporal facts with `validFrom`/`validTo`, half-open interval semantics, `getFactsAt(timestamp)` queries.
 
 ### M4: Events as Source of Truth ✅ DONE
 
-**Goal:** Track events that generate facts, record participation, preserve original prose.
+Events with participants, visibility levels (private/restricted/public), outcomes linking to facts, `getFactsFromEvent` extraction.
 
-**What was built:**
-- `Event` type: id, worldId, timestamp, title, location, participants, visibility, outcomes, prose
-- `EventStore` with queries by participant, timestamp, location, visibility
-- Fact generation from events (`getFactsFromEvent`)
-- Visibility levels: private, restricted, public
+### Extension System ✅ DONE
 
-**Deliverables:**
-- `src/world-state/event/event.ts` - Event type
-- `src/world-state/event/event-store.ts` - Store, query, and fact generation
-- `src/world-state/event/event-store.test.ts` - Tests
-- `src/world-state/event/index.ts` - Exports
+Config-driven 6-stage pipeline, dependency-aware wave activation, config write-back, contribution aggregation, required slot validation. See `decisions.md` for architecture details.
 
-**Event structure:**
+---
+
+## Phase 0: Validate Assumptions (M5-M6)
+
+These spikes are cheap experiments (1-2 days each) that validate the two riskiest architectural assumptions before committing to full implementation.
+
+### M5: Tool-Calling Spike 🎯 NEXT
+
+**Goal:** Determine whether LLMs reliably call world-state tools instead of hallucinating values.
+
+**Why this matters:** The entire post-M7 architecture (tool-calling infrastructure, scene generation, validation) assumes LLMs will call `getFacts`/`getKnowledge` before generating numeric values. If they skip tools and hallucinate, the constraint engine concept needs a different enforcement mechanism.
+
+**What to build:**
+- Minimal tool definitions: `getFacts(entityId)` and `getRelationships(entityId)`
+- Hard-coded fact data for 2-3 Excelsia entities (Sunnaria economy, Aradia, Alaric)
+- Test harness that sends scene prompts requiring factual queries
+- Metrics collection: tool call rate, accuracy, model comparison
+
+**Test scenarios:**
+1. "Aradia considers raising the grain tariff" → must call `getFacts("sunnaria-economy")` to get current rate
+2. "Alaric reviews the kingdom's military readiness" → must call `getFacts("sunnaria-kingdom")`
+3. "A merchant discusses trade routes" → should call `getRelationships("sunnaria-economy")`
+4. Free-form scene with no obvious fact need → should NOT hallucinate specific numbers
+
+**Measure across models:**
+- OpenRouter free tier (current default)
+- Claude Sonnet
+- Claude Opus
+- Any other models of interest
+
+**Success criteria:**
+- At least one model tier achieves >90% tool call rate for fact-dependent prompts
+- Tool responses are used verbatim (not paraphrased with wrong values)
+- Model tier needed for reliable tool-calling is identified and documented
+
+**Failure response:**
+- If no model reliably calls tools: investigate hybrid approach (pre-inject critical facts as context, use tools for secondary queries)
+- If tool calls happen but values are paraphrased: investigate structured output enforcement
+- Document findings in `decisions.md` regardless of outcome
+
+**Enables:** M8 (Tool-Calling Infrastructure), M11 (Scene Generation Loop)
+
+---
+
+### M6: Character Extraction Spike
+
+**Goal:** Determine whether LLMs can reliably extract structured psychological and physical attributes from lorebook prose.
+
+**Why this matters:** The Lorebook ETL Pipeline (M10) assumes an LLM can extract goals, motivations, fears, values, physical attributes, and relationships from narrative prose. If extraction quality is too low, the entire multi-pass ETL approach needs rethinking.
+
+**What to build:**
+- Extraction prompt that requests structured JSON output for a single lorebook entry
+- Test against 5-10 Excelsia entries spanning different categories (characters, kingdoms, economies)
+- Quality evaluation framework (precision, recall, consistency across runs)
+
+**Test scenarios:**
+1. **Character extraction:** Princess Aradia entry → extract goals, motivations, fears, physical attributes, skills, relationships
+2. **Kingdom extraction:** Sunnaria entry → extract population estimates, military strength, borders, political relationships
+3. **Economy extraction:** Sunnarian Economy entry → extract trade volume, tariff rates, key resources
+4. **Cross-entity consistency:** Extract all 8+ kingdoms → do they get consistent attribute schemas?
+5. **Inferred values:** "thriving economy" → does the LLM produce reasonable numeric estimates?
+
+**Evaluation criteria:**
+- **Structural completeness:** Does it extract all major attributes mentioned in prose?
+- **Factual accuracy:** Do extracted values match what the prose actually says?
+- **Inference quality:** Are inferred numeric values reasonable and consistent?
+- **Cross-run stability:** Same entry extracted twice → similar results?
+- **Cross-entity consistency:** All kingdoms get population, military-strength, borders?
+
+**Success criteria:**
+- Character extraction captures >80% of attributes mentioned in prose
+- Inferred numeric values are consistent across multiple runs (within 20% variance)
+- Cross-entity schema consistency >70% (kingdoms share common attributes)
+
+**Failure response:**
+- If extraction is unreliable: investigate human-in-the-loop ETL (LLM proposes, human confirms)
+- If schema consistency is poor: investigate providing schema templates per category
+- If inference quality is low: investigate extracting only explicit facts, skip inferred values
+- Document findings in `decisions.md` regardless of outcome
+
+**Enables:** M10 (Lorebook ETL Pipeline), M12 (Character State Extraction)
+
+---
+
+## Phase 1: Character Knowledge (M7-M13)
+
+**Goal:** Enable realistic character knowledge boundaries in roleplay scenarios.
+
+### M7: Epistemic State Queries ⭐ FIRST BIG WIN
+
+**Goal:** Track what each character knows based on event participation and visibility. This is the core differentiator — no existing tool does this.
+
+**What to build:**
+- `getKnowledge(characterId, timestamp)` query function
+- Participation-based filtering (events character was at)
+- Visibility-based filtering (public events everyone knows)
+- Reveal/conceal mechanism (told about something / hidden from)
+
+**Algorithm:**
+```
+1. Get events character participated in (up to timestamp)
+2. Get public events (everyone knows)
+3. Get revealed events (someone told them)
+4. Subtract concealed events
+5. Extract facts and entity IDs from known events
+```
+
+**Test cases (ZOMBIES):**
+- Zero: Character with no events → empty knowledge
+- One: Character participated in one event → knows it
+- Many: Character at multiple events → knows all
+- Boundary: Event at exact timestamp, public vs private visibility
+- Interface: API returns events, facts, entities in clean structure
+- Exception: Unknown character ID
+- Simple: Secret war council — King knows, Princess doesn't
+
+**Success criteria:**
+- Create private event (Secret War Council) with King as participant
+- `getKnowledge("aradia", timestamp)` → doesn't include it
+- `getKnowledge("alaric", timestamp)` → includes it
+- Public events visible to all characters
+
+**Enables:** M8 (tools wrap epistemic queries), M13 (multi-agent needs POV filtering)
+
+**Detailed design:** See `architecture/core/08-epistemic-state.md`
+
+---
+
+### M8: Tool-Calling Infrastructure
+
+**Goal:** Expose world-state queries as LLM tools with deterministic responses.
+
+**Depends on:** M5 (spike validates approach), M7 (epistemic queries exist to wrap)
+
+**What to build:**
+- Tool definitions: `getFacts`, `getKnowledge`, `getRelationships`, `searchEntities`
+- Tool execution layer (receives tool call, routes to store, returns result)
+- Tool enforcement wrapper (system prompt + validation that tools were called)
+- Integration with OpenRouter client
+
+**Tools API:**
 ```typescript
-type Event = {
-  id: string;
-  worldId: string;
-  timestamp: number;          // numeric timestamp
-  title: string;              // "Secret War Council"
-  location?: string;          // Entity ID for location
-  participants: string[];     // Entity IDs
-  visibility: Visibility;     // "private" | "restricted" | "public"
-  outcomes?: Fact[];          // Facts extracted from this event
-  prose?: string;             // Original prose
-};
+getFacts(entityId, timestamp?) → { property: value } map
+getKnowledge(characterId, timestamp) → { events, facts, entities }
+getRelationships(entityId, types?) → Relationship[]
+searchEntities(query) → EntitySummary[]
 ```
 
-**Enables:** Epistemic state (who was at which events)
+**Success criteria:**
+- LLM calls `getFacts("sunnaria-economy")` → gets `{ "grain-tariff": 0.15, ... }`
+- LLM uses exact returned values in generated prose
+- Validation rejects outputs that reference numeric values without tool calls
 
-**Detailed design:** See `architecture/core/02-timeline-centric.md` §2.2, `architecture/core/08-epistemic-state.md`
+**Enables:** M11 (scene generation uses tools), M13 (multi-agent uses filtered tools)
 
 ---
 
-### M5: Epistemic State + Tool-Calling Architecture ⭐ FIRST BIG WIN
+### M9: SQLite Persistence
 
-**Goal:** Track what each character knows based on event participation and visibility. Enable tool-calling LLM architecture with deterministic facts. Transform lorebooks into comprehensive structured data.
+**Goal:** Durable storage for world state. Replace in-memory stores with SQLite-backed stores.
 
-**Architectural Shift:** Moving from context-stuffing to tool-calling (see decisions.md: "Tool-Calling Over Context-Stuffing")
-
----
-
-#### Part 1: Hybrid Persistence Layer (SQLite + JSON)
-
-**Files to create:**
-- `src/world-state/persistence/sqlite-store.ts` - SQLite database operations
-- `src/world-state/persistence/json-snapshot.ts` - JSON export/import
-- `src/world-state/persistence/persistence.test.ts` - Tests
-
-**Schema:**
-```sql
--- Single database per world: worlds/excelsia/excelsia.db
-CREATE TABLE entities (
-  id TEXT PRIMARY KEY,
-  worldId TEXT NOT NULL,
-  name TEXT NOT NULL,
-  category TEXT,  -- character, kingdom, economy, weather, etc.
-  aliases TEXT    -- JSON array
-);
-
-CREATE TABLE facts (
-  id TEXT PRIMARY KEY,
-  worldId TEXT NOT NULL,
-  subject TEXT NOT NULL,  -- entity ID
-  property TEXT NOT NULL,
-  value TEXT NOT NULL,    -- JSON for complex values
-  validFrom INTEGER,
-  validTo INTEGER,
-  causedBy TEXT           -- entity ID that caused this fact
-);
-
-CREATE TABLE relationships (
-  id TEXT PRIMARY KEY,
-  worldId TEXT NOT NULL,
-  fromEntity TEXT NOT NULL,
-  type TEXT NOT NULL,
-  toEntity TEXT NOT NULL,
-  validFrom INTEGER,
-  validTo INTEGER
-);
-
-CREATE TABLE events (
-  id TEXT PRIMARY KEY,
-  worldId TEXT NOT NULL,
-  timestamp INTEGER NOT NULL,
-  title TEXT,
-  location TEXT,          -- entity ID
-  participants TEXT,      -- JSON array of entity IDs
-  visibility TEXT,        -- private/restricted/public
-  outcomes TEXT,          -- JSON array of facts
-  prose TEXT
-);
-```
+**What to build:**
+- SQLite schema for entities, facts, relationships, events
+- SQLite store implementations (same interfaces as memory stores)
+- JSON snapshot export/import for human inspection
+- Migration utilities
 
 **File structure:**
 ```
@@ -285,545 +308,142 @@ worlds/
   excelsia/
     excelsia.db              # SQLite runtime database
     source/                  # Original lorebook files (read-only)
-      characters.json
-      kingdoms.json
-      ...
-    snapshots/               # Human-readable backups
-      snapshot-2025-12-31.json
+    snapshots/               # Human-readable JSON backups
 ```
+
+**Success criteria:**
+- All existing tests pass with SQLite stores swapped in
+- Fact queries perform <100ms
+- JSON snapshot matches database content
+- Data survives process restart
+
+**Enables:** M10 (ETL needs persistent storage), M11 (scene loop commits to durable store)
+
+**Detailed design:** See `architecture/core/06-storage-format.md`
 
 ---
 
-#### Part 2: Comprehensive Lorebook ETL
+### M10: Lorebook ETL Pipeline
 
-**Files to create:**
-- `src/import/lorebook-etl.ts` - Main ETL pipeline
-- `src/import/entity-categorizer.ts` - Classify entity types
-- `src/import/fact-extractor.ts` - Extract ALL facts from prose
-- `src/import/relationship-extractor.ts` - Extract relationships
-- `src/import/schema-analyzer.ts` - Identify common attributes across categories
-- `src/import/lorebook-etl.test.ts` - Tests
+**Goal:** Transform lorebook prose into comprehensive structured data via multi-pass LLM extraction.
 
-**ETL Pipeline:**
-```
-PASS 1: Entity Categorization
-  → Parse all lorebook entries
-  → LLM classifies each: character, kingdom, economy, magic-system, etc.
-  → Generate entity IDs: "aradia-princess", "sunnaria-kingdom", "sunnaria-economy"
-  → Result: Entity registry with categories
+**Depends on:** M6 (spike validates extraction quality), M9 (SQLite for persistence)
 
-PASS 2: Schema Discovery
-  → Group entities by category (all kingdoms, all characters, etc.)
-  → Identify common attributes across category
-  → Example: All kingdoms have [population, borders-count, military-strength, ...]
-  → Result: Schema templates per category
+**What to build:**
+- Pass 1: Entity categorization (character, kingdom, economy, etc.)
+- Pass 2: Schema discovery (common attributes per category)
+- Pass 3: Comprehensive fact extraction (explicit + inferred values)
+- Pass 4: Relationship extraction (name → ID resolution)
+- Pass 5: Persist to SQLite + create JSON snapshot
 
-PASS 3: Comprehensive Fact Extraction (per entity)
-  → For each entity, extract ALL measurable attributes
-  → Use schema from Pass 2 as guide
-  → Infer missing values from qualitative prose:
-    - "thriving economy" → trade-volume: 8500
-    - "defense-focused" → military-strength: 6.5/10
-  → Extract both explicit and implicit facts
-  → Result: Complete fact set per entity
+**Entity categories (auto-detected):**
+- `character` — persons (Aradia, Alaric)
+- `kingdom` — places (Sunnaria, Lunaria)
+- `economy` — abstract systems (Sunnarian Economy)
+- `weather` — environmental state
+- `magic-system` — abstract concepts
+- `faction` — groups (Merchant Guild)
 
-PASS 4: Relationship Extraction
-  → Identify relationships in prose
-  → Use entity registry for name→ID resolution
-  → Extract: daughter-of, rules, borders, allied-with, etc.
-  → Result: Relationship graph
+**Character extraction includes psychological depth:**
+- Physical attributes (height, strength, age)
+- Goals and motivations (what they want, why)
+- Fears and internal conflicts
+- Values and beliefs
+- Skills and capabilities
 
-PASS 5: Store in SQLite + Create JSON Snapshot
-  → Insert all entities, facts, relationships into SQLite
-  → Generate JSON snapshot for human inspection
-  → Preserve original prose in metadata
-```
+**Success criteria:**
+- All 106 Excelsia lorebook entries → entities in SQLite
+- ~500-1000 facts extracted (including inferred values)
+- Relationship graph populated
+- All kingdoms share consistent attribute schema
+- JSON snapshot readable and accurate
 
-**Entity Categories (auto-detected):**
-- `character` - Concrete persons (Aradia, Alaric, Elara)
-- `kingdom` - Concrete places (Sunnaria, Lunaria)
-- `economy` - Abstract systems (Sunnarian Economy, Continental Trade)
-- `weather` - Environmental state (Sunnaria Weather)
-- `magic-system` - Abstract concepts (Circle 1, Circle 2)
-- `race` - Categories (Humans, Elves)
-- `faction` - Groups (Merchant Guild, Military Order)
-- `constant` - World fundamentals (always in context)
+**Enables:** M11 (rich data for scene generation), M12 (character model for extraction)
 
-**Character-Specific Extraction (Complete Person Model):**
-
-**Core principle:** Characters are not stat blocks. They are people with desires, fears, and motivations. Without these, they're just caricatures bound to their roles.
-
-Characters get comprehensive state extraction across categories:
-
-**1. Physical Attributes:**
-```typescript
-{subject: "reacher", property: "height", value: 185}  // cm
-{subject: "reacher", property: "strength", value: 7.5}  // 0-10 scale
-{subject: "reacher", property: "dexterity", value: 6.0}
-{subject: "reacher", property: "age", value: 34}
-```
-
-**2. Equipment State:**
-```typescript
-{subject: "reacher", property: "equipment.shoe-left.condition", value: "worn"}
-{subject: "reacher", property: "equipment.tunic.color", value: "red"}
-{subject: "reacher", property: "equipment.sword", value: "standard-steel-blade"}
-```
-
-**3. Appearance:**
-```typescript
-{subject: "reacher", property: "appearance.clothing.tunic.color", value: "red"}
-{subject: "reacher", property: "appearance.hair.style", value: "short-unkempt"}
-{subject: "reacher", property: "appearance.visible-injuries", value: "scar-left-cheek"}
-```
-
-**4. Capabilities:**
-```typescript
-{subject: "reacher", property: "skill.aspect-theory", value: 9.5}  // 0-10
-{subject: "reacher", property: "skill.combat", value: 7.0}
-{subject: "reacher", property: "can-swim", value: true}
-```
-
-**5. Goals & Desires (WHO they are):**
-```typescript
-// Primary goals - what they want
-{subject: "aradia", property: "primary-goal", value: "achieve-peace-with-lunaria"}
-{subject: "aradia", property: "secondary-goal", value: "prove-worth-to-father"}
-
-// Motivations - why they want it
-{subject: "aradia", property: "motivation.peace", value: "haunted-by-war-casualties"}
-{subject: "aradia", property: "motivation.prove-worth", value: "dismissed-as-naive-idealist"}
-
-// What drives their decisions
-{subject: "alaric", property: "primary-goal", value: "protect-sunnaria"}
-{subject: "alaric", property: "motivation", value: "honor-ancestors-legacy"}
-```
-
-**6. Fears & Internal Conflicts:**
-```typescript
-// What they fear
-{subject: "aradia", property: "fears", value: "failing-her-people"}
-{subject: "aradia", property: "fears.secondary", value: "fathers-disappointment"}
-
-// Internal conflicts that create tension
-{subject: "aradia", property: "internal-conflict", value: "duty-to-father-vs-moral-conviction"}
-{subject: "alaric", property: "internal-conflict", value: "peace-vs-strength-dilemma"}
-```
-
-**7. Values & Beliefs:**
-```typescript
-// Core values that guide behavior
-{subject: "aradia", property: "values.primary", value: "compassion-over-conquest"}
-{subject: "aradia", property: "values.secondary", value: "dialogue-before-force"}
-
-// Beliefs about the world
-{subject: "alaric", property: "belief.leadership", value: "strength-earns-respect"}
-{subject: "alaric", property: "belief.peace", value: "won-through-power-not-words"}
-```
-
-**8. Attitudes & Social Bonds (context-specific):**
-```typescript
-// How they feel about specific entities/situations
-{subject: "reacher", property: "attitude-toward.academy", value: 7.0}  // 0-10 scale
-{subject: "reacher", property: "trust-level.council", value: 3.5}
-{subject: "aradia", property: "attitude-toward.war", value: "deeply-opposed"}
-```
-
-**LLM Requirements:**
-- High-quality model for comprehensive extraction (Opus-tier recommended)
-- Must infer missing numeric values from context
-- Must maintain consistency across similar entities
-- Must extract ALL character attributes (treat characters as complete people, not stat blocks)
-- Must extract psychological depth: goals, motivations, fears, values, conflicts
-
-**Critical distinction - M5 vs M11:**
-
-**M5 extracts character ATTRIBUTES (WHO they are):**
-- These are static or slow-changing facts about the character
-- Goals, motivations, fears define their personality
-- Example: `{subject: "aradia", property: "primary-goal", value: "achieve-peace"}`
-- This is extracted from lorebook during ETL
-
-**M11 Intent System tracks PURSUIT (HOW they act on goals):**
-- Active, off-screen progression toward goals
-- References M5 goal facts
-- Example: `{characterId: "aradia", activeIntent: "negotiate-treaty", goal: "achieve-peace", progress: 0.6}`
-- This is dynamic simulation, not character definition
-
-**Without M5 goals/motivations, characters are just NPCs with no agency or depth.**
+**Detailed design:** See `architecture/future/10-import-pipeline.md`
 
 ---
 
-#### Part 3: Tool-Calling Infrastructure
+### M11: Scene Generation Loop
 
-**Files to create:**
-- `src/tools/world-tools.ts` - Tool definitions for LLMs
-- `src/tools/fact-query.ts` - getFacts implementation
-- `src/tools/knowledge-query.ts` - getKnowledge implementation
-- `src/tools/relationship-query.ts` - getRelationships implementation
-- `src/tools/entity-search.ts` - searchEntities implementation
-- `src/tools/tools.test.ts` - Tests
+**Goal:** Close the generate → validate → extract → commit loop.
 
-**Tools API:**
-```typescript
-// Tool 1: Query all facts for an entity
-getFacts(entityId: string, timestamp?: number): FactMap
-  → Returns: { property: value } map for all facts
-  → Example: { "grain-tariff": 0.15, "trade-volume": 8500, ... }
+**Depends on:** M8 (tools), M9 (persistence), M10 (rich data)
 
-// Tool 2: Epistemic query - what does character know?
-getKnowledge(characterId: string, timestamp: number): Knowledge
-  → Returns: { events, facts, entities } character is aware of
-  → Filters by event participation and visibility
-
-// Tool 3: Relationship query
-getRelationships(entityId: string, types?: string[]): Relationship[]
-  → Returns: All relationships for entity
-  → Optional filter by relationship type
-
-// Tool 4: Entity discovery
-searchEntities(query: string): EntitySummary[]
-  → Fuzzy search across entity names/categories
-  → Returns: ID list with brief descriptions
-```
-
-**Enforcement Strategy:**
-- System prompt with strict tool usage requirements
-- Function calling / structured output mode
-- Validation rejects outputs without tool calls
-- Lightweight LLM wrapper that enforces tool protocol
-
----
-
-#### Part 4: Epistemic State Queries
-
-**Files to create:**
-- `src/world-state/epistemic/knowledge-query.ts` - Core epistemic logic
-- `src/world-state/epistemic/knowledge-query.test.ts` - Tests
-
-**Algorithm:**
-```typescript
-getKnowledge(characterId: string, timestamp: number) {
-  // 1. Events character participated in
-  const participatedEvents = eventStore.getByParticipant(characterId)
-    .filter(e => e.timestamp <= timestamp);
-
-  // 2. Public events (everyone knows)
-  const publicEvents = eventStore.getByVisibility("public")
-    .filter(e => e.timestamp <= timestamp);
-
-  // 3. Revealed events (told about it)
-  const revealedEvents = findReveals(characterId, timestamp);
-
-  // 4. Combine (minus concealed events)
-  const knownEvents = [...participatedEvents, ...publicEvents, ...revealedEvents]
-    .filter(e => !isConcealedFrom(e, characterId));
-
-  // 5. Extract facts and entity IDs from known events
-  const knownFacts = knownEvents.flatMap(e => getFactsFromEvent(e));
-  const knownEntities = extractEntityIds(knownEvents);
-
-  return { events: knownEvents, facts: knownFacts, entities: knownEntities };
-}
-```
-
----
-
-#### Part 5: Scene Generation with Tools
-
-**Files to create:**
-- `src/scene/tool-calling-generator.ts` - LLM wrapper with tool enforcement
-- `src/scene/scene-setup.ts` - Scene configuration
-- `src/scene/validation.ts` - Output validation
-- `src/scene/scene.test.ts` - Tests
-
-**Scene Flow:**
-```typescript
-1. Scene Setup (human or LLM-assisted)
-   → participants: ["aradia-princess", "alaric-king"]
-   → location: "sunnaria-throne-room"
-   → timestamp: Chapter 5, Scene 3
-   → povCharacter: "aradia-princess" (optional)
-
-2. Build Minimal Context
-   → Scene setup details
-   → Entity ID list (relevant entities for this scene)
-   → World fundamentals (kingdoms, magic rules)
-   → Available tools
-
-3. LLM Generation (with tool calling)
-   → LLM must call getFacts/getKnowledge before generating
-   → Tools return deterministic values
-   → LLM generates prose using exact facts
-
-4. Validation
-   → Structural: Valid output format?
-   → Fact consistency: Contradicts existing facts?
-   → World boundary: Invalid entities/concepts?
-   → Epistemic: Character knows information they shouldn't?
-
-5. Extract New Facts from Output
-   → Parse prose for new facts/events
-   → Store with timestamp in SQLite
-
-6. User Response
-   → Parse user message for facts/events
-   → Update world state
-   → Continue loop
-```
-
----
-
-**Deliverables:**
-
-**Persistence:**
-- SQLite schema + operations
-- JSON snapshot export/import
-- Migration utilities
-
-**ETL:**
-- Multi-pass extraction pipeline
-- Entity categorization (LLM-powered)
-- Schema discovery across categories
-- Comprehensive fact extraction (including inferred values)
-- Relationship extraction
-
-**Tools:**
-- getFacts, getKnowledge, getRelationships, searchEntities
-- Tool enforcement wrapper
-- Validation pipeline
-
-**Epistemic:**
-- Knowledge query algorithm
-- Participation + visibility filtering
-- Reveal/conceal mechanisms
-
-**Scene Generation:**
-- Tool-calling LLM integration
-- Scene setup utilities
-- Output validation
+**What to build:**
+- Scene setup (participants, location, timestamp, POV character)
+- Minimal context assembly (entity IDs + tools, not full prose)
+- LLM generation with tool calling
+- Output validation (fact consistency, world boundary, epistemic)
 - Fact extraction from generated prose
+- Staging area for human review
+- Commit approved facts to timeline
+
+**Scene flow:**
+```
+1. Scene Setup → participants, location, timestamp
+2. Build Minimal Context → entity IDs, tools, world fundamentals
+3. LLM Generates (with tool calls) → prose
+4. Validate → fact consistency, world boundary, epistemic
+5. Extract New Facts → parse prose for state changes
+6. Stage for Review → user approves/rejects
+7. Commit to Timeline → facts with temporal bounds
+```
+
+**Success criteria:**
+- Scene: "Aradia considers raising tariffs"
+- LLM calls `getFacts("sunnaria-economy")` → gets `grain-tariff: 0.15`
+- LLM generates prose using 0.15, not hallucinated value
+- New facts extracted and committed to timeline
+- Round-trip works: next scene queries updated facts
+
+**Enables:** M12 (character state extraction post-scene), M13 (multi-agent scenes)
+
+**Detailed design:** See `architecture/future/09-scene-execution.md`
 
 ---
 
-#### Part 6: Comprehensive Character State Extraction from Scenes
+### M12: Character State Extraction
 
-**Files to create:**
-- `src/extraction/character-state-extractor.ts` - Extract state changes from prose
-- `src/extraction/validation-rules.ts` - Consistency validation rules
-- `src/extraction/character-state-extractor.test.ts` - Tests
+**Goal:** Extract comprehensive character state changes from scene prose.
 
-**What to extract from scene prose:**
+**Depends on:** M6 (spike validates extraction), M11 (scenes to extract from)
 
-**Physical Condition (Temporal):**
-```typescript
-// Injuries, exhaustion, environmental effects
-{subject: "reacher", property: "health.current", value: 85, validFrom: 43}
-{subject: "reacher", property: "stamina.current", value: 60, validFrom: 43}
-{subject: "reacher", property: "condition.wetness", value: "waist-down", validFrom: 43, validTo: 48}
-{subject: "reacher", property: "condition.exhaustion", value: 6.5, validFrom: 43, validTo: 50}
-```
+**What to build:**
+- Post-scene analysis: LLM extracts state changes per character
+- Categories: physical condition, equipment, appearance, mood, attitudes
+- Human review workflow (show extracted facts, approve/edit/reject)
+- Consistency validation (clothing color changes, physical constraints)
+- Commit approved changes to timeline
 
-**Equipment Changes (Temporal):**
-```typescript
-// Damage, acquisition, loss
-{subject: "reacher", property: "equipment.shoe-left.condition", value: "damaged-toe-exposed", validFrom: 43}
-{subject: "reacher", property: "equipment.tunic.condition", value: "torn-shoulder", validFrom: 43}
-{subject: "reacher", property: "equipment.sword", value: "lost-in-river", validFrom: 43}
-```
+**What to extract:**
+- Physical condition (injuries, exhaustion, environmental effects)
+- Equipment changes (damage, acquisition, loss)
+- Appearance changes (clothing, visible wounds)
+- Social/emotional changes (attitude shifts, mood)
+- Status effects (poisoned, blessed, cursed)
 
-**Appearance Changes (Temporal):**
-```typescript
-// Clothing changes, visible wounds
-{subject: "reacher", property: "appearance.clothing.tunic.color", value: "red", validFrom: 1}  // Consistency check
-{subject: "reacher", property: "appearance.visible-injuries", value: "cut-left-arm", validFrom: 43}
-```
+**Success criteria:**
+- Scene: Character's shoe damaged → equipment fact extracted
+- Scene: Red tunic → later green tunic → contradiction flagged
+- Scene: Character exhausted → fact persists into next scene
+- Validation: Short character can't reach high table → violation flagged
 
-**Social/Emotional Changes (Temporal):**
-```typescript
-// Attitude shifts, mood changes
-{subject: "reacher", property: "mood", value: "irritable", validFrom: 43, validTo: 50}
-{subject: "reacher", property: "attitude-toward.violet-elf", value: "impressed", validFrom: 43}
-```
-
-**Status Effects (Temporal):**
-```typescript
-// Buffs, debuffs, conditions
-{subject: "reacher", property: "status.poisoned", value: true, validFrom: 43, validTo: 50}
-{subject: "reacher", property: "status.blessed", value: "aspect-ward", validFrom: 43, validTo: 100}
-```
-
-**Extraction Process:**
-
-1. **Post-Scene Analysis:**
-   - LLM analyzes prose for state changes
-   - Extracts all changes per character
-   - Returns candidate facts with timestamps
-
-2. **Human Review:**
-   - Show extracted facts to user
-   - "Extracted from Scene 43: Reacher's shoe damaged (toe exposed), wet waist-down, exhausted (6.5/10)"
-   - User approves/edits/rejects
-
-3. **Consistency Validation:**
-   - Check for contradictions (red tunic → green tunic without clothing-change event)
-   - Check for impossible changes (height changes, capabilities lost without cause)
-   - Flag warnings for review
-
-4. **Commit to Timeline:**
-   - Add approved facts to SQLite
-   - Update JSON snapshot
-   - Facts now queryable in future scenes
-
-**Validation Rules:**
-
-**Appearance Consistency:**
-```typescript
-// If clothing color changes without explicit change event, flag it
-validateAppearanceConsistency(newFact, existingFacts) {
-  if (newFact.property === "appearance.clothing.tunic.color") {
-    const previous = existingFacts.find(f => f.property === newFact.property)
-    if (previous && previous.value !== newFact.value) {
-      return {
-        warning: "Clothing color changed without explicit event",
-        previous: previous.value,
-        new: newFact.value,
-        suggestion: "Create clothing-change event or correct color"
-      }
-    }
-  }
-}
-```
-
-**Physical Constraints:**
-```typescript
-// Characters can't exceed reach height, strength limits, etc.
-validatePhysicalConstraints(action, characterFacts) {
-  if (action === "reach-high-table") {
-    const height = characterFacts["height"]
-    const reach = characterFacts["can-reach-height"] || (height + 30)
-    const tableHeight = 180
-
-    if (reach < tableHeight) {
-      return {
-        violation: "Impossible action - cannot reach",
-        characterReach: reach,
-        requiredHeight: tableHeight,
-        suggestion: "Character needs to climb or get help"
-      }
-    }
-  }
-}
-```
-
-**Equipment State Constraints:**
-```typescript
-// Can't use broken equipment
-validateEquipmentUsage(action, equipmentState) {
-  if (action === "sword-attack" && equipmentState["equipment.sword"] === "broken") {
-    return {
-      violation: "Cannot use broken equipment",
-      suggestion: "Repair sword or use different weapon"
-    }
-  }
-}
-```
-
-**Benefits:**
-
-1. **Complete Continuity:** "I was wearing red" stays red across scenes
-2. **Physical Consistency:** Damaged shoe affects future actions (mud avoidance)
-3. **RPG-Style State:** Characters have queryable stats like any entity
-4. **Emergence:** Status effects combine (exhausted + wounded = can't run)
+**Enables:** M13 (character state feeds multi-agent context)
 
 ---
 
-**Test Cases:**
-
-**ETL:**
-- Extract Aradia → ALL attributes (age, height, personality, combat-skill, etc.)
-- Extract Sunnaria → ALL attributes (population, borders, military-strength, trade-volume, etc.)
-- All 9 kingdoms have same schema (consistent attributes)
-- Abstract entities (economy, weather) extracted as entities with facts
-- Characters extracted with full RPG stats (appearance, equipment, skills, etc.)
-
-**Persistence:**
-- Save/load world to SQLite
-- JSON snapshot matches database
-- Query performance acceptable (<100ms for fact queries)
-
-**Epistemic:**
-- Character participated in event → knows about it
-- Character didn't participate, event is public → knows about it
-- Character didn't participate, event is private → doesn't know
-- getKnowledge filters correctly
-
-**Tool-Calling:**
-- LLM calls getFacts before generating economic data
-- LLM calls getKnowledge before writing character dialogue
-- Tool returns match database exactly (deterministic)
-
-**Character State Extraction:**
-- Scene: Character's shoe damaged → Extract equipment.shoe-left.condition fact
-- Scene: Character wearing red tunic → Later scene with green tunic → Flag contradiction
-- Scene: Character exhausted and wet → Facts persist into next scene
-- Validation: Short character can't reach high table → Flag violation
-
----
-
-**Success Criteria:**
-
-1. **Excelsia ETL Complete:**
-   - All 106 lorebook entries → entities in SQLite
-   - ~500-1000 facts extracted (comprehensive, including all character RPG stats)
-   - Relationship graph populated
-   - JSON snapshot readable and accurate
-
-2. **Epistemic Isolation Works:**
-   - Create private event (Secret War Council)
-   - Query Aradia's knowledge → doesn't include it
-   - Query King's knowledge → includes it
-   - Tool calls respect epistemic boundaries
-
-3. **Tool-Calling Generation Works:**
-   - Scene: Aradia considers raising tariffs
-   - LLM calls getFacts("sunnaria-economy")
-   - Tool returns grain-tariff: 0.15 (exact value)
-   - LLM generates prose using 0.15, not hallucinated value
-
-4. **Character State Continuity Works:**
-   - Scene 43: Reacher's shoe damaged (extracted as fact)
-   - Scene 50: LLM queries getFacts("reacher"), sees damaged shoe
-   - LLM generates: "Reacher avoided the mud, mindful of his exposed toe"
-   - Validation catches clothing color contradictions
-
-5. **Round-Trip Works:**
-   - Generate scene → extract character state changes → store in DB
-   - Next scene queries updated facts (equipment, conditions, appearance)
-   - Changes persist across sessions (SQLite)
-
-**Enables:** Multi-agent orchestration (M6), deterministic world state, true epistemic isolation
-
-**Detailed design:** See `architecture/core/08-epistemic-state.md` and decisions.md
-
----
-
-### M6: Multi-Agent Orchestration ⭐ PROOF-OF-CONCEPT COMPLETE
+### M13: Multi-Agent Orchestration ⭐ PROOF-OF-CONCEPT COMPLETE
 
 **Goal:** Generate scenes with multiple characters who have different knowledge. Each character gets POV-filtered context.
 
+**Depends on:** M7 (epistemic queries), M8 (tools), M11 (scene generation)
+
 **What to build:**
 - Multi-agent scene setup (multiple characters, each with POV context)
-- Orchestrated dialogue generation (character A speaks, character B responds)
-- Knowledge tracking during scene (if A reveals X to B, update B's knowledge)
+- Orchestrated dialogue generation (character A speaks, B responds)
+- Knowledge tracking during scene (A reveals X to B → update B's knowledge)
 - Merge individual outputs into coherent scene
-- UI for multi-agent scene setup
-
-**Deliverables:**
-- `src/scene/multi-agent.ts` - Multi-agent orchestration
-- `src/scene/multi-agent.test.ts` - Tests
-- `src/ui/routes/scene.ts` - Scene setup UI
-- Integration with epistemic state
 
 **Test cases:**
 - Two-character scene, both know same information → normal dialogue
@@ -839,569 +459,143 @@ validateEquipmentUsage(action, equipmentState) {
   - King's dialogue with full context (including secret)
   - Aradia's dialogue with limited context (no secret)
   - LLM for King can reference strategy, LLM for Aradia cannot
-- If King mentions "northern strategy" in dialogue → system flags as "revealed to Aradia"
+- If King mentions "northern strategy" → system flags as revealed to Aradia
+
+**This is the proof-of-concept decision point.** If epistemic isolation works in multi-agent scenes, the core vision is validated.
 
 **Enables:** Realistic roleplay with secrets, complex multi-character scenes
 
-**Proof-of-concept target:** If this works, the core vision is validated.
-
-**Detailed design:** See `architecture/core/09-scene-execution.md` §9.3-9.4
+**Detailed design:** See `architecture/future/09-scene-execution.md` §9.3-9.4
 
 ---
 
-## Phase 2: Physical Constraints (M7-M8)
+## Phase 2: Physical Constraints (M14-M15)
 
 **Goal:** Add spatial validation and prevent impossible character movement.
 
-### M7: Basic Geography
+### M14: Basic Geography
 
 **Goal:** Locations with containment hierarchy. "X is in Y" relationships.
 
 **What to build:**
-- `Location` type (entity subtype with spatial properties)
+- Location type (entity subtype with spatial properties)
 - Containment relationships (`part-of`, `located-in`)
 - Proximity queries ("what's near X?")
 - Location context for scenes
-
-**Deliverables:**
-- `src/world-state/geography/location.ts`
-- `src/world-state/geography/containment.ts`
-- Tests
 
 **Success criteria:**
 - "Royal Gardens" is `part-of` "Sunnaria"
 - Query "What's in Sunnaria?" → [Palace, Royal Gardens, Market District, ...]
 - Scene in Royal Gardens → context includes Sunnaria
 
-**Enables:** Travel validation
-
 **Detailed design:** See `architecture/core/04-containment.md`
 
 ---
 
-### M8: Travel Validation
+### M15: Travel Validation
 
 **Goal:** Routes between locations, travel time validation. Characters can't teleport.
 
 **What to build:**
-- `Route` type: from/to locations, travel time
+- Route type: from/to locations, travel time
 - Travel time calculation
 - Validation rule: "Can character X be at location Y at timestamp Z?"
 
-**Deliverables:**
-- `src/world-state/geography/route.ts`
-- `src/validation/travel-rule.ts`
-- Tests
-
 **Success criteria:**
 - Route: Sunnaria ↔ Ilaria (7 days)
-- Aradia in Sunnaria at Chapter 5, Day 1
-- Aradia in Ilaria at Chapter 5, Day 9
-- Validation: ✅ (7 days + margin, plausible)
-- Aradia in Ilaria at Chapter 5, Day 3
-- Validation: ❌ (only 2 days, impossible)
+- Aradia in Sunnaria Day 1, in Ilaria Day 9 → ✅ (plausible)
+- Aradia in Sunnaria Day 1, in Ilaria Day 3 → ❌ (impossible)
 
-**Enables:** Spatial consistency constraints
-
-**Detailed design:** See `architecture/core/16-map-spatial-system.md` §16.7
+**Detailed design:** See `architecture/future/16-map-spatial-system.md` §16.7
 
 ---
 
-## Phase 3: Advanced Features (M9-M11)
+## Phase 3: Advanced Features (M16-M18)
 
 **Goal:** Add richness and depth to the world model.
 
-### M9: Full Map System
+### M16: Full Map System
 
-**Goal:** 2D coordinates, terrain, weather, advanced travel physics.
+2D coordinates, terrain types, weather system, advanced route calculation. See `architecture/future/16-map-spatial-system.md`.
 
-**What to build:**
-- 2D coordinates for locations
-- Terrain types (plains, mountains, forest, etc.)
-- Weather system (per location, per timestamp)
-- Advanced route calculation (terrain affects travel time)
-- Map visualization (optional)
+### M17: Calendar System
 
-**Deliverables:**
-- `src/world-state/map/coordinates.ts`
-- `src/world-state/map/terrain.ts`
-- `src/world-state/map/weather.ts`
-- Tests
+Full temporal granularity (year → season → month → day → hour), custom calendars per world, seasonal constraints. See `architecture/future/15-calendar-time-system.md`.
 
-**Success criteria:**
-- Locations have (x, y) coordinates
-- Route calculation considers terrain (mountains slower than plains)
-- Weather at location/timestamp ("Sunnaria, Chapter 5, Day 3" → "Rainy")
-- Context injection includes weather/terrain
+### M18: Unified World Tick & Ambient Simulation
 
-**Detailed design:** See `architecture/core/16-map-spatial-system.md`
+Tiered simulation where ALL entities progress every timestamp at varying detail levels:
+- **Focus** (full scenes), **Intentional** (off-screen with goals), **Passive** (background drift), **System** (automatic rules)
+- Intent management for off-screen goal pursuit
+- Relevance-based optimization (only simulate graph neighbors)
+- Dynamic tier transitions
 
----
-
-### M10: Calendar System
-
-**Goal:** Full temporal granularity (year → season → month → day → hour).
-
-**What to build:**
-- Calendar structure (epochs, eras, years, seasons, months, days, hours)
-- Custom calendar support (configurable per world)
-- Time-of-day and seasonal constraints
-- Temporal math (duration, interval, comparison)
-
-**Deliverables:**
-- `src/world-state/calendar/calendar.ts`
-- `src/world-state/calendar/timestamp.ts`
-- Tests
-
-**Success criteria:**
-- Define custom calendar (12 months, 30 days each, 4 seasons)
-- Timestamps have full granularity: "Year 20, Summer, Month 3, Day 15, Hour 14"
-- Constraints: "Can't farm in winter" (season check)
-- Context: "It's night, the market is closed" (time-of-day check)
-
-**Detailed design:** See `architecture/core/15-calendar-time-system.md`
-
----
-
-### M11: Unified World Tick & Ambient Simulation
-
-**Goal:** Implement unified world tick architecture where ALL entities simulate forward (at varying detail levels). The world always progresses, whether characters are in focus or off-screen.
-
-**Core Principle:** Everything ticks forward every timestamp. The difference isn't IF entities update, it's HOW MUCH DETAIL.
-
----
-
-**What to build:**
-
-**1. Simulation Tier System**
-
-Entities are assigned simulation tiers based on focus:
-
-```typescript
-type SimulationTier = "focus" | "intentional" | "passive" | "system"
-
-type Entity = {
-  id: string
-  tier: SimulationTier  // Changes dynamically
-  lastSimulated: number
-  activeIntent?: Intent
-}
-```
-
-**Tier 1: Focus (Full Scenes)**
-- Characters currently in focus
-- Full prose generation (user-driven or LLM)
-- Complete state extraction
-- Detailed Events with full prose
-
-**Tier 2: Intentional (Off-Screen Active)**
-- Characters with active goals/intents
-- State changes + brief summaries
-- Events with summary prose
-- Example: Aradia fighting necromancer off-screen
-
-**Tier 3: Passive (Background)**
-- Inactive characters, minor NPCs
-- Minimal state drift (location changes, routine activities)
-- Events only for significant changes
-- Example: Guards patrolling, students studying
-
-**Tier 4: System (Automatic)**
-- Non-character entities (economies, weather, kingdoms)
-- Rule-based or stochastic updates
-- Direct fact updates (no Events unless significant)
-- Example: Grain tariff drifts, seasons change
-
----
-
-**2. Unified Tick Function**
-
-**Files to create:**
-- `src/simulation/world-tick.ts` - Main tick orchestrator
-- `src/simulation/tier-simulators.ts` - Tier-specific simulation logic
-- `src/simulation/intent-manager.ts` - Off-screen intent tracking
-- `src/simulation/relevance-filter.ts` - Determine which entities to simulate
-- `src/simulation/world-tick.test.ts` - Tests
-
-**Core Algorithm:**
-```typescript
-worldTick(timestamp: number) {
-
-  // Get all entities in world
-  const entities = getAllEntities()
-
-  // Group by simulation tier
-  const byTier = groupByTier(entities)
-
-  // Simulate each tier with appropriate detail level
-  const updates = [
-    ...simulateFocusTier(byTier.focus, timestamp),        // Full scenes
-    ...simulateIntentionalTier(byTier.intentional, timestamp),  // Summaries
-    ...simulatePassiveTier(byTier.passive, timestamp),    // Minimal
-    ...simulateSystemTier(byTier.system, timestamp)       // Automatic
-  ]
-
-  // Commit all changes to timeline
-  commitAllUpdates(updates, timestamp)
-
-  // World is now at timestamp+1
-}
-```
-
-**Tier Simulators:**
-
-```typescript
-// Tier 1: Full scene generation
-simulateFocusTier(characters: Entity[], timestamp: number) {
-  const events = []
-
-  for (const char of characters) {
-    // User-driven or LLM prose generation
-    const scene = generateFullScene({
-      character: char,
-      timestamp: timestamp,
-      userPrompt: currentPrompt
-    })
-
-    // Extract comprehensive state changes
-    const stateChanges = extractCharacterState(scene.prose)
-
-    // Create full Event
-    events.push({
-      timestamp: timestamp,
-      participants: [char.id],
-      prose: scene.prose,  // FULL PROSE
-      outcomes: stateChanges,
-      type: "focus"
-    })
-  }
-
-  return events
-}
-
-// Tier 2: Intentional simulation (off-screen active)
-simulateIntentionalTier(characters: Entity[], timestamp: number) {
-  const events = []
-
-  for (const char of characters) {
-    if (!char.activeIntent) continue
-
-    // Generate state changes based on intent progress
-    const update = progressIntent({
-      character: char,
-      intent: char.activeIntent,
-      timestamp: timestamp
-    })
-
-    // Create Event with SUMMARY prose
-    events.push({
-      timestamp: timestamp,
-      participants: [char.id],
-      prose: update.summary,  // BRIEF: "Aradia pressed deeper into crypts..."
-      outcomes: update.stateChanges,
-      type: "intentional"
-    })
-
-    // Check if intent resolves
-    if (update.progress >= 1.0) {
-      const resolution = resolveIntent(char.activeIntent, timestamp)
-      events.push(resolution.event)
-      char.activeIntent = null  // Clear completed intent
-    }
-  }
-
-  return events
-}
-
-// Tier 3: Passive simulation (background)
-simulatePassiveTier(characters: Entity[], timestamp: number) {
-  const updates = []
-
-  for (const char of characters) {
-    // Minimal automatic changes
-    const drift = simulatePassiveDrift(char, timestamp)
-
-    // Only create Event if something significant
-    if (drift.significant) {
-      updates.push({
-        timestamp: timestamp,
-        participants: [char.id],
-        prose: null,  // NO PROSE (just state change)
-        outcomes: drift.stateChanges,
-        type: "passive"
-      })
-    }
-  }
-
-  return updates
-}
-
-// Tier 4: System simulation (economies, weather, etc.)
-simulateSystemTier(systems: Entity[], timestamp: number) {
-  const updates = []
-
-  for (const system of systems) {
-    // Rule-based updates
-    const changes = simulateSystemRules(system, timestamp)
-
-    // Direct fact updates (no Event needed)
-    updates.push({
-      factUpdates: changes,
-      type: "system"
-    })
-  }
-
-  return updates
-}
-```
-
----
-
-**3. Intent Management**
-
-**Intent references character goals (M5 facts):**
-
-M11 Intent system builds on M5 character goals. Characters pursue their goals off-screen.
-
-**Declaring Intents (when character goes off-screen):**
-
-```typescript
-// First, retrieve character's goals from M5 facts
-const characterGoals = getFacts("aradia", timestamp)
-  .filter(f => f.property.startsWith("goal") || f.property.startsWith("motivation"))
-
-// Example M5 facts:
-// {subject: "aradia", property: "primary-goal", value: "achieve-peace"}
-// {subject: "aradia", property: "motivation.peace", value: "haunted-by-war-casualties"}
-
-// Declare intent based on character goals
-declareIntent({
-  character: "aradia",
-  goal: "negotiate-peace-treaty",           // Active pursuit of M5 goal
-  basedOnGoal: "achieve-peace",             // References M5 primary-goal
-  motivation: "haunted-by-war-casualties",  // References M5 motivation
-  estimatedDuration: 15,  // timestamps
-  difficulty: 7.0,
-  stakes: "war-continues-if-fails",         // What happens if intent fails
-  consequenceScope: ["sunnaria", "lunaria", "diplomatic-relations"]
-})
-
-// Character moves to Tier 2 (intentional simulation)
-setEntityTier("aradia", "intentional")
-```
-
-**Why goals matter for Intent:**
-- Character goals (M5) define WHO they are
-- Intents (M11) show HOW they pursue those goals
-- Without M5 goals, we don't know what characters want or why they act
-
-**Intent Resolution (LLM-generated branches):**
-
-```typescript
-resolveIntent(intent: Intent, timestamp: number) {
-
-  // LLM generates outcome branches
-  const branches = generateOutcomeBranches({
-    character: intent.character,
-    goal: intent.goal,
-    difficulty: intent.difficulty,
-    characterStats: getFacts(intent.character, timestamp)
-  })
-
-  // Example branches:
-  // [60%] Complete Success - Necromancer defeated
-  // [30%] Partial Success - Necromancer wounded
-  // [10%] Failure - Aradia captured
-
-  // User selects or dice roll
-  const selected = selectBranch(branches)
-
-  // Create resolution Event
-  return {
-    event: {
-      timestamp: timestamp,
-      title: `${intent.goal} - ${selected.outcome}`,
-      participants: [intent.character],
-      prose: selected.summary,
-      outcomes: selected.effects,
-      type: "intent-resolution"
-    }
-  }
-}
-```
-
----
-
-**4. Relevance-Based Optimization**
-
-Don't simulate ALL 10,000 NPCs every tick:
-
-```typescript
-// Only simulate entities relevant to current focus
-getRelevantEntities(focusCharacters: string[], radius: number) {
-
-  const relevant = new Set(focusCharacters)
-
-  // Expand by graph distance
-  for (let i = 0; i < radius; i++) {
-    for (const entity of relevant) {
-      const neighbors = getGraphNeighbors(entity)
-      neighbors.forEach(n => relevant.add(n))
-    }
-  }
-
-  return Array.from(relevant)
-}
-
-worldTick(timestamp: number) {
-  const focusChars = getFocusCharacters()
-  const relevantEntities = getRelevantEntities(focusChars, radius: 3)
-
-  // Only simulate relevant subset
-  simulateEntities(relevantEntities, timestamp)
-
-  // Systems always simulate (cheap)
-  simulateAllSystems(timestamp)
-}
-```
-
-**Relevance radius:**
-- Radius 0: Just focus characters
-- Radius 1: Same location, direct relationships
-- Radius 2: 1-hop connections
-- Radius 3: Broader context
-- Beyond radius: Frozen until relevant
-
----
-
-**5. Dynamic Tier Changes**
-
-Characters move between tiers as focus shifts:
-
-```typescript
-// Aradia goes off-screen with intent
-setEntityTier("aradia", "intentional")
-declareIntent({character: "aradia", goal: "defeat-necromancer", ...})
-
-// Later: Aradia returns to scene
-setEntityTier("aradia", "focus")
-// Now generates full prose again
-
-// Character becomes inactive
-setEntityTier("background-npc-7", "passive")
-// Minimal simulation
-
-// Character becomes relevant again
-setEntityTier("background-npc-7", "intentional")
-// Resume active simulation
-```
-
----
-
-**Deliverables:**
-
-- Unified tick orchestrator
-- Tier-specific simulators
-- Intent declaration/management system
-- Intent resolution with LLM branches
-- Relevance filtering
-- Dynamic tier assignment
-- Tests for all tiers
-
----
-
-**Test Cases:**
-
-**Unified Tick:**
-- T48: Reacher (focus) + Aradia (intentional) + NPCs (passive) + Economy (system) all update
-- All entities have state at T49 (no frozen entities)
-
-**Off-Screen Progression:**
-- T30: Aradia declares necromancer intent (15 timestamps)
-- T31-44: Reacher scenes (Aradia simulating off-screen)
-- T45: Aradia's intent resolves (LLM branches, user selects)
-- T48: Reacher asks about north → gets updated facts (necromancer defeated)
-
-**Tier Transitions:**
-- Aradia: focus → intentional → focus (smooth state continuity)
-- NPC: passive → intentional (becomes relevant) → passive (returns to background)
-
-**Relevance Filtering:**
-- 10,000 entities in world
-- Only ~100 simulated per tick (radius 3 from focus)
-- Performance acceptable (<500ms per tick)
-
----
-
-**Success Criteria:**
-
-1. **Off-Screen Continuity Works:**
-   - Aradia defeats necromancer off-screen (T31-45)
-   - Reacher at T48 sees effects (northern provinces safe)
-   - Timeline consistent
-
-2. **World Feels Alive:**
-   - Economies drift
-   - Weather changes seasonally
-   - Background characters age, move locations
-   - All automatic, no manual updates
-
-3. **Focus Changes Smoothly:**
-   - Switch focus from Reacher → Aradia mid-story
-   - Both characters have continuous state
-   - No jarring gaps or inconsistencies
-
-4. **Performance Acceptable:**
-   - 10,000 entities in world
-   - Tick completes in <500ms
-   - Relevance filtering works
-
-5. **Intent System Works:**
-   - Declare intent → simulate progress → resolve with branches
-   - User/dice selects outcome
-   - Effects propagate to world state
-
-**Enables:** True living world simulation, seamless focus shifts, emergent world events
-
-**Detailed design:** See `architecture/core/03-effects.md`, `architecture/core/09-scene-execution.md` §9.5-9.6
+See `architecture/future/03-effects.md`, `architecture/future/09-scene-execution.md` §9.5-9.6, and `decisions.md` (Unified World Tick).
 
 ---
 
 ## Milestone Dependencies
 
 ```
-M1 ✅
- │
- └─► M2 (Relationship Graph)
-      │
-      └─► M3 (Timeline)
-           │
-           └─► M4 (Events)
-                │
-                ├─► M5 (Epistemic State) ⭐
-                │    │
-                │    └─► M6 (Multi-Agent) ⭐ PROOF-OF-CONCEPT
-                │
-                └─► M7 (Basic Geography)
-                     │
-                     └─► M8 (Travel Validation)
-                          │
-                          ├─► M9 (Full Map)
-                          │
-                          └─► M10 (Calendar)
+M1 ✅ ─► M2 ✅ ─► M3 ✅ ─► M4 ✅
                                │
-                               └─► M11 (Effects)
+                     ┌─────────┼─────────┐
+                     ▼         ▼         ▼
+                M5 (Tool      M6 (Char   M7 (Epistemic
+                Spike) 🎯     Extract    Queries) ⭐
+                     │        Spike)          │
+                     ▼         │              │
+                M8 (Tool       │         ┌────┘
+                Infra)         ▼         │
+                     │    M9 (SQLite) ◄──┘
+                     │         │
+                     │    M10 (ETL) ◄── M6
+                     │         │
+                     ▼         ▼
+                M11 (Scene Generation) ◄── M8
+                     │
+                     ▼
+                M12 (Char State Extraction) ◄── M6
+                     │
+                     ▼
+                M13 (Multi-Agent) ⭐ PROOF-OF-CONCEPT
+                     │
+           ┌─────────┴─────────┐
+           ▼                   ▼
+      M14 (Geography)    M16 (Map)
+           │                   │
+           ▼                   ▼
+      M15 (Travel)       M17 (Calendar)
+                               │
+                               ▼
+                          M18 (World Tick)
 ```
 
-**Critical path:** M1 → M2 → M3 → M4 → M5 → M6 (epistemic + multi-agent)
-**Parallel track:** M7 → M8 → M9 (geography)
-**Final integration:** M10 (calendar) + M11 (effects)
+**Critical path:** M4 → M5 → M8 → M11 → M13
+**Parallel tracks:**
+- M6 can run alongside M5
+- M7 can start after M4 (doesn't need spikes)
+- M9 can start after M7
+- M14-M15 and M16-M18 are independent tracks after M13
 
 ---
 
 ## Evaluation Points
 
-### After M6 (Proof-of-Concept) - CRITICAL DECISION POINT
+### After M5-M6 (Spikes) — ARCHITECTURE DECISION POINT
+
+**Evaluate:**
+- Does tool-calling work reliably? At what model tier?
+- Does character extraction produce usable structured data?
+- Do we proceed as planned, adjust approach, or pivot?
+
+**Decisions:**
+- ✅ Both spikes succeed: Proceed with M7-M13
+- ⚠️ Tool-calling unreliable: Investigate hybrid context-stuffing + tools
+- ⚠️ Extraction poor: Investigate human-in-the-loop ETL
+- ❌ Both fail: Fundamental architecture rethink needed
+
+### After M13 (Proof-of-Concept) — CRITICAL DECISION POINT
 
 **Test scenarios:**
 1. Secret war council (3 characters know, Princess doesn't)
@@ -1415,25 +609,17 @@ M1 ✅
 - Is the system worth continuing?
 
 **Decisions:**
-- ✅ If successful: Continue to M7-M11
-- ⚠️ If mixed: Adjust approach, iterate on M5-M6
+- ✅ If successful: Continue to M14-M18
+- ⚠️ If mixed: Adjust approach, iterate on M7-M13
 - ❌ If unsuccessful: Pivot architecture or tooling
 
-### After M8 (Physical Constraints)
+### After M15 (Physical Constraints)
 
-**Test:** Travel validation working?
-- Character movement makes sense?
-- No teleporting?
+**Evaluate:** Is spatial validation adding value? Travel time working?
 
-**Evaluate:** Is spatial validation adding value?
+### After M18 (Full Vision)
 
-### After M11 (Full Vision)
-
-**Test:** Full constraint package working?
-- All three pillars (Timeline, Map, Calendar)?
-- LLM generating world-consistent prose?
-
-**Evaluate:** Production-ready?
+**Evaluate:** Full constraint package working? Production-ready?
 
 ---
 
@@ -1451,232 +637,13 @@ M1 ✅
 
 ---
 
-## Future Features (Post-M11)
+## Future Features (Post-M18)
 
 ### Anticipatory Context Injection
 
-**Problem:** If a scene is *leading toward* a topic (e.g., trade negotiations about tariffs) without explicitly mentioning it, how can we preemptively inject relevant context?
-
-**Potential approaches:**
-
-1. **Scene Classification**
-   - LLM analyzes conversation trajectory: "This looks like a diplomatic scene building toward trade discussion"
-   - Pre-inject trade/economic entries before they're explicitly mentioned
-
-2. **Topic Momentum Tracking**
-   - Track topic mentions across conversation history
-   - When a topic gains momentum (multiple related mentions), anticipate and inject
-
-3. **Narrative Arc Templates**
-   - Define common story beats: "Diplomatic meeting" → likely leads to treaties, trade, alliances
-   - Pre-inject related context based on scene type
-
-**Status:** Deferred. Requires conversation history analysis and scene classification. Consider after M6.
+Pre-inject context based on conversation trajectory before topics are explicitly mentioned. Requires conversation history analysis and scene classification. Consider after M13.
 
 ---
-
-## Active Track: Extension System Redesign
-
-**Date Started:** 2026-01-10
-**Status:** Config Schema Finalized ✅ | Config Loader Implemented ✅ | Runtime Next 🎯
-
----
-
-### Design Decision (2026-01-10)
-
-We redesigned the extension system to be simpler and more explicit. Key changes:
-
-1. **Config-driven loading** instead of auto-discovery
-2. **Six-stage pipeline** instead of complex dependency graphs
-3. **Simple ExtensionContext** as plain object instead of registry abstraction
-4. **Required slots validation** instead of built-in defaults
-5. **System-managed config** with automatic dependency tracking
-6. **Parallel loading** via dependency DAG
-
-**Config presence:**
-- Default `extensions.json` is checked into the repo
-- No auto-discovery or init command when config is missing
-- Missing config fails fast with: `Config missing: extensions.json. Restore the default file.`
-
-See [decisions.md](decisions.md) for full rationale.
-
----
-
-### Config Schema
-
-```typescript
-type Status = "on" | "off" | `needs:${string}`
-
-type ExtensionEntry = {
-  name: string
-  path: string
-  status: Status
-  options?: unknown
-}
-
-type LorebookConfig = {
-  stores: ExtensionEntry[]
-  loaders: ExtensionEntry[]
-  validators: ExtensionEntry[]
-  contextBuilders: ExtensionEntry[]
-  senders: ExtensionEntry[]
-  ui: ExtensionEntry[]
-}
-```
-
-#### Example Config (`extensions.json`)
-
-```json
-{
-  "stores": [
-    {
-      "name": "@core/memory-fact-store",
-      "path": "extensions/core/2-store-timeline/memory-fact-store/fact-store.ts",
-      "status": "on"
-    },
-    {
-      "name": "@core/memory-event-store",
-      "path": "extensions/core/2-store-timeline/memory-event-store/event-store.ts",
-      "status": "on"
-    },
-    {
-      "name": "@core/memory-entity-store",
-      "path": "extensions/core/2-store-timeline/memory-entity-store/entity-store.ts",
-      "status": "on"
-    }
-  ],
-  "loaders": [
-    {
-      "name": "@core/sillytavern-loader",
-      "path": "extensions/core/1-load-world-data/from-sillytavern/sillytavern-loader.ts",
-      "status": "on"
-    }
-  ],
-  "validators": [
-    {
-      "name": "@core/entity-exists-validator",
-      "path": "extensions/core/3-validate-consistency/check-entity-exists/entity-exists-rule.ts",
-      "status": "off"
-    }
-  ],
-  "contextBuilders": [
-    {
-      "name": "@core/keyword-matcher",
-      "path": "extensions/core/4-build-scene-context/match-keywords/keyword-matcher.ts",
-      "status": "off"
-    }
-  ],
-  "senders": [
-    {
-      "name": "@core/openrouter",
-      "path": "extensions/core/5-send-scene-context/to-llm/openrouter-client.ts",
-      "status": "off"
-    }
-  ],
-  "ui": [
-    {
-      "name": "@core/dev-chat",
-      "path": "extensions/core/6-provide-ui/dev-chat/main.ts",
-      "status": "off"
-    }
-  ]
-}
-```
-
-#### Extension Definition
-
-```typescript
-export default defineExtension({
-  name: '@core/memory-fact-store',
-  version: '1.0.0',
-  kind: 'store',
-  after: [],  // within-stage dependencies (by name)
-
-  activate: (context, options) => {
-    context.factStore = createMemoryFactStore()
-    return undefined
-  }
-})
-
-// Run bootstrap with: bun run start
-
-// Optional: return contributions to aggregate into collections
-// return { validators: [myValidator] }
-
-```
-
-#### ExtensionContext (Simple Object)
-
-```typescript
-type ExtensionContext = {
-  factStore?: FactStore
-  eventStore?: EventStore
-  entityStore?: EntityStore
-  relationshipStore?: RelationshipStore
-
-  loaders: WorldDataLoader[]
-  validators: Validator[]
-  contextBuilders: ContextBuilder[]
-  senders: Sender[]
-  uiComponents: UIComponent[]
-}
-
-// Bootstrap aggregates ExtensionContribution returns into these arrays.
-```
-
----
-
-### Implementation Plan
-
-#### Phase 1: Core Types and Runtime
-- ✅ Create `src/extension-system/types.ts` (config types)
-- ✅ Create `src/extension-system/config-loader.ts` (load config, validate schema)
-- ✅ Create `src/extension-system/bootstrap.ts` (build DAG, parallel activation, validate required slots)
-- ✅ Create `src/extension-system/config-writer.ts` (write back normalizations, dependency status)
-- ✅ Tests for DAG building, parallel activation, config write-back
-
-#### Phase 2: Migrate Extensions
-- ✅ Update existing extensions to new format
-- ✅ Create `extensions.json`
-- ✅ Ensure all tests pass
-
-#### Phase 3: Documentation
-- Update extension authoring guide
-- Add example extensions
-- Update core docs for extension bootstrap state
-
-### Previous Implementation (Superseded)
-
-The extension system was previously designed with auto-discovery and complex dependency graphs. This has been superseded by the simpler config-driven approach above. See git history for details of the old implementation.
-
----
-
-### Benefits of New Architecture
-
-1. ✅ **Explicit config**: See exactly what's loaded and in what order
-2. ✅ **Simple pipeline**: 6 stages, no complex dependency graphs
-3. ✅ **GUI-friendly**: Config file easy to read/write programmatically
-4. ✅ **Clear contracts**: Interfaces define what extensions can do
-5. ✅ **Composable**: Multiple extensions enhance same functionality
-6. ✅ **Testable**: Extensions isolated, easy to test
-7. ✅ **Debuggable**: Know exactly which extension did what
-
----
-
-## Next Steps
-
-**Immediate:** Implement new extension system, then M5 (Epistemic State)
-
-1. Design `getKnowledge(characterId, timestamp)` query interface
-2. Implement participation-based knowledge (if you were there, you know)
-3. Implement visibility-based knowledge (public vs private events)
-4. Apply ZOMBIES, write `test.todo()` cases
-5. Create POV-filtered context retrieval
-
-**See also:**
-- `vision.md` - What we're building toward
-- `current.md` - Where we are now
-- `decisions.md` - Why we made key design choices
 
 ## See also
 - [current.md](./current.md)

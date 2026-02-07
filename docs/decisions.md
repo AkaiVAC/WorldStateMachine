@@ -1219,11 +1219,54 @@ const createEntityStore = () => {
 
 ---
 
-**See also:**
-- `vision.md` - What we're building
-- `current.md` - Where we are
-- `roadmap.md` - How we get there
-- `architecture/` - Detailed design docs
+---
+
+## Risk Management
+
+### Spike-Driven Validation (2026-02-07)
+
+**Decision:** Validate the two riskiest architectural assumptions with cheap experiments (spikes) before committing to full implementation. The original M5 has been decomposed into two spike milestones (M5, M6) and six implementation milestones (M7-M12).
+
+**Why:**
+- **Tool-calling reliability (M5 spike):** The entire tool-calling architecture (M8), scene generation loop (M11), and validation pipeline assume LLMs will reliably call `getFacts`/`getKnowledge` instead of hallucinating values. If LLMs skip tools, the constraint engine concept needs a fundamentally different enforcement mechanism. No prototype has validated this assumption.
+- **Character extraction quality (M6 spike):** The Lorebook ETL Pipeline (M10) and Character State Extraction (M12) assume LLMs can reliably extract structured psychological attributes (goals, motivations, fears, values) and numeric properties from narrative prose. Extracting `primary-goal: achieve-peace` from 2,000+ words of rich narrative is a hard NLP problem. No prototype has validated this assumption.
+
+**Risk profile:**
+- If tool-calling works: proceed as planned (M7-M13)
+- If tool-calling fails: investigate hybrid context-stuffing + tools, or pre-injection of critical facts
+- If extraction quality is poor: investigate human-in-the-loop ETL, schema templates, or explicit-facts-only extraction
+- If both fail: fundamental architecture rethink needed before continuing
+
+**Cost of spikes:** 1-2 days each
+**Cost of building without validation:** Months of architecture that may need to be discarded
+
+**Alternative considered:** Build the full M5 stack and validate at the end
+- Rejected: Too expensive if assumptions are wrong. Spikes are cheap insurance.
+
+**Source:** Architecture review on 2026-02-07
+
+---
+
+### Epistemic Isolation Cost Model (2026-02-07, OPEN)
+
+**Decision:** Deferred — needs investigation during M7/M13 implementation.
+
+**Concern:** Literal epistemic isolation (separate LLM call per character POV) has cost and latency implications:
+- 3-character scene = 3 LLM calls minimum
+- 10-NPC tavern = 10 LLM calls
+- No caching of shared public knowledge is currently designed
+
+**Potential mitigations (to explore):**
+- Cache shared public knowledge context across characters in same scene
+- Batch NPC responses at lower model tiers
+- Only isolate characters with meaningful knowledge differences
+- Use "knowledge delta" approach: shared base context + per-character private additions
+
+**This is not blocking.** The concern is noted for M7/M13 design.
+
+**Source:** Architecture review on 2026-02-07
+
+---
 
 ## See also
 - [vision.md](./vision.md)
