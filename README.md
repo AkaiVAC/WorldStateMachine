@@ -6,7 +6,9 @@ A constraint engine that prevents LLMs from generating inconsistent roleplay pro
 
 **Clean rewrite in progress.** Prior project completed M1–M4 with a custom extension system. This iteration rebuilds from the core data model on Neo4j + Mastra + MCP TypeScript SDK.
 
-**Next step:** Initialize `mcp/` project (Bun, TypeScript, Biome, Podman compose for Neo4j).
+**Scaffolding complete:** `mcp/` project initialized (Bun, TypeScript, Biome, Podman compose for Neo4j). All design decisions for the Neo4j-native data model are documented in `docs/decisions.md`.
+
+**Next step:** Define core ambient types in `mcp/src/types.d.ts` — Entity, Fact, Event, Relationship — reflecting the Neo4j-native graph model (see `docs/decisions.md` for the settled design).
 
 ## Docs
 

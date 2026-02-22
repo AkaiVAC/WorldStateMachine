@@ -715,16 +715,19 @@ Query at Ch15: "Aldric is King" ❌ (died at Ch10)
 - Preserves original prose alongside structured data
 - Supports "why" questions (which event caused this fact?)
 
-**Design:**
+**Design (Neo4j graph model):**
 ```
-Event: "Coronation of King Aldric" (Ch1)
-├─ participants: [Aldric, High Priest, Court]
-├─ visibility: public
-├─ prose: "The crown was placed upon Aldric's head..."
-└─ outcomes:
-    ├─ Fact: {subject: "Aldric", property: "title", value: "King", validFrom: "Ch1"}
-    └─ Fact: {subject: "Aldric", property: "location", value: "Great Hall", at: "Ch1"}
+(event:Event {title: "Coronation of King Aldric", timestamp: 1, visibility: "public"})
+  ─[:PRODUCED]─▶ (f1:Fact {property: "title", value: "King", validFrom: 1})
+  ─[:PRODUCED]─▶ (f2:Fact {property: "location", value: "Great Hall", validFrom: 1})
+  ─[:PARTICIPANT]─▶ (aldric:Entity:Character)
+  ─[:PARTICIPANT]─▶ (highPriest:Entity:Character)
+
+(f1) ─[:ABOUT]─▶ (aldric)
+(f2) ─[:ABOUT]─▶ (aldric)
 ```
+
+Event-Fact-Entity connections are graph edges, not embedded arrays. To find what an Event produced, traverse `PRODUCED` edges. To find what caused a Fact, reverse-traverse `PRODUCED` from the Fact back to the Event. No `outcomes` field on Event or `causedBy` field on Fact — these are traversal patterns, not stored properties.
 
 **Alternative considered:** Facts only (no events)
 - Rejected: Loses context, can't do epistemic state, no prose preservation
@@ -733,7 +736,9 @@ Event: "Coronation of King Aldric" (Ch1)
 
 ---
 
-### Relationships Are Facts (Not Separate)
+### ~~Relationships Are Facts (Not Separate)~~ (2025-12-30, **superseded 2026-02-22**)
+
+> **Superseded:** With Neo4j as the storage backend, relationships are first-class graph edges, not fact rows. See "Relationships Are First-Class Graph Edges" below.
 
 **Decision:** Relationships use the same Fact structure (subject/property/value).
 
@@ -1204,17 +1209,22 @@ const createEntityStore = () => {
 | ~~Six-stage pipeline~~ | ~~Superseded by Mastra workflows~~ |
 | ~~Simple ExtensionContext~~ | ~~Superseded by Mastra~~ |
 | ~~Required slots validation~~ | ~~Superseded by Mastra~~ |
-| Neo4j as graph database | GPLv3, mature TS driver, native graph model fits entity/fact/relationship data |
+| ~~Relationships are facts~~ | ~~Superseded by first-class graph edges~~ |
+| Neo4j as graph database | GPLv3, index-free adjacency, native graph model. Postgres+AGE rejected (JOINs under the hood). DuckDB rejected (OLAP, no traversals). |
+| Relationships are graph edges | Broad edge types (FAMILY, POLITICAL, etc.) + subtype property. Two-layer validation: synonym normalization then canonical registry. |
+| Facts are temporal nodes | Separate Fact nodes with `ABOUT` edges to Entities, preserving temporal bounds |
+| Entity categories as labels | Neo4j labels for fast queries + per-world canonical registry for consistency |
 | Mastra for orchestration | TypeScript-native, stable 1.0, enforces retrieval-before-generation via workflows |
 | MCP TypeScript SDK | Tool-use interface to Claude, production-grade, replaces custom tool-calling |
 | Podman for containerization | Neo4j runs in Podman container for local dev |
+| Architecture tests deferred | dependency-cruiser when first store layer lands (ts-arch/ArchUnitTS need Jest) |
 | Lorebook is import format | Entity IDs solve name disambiguation |
 | World state as RPG stats | All entities have queryable numeric attributes |
 | Tool-calling over context-stuffing | Deterministic facts, no hallucination, scalable |
 | Unified world tick | Everything simulates (focus/off-screen just detail level) |
 | Characters are RPG stat sheets | Complete continuity (clothing, equipment, conditions) |
 | Timeline is database | Handle temporal state elegantly |
-| Events → Facts | Preserve context, enable epistemic state |
+| Events → Facts | Preserve context, enable epistemic state. Connected via `PRODUCED` graph edges. |
 | Store verbose, render compact | Different goals (query vs tokens) |
 | Generic validation framework | Flexibility, extensibility |
 | Never cache epistemic state | Correctness over performance |
@@ -1270,7 +1280,11 @@ const createEntityStore = () => {
 - Official TypeScript driver at v6 with full type definitions
 - Community Edition is GPLv3 (genuinely open source), sufficient for single-node production use
 
+**Key advantage — index-free adjacency:** Each Neo4j node physically stores pointers to its neighbors. Traversing an edge is a pointer dereference, O(1) per hop. This compounds at depth — "walk 3 hops through events, filter by visibility" (epistemic state queries) is where native graph storage wins decisively.
+
 **Rejected:**
+- **Postgres + Apache AGE:** Adds Cypher-compatible graph queries on top of Postgres. Same query syntax, massive ecosystem, battle-tested. However, traversals are still JOINs under the hood — the Cypher layer is syntactic, not architectural. At depth 3+, Neo4j's index-free adjacency outperforms. Also introduces impedance mismatch (SQL part vs graph part). For a project where the data model IS a graph, a native graph DB is a simpler mental model.
+- **DuckDB:** Analytical/OLAP columnar database, optimized for scans and aggregations (average tariff across kingdoms). Wrong tool entirely — no concept of edges or traversals. The core queries (multi-hop epistemic walks) are DuckDB's worst case.
 - **FalkorDB:** SSPL license (not OSI open source); GraphRAG-SDK is Python-only
 - **Graphiti/Zep (self-hosted):** Python-only core; requires Python sidecar from TypeScript
 - **SQLite:** Originally planned in roadmap M5; replaced because graph queries are the primary access pattern
@@ -1287,6 +1301,186 @@ const createEntityStore = () => {
 - Docker alternative without daemon requirement
 - Compose file in `mcp/compose.yml` gives one-command local setup
 - Same OCI container format, no practical differences for this use case
+
+**Source:** Discussion on 2026-02-22
+
+---
+
+### Relationships Are First-Class Graph Edges (Broad Types + Subtypes)
+
+**Decision:** Relationships between entities are Neo4j edges with temporal properties, not Fact nodes. Supersedes "Relationships Are Facts (Not Separate)." Edges use a small set of broad type categories with specific `subtype` properties.
+
+**Why:**
+- Neo4j's entire value proposition is native graph edges — storing relationships as Fact nodes (with entity ID string values) turns a one-hop traversal into a two-hop traversal with a string lookup in the middle
+- "Who is Aradia related to?" becomes a single edge traversal from the Aradia node, not a table scan of all Facts hoping to find entity ID values
+- Temporal bounds (`validFrom`, `validTo`) live as properties on the edge itself
+
+**Edge type strategy — broad types + subtypes:**
+
+Using many specific edge types (`:DAUGHTER_OF`, `:SPOUSE_OF`, `:WIFE_OF`) causes drift and requires enumerating all types in queries. Neo4j edge types are immutable — fixing drift means deleting and recreating edges.
+
+Instead, use a small fixed set of broad edge types with a `subtype` property:
+
+```
+(aradia) ─[:FAMILY    {subtype: "child",  validFrom: 1}]──▶ (alaric)
+(aradia) ─[:FAMILY    {subtype: "spouse", validFrom: 5}]──▶ (reacher)
+(sunnaria) ─[:POLITICAL {subtype: "allied", validFrom: 2, validTo: 8}]──▶ (limaria)
+(aradia) ─[:SOCIAL    {subtype: "friend", validFrom: 3}]──▶ (violet)
+```
+
+- Broad types are stable across genres (`:FAMILY` works in fantasy and sci-fi), so drift risk is negligible
+- Subtypes are mutable properties — fixable with a one-line Cypher update if drift slips through
+- "Find all family connections" is just `[:FAMILY]` — Neo4j uses its type index, no enumeration needed
+- Adding new subtypes doesn't require updating existing queries that filter by broad type
+
+**Two-layer write validation (prevents subtype drift):**
+
+```
+ETL extracts: "wife of"
+         │
+         ▼
+┌─────────────────────────┐
+│  1. Normalization (soft) │  "wife of" → "spouse"
+│  Synonym mapping         │  "married to" → "spouse"
+│                          │  "daughter" → "child"
+└────────────┬────────────┘
+             │  "spouse"
+             ▼
+┌─────────────────────────┐
+│  2. Validation (hard)    │  Is "spouse" in FAMILY's allowed subtypes?
+│  Canonical registry      │  FAMILY: ["parent", "child", "spouse", "sibling"]
+│                          │  ✅ Yes → write to Neo4j
+│                          │  ❌ No  → reject with error
+└────────────┬────────────┘
+             │
+             ▼
+         Neo4j
+```
+
+- Normalization maps synonyms before they reach validation (LLM intelligence during ETL)
+- Validation checks against a per-world canonical registry — unrecognized subtypes are rejected, never written
+- User resolves rejected writes: add as new canonical subtype, or add as synonym mapping
+- Registry is per-world data, not code — a sci-fi world registers `["clone-of"]` under FAMILY, a fantasy world doesn't
+
+**Broad edge types (6):**
+
+| Broad Type | What it covers | Example subtypes |
+|---|---|---|
+| `FAMILY` | Kinship bonds | parent, child, spouse, sibling, adopted, clone-of |
+| `SOCIAL` | Interpersonal connections | friend, rival, mentor, student, lover |
+| `POLITICAL` | Power and governance | allied, enemy, vassal, overlord, rules, tributary |
+| `ORGANIZATIONAL` | Group membership | member-of, leads, serves, founded |
+| `GEOGRAPHIC` | Spatial containment/proximity | contains, borders, part-of, located-in |
+| `POSSESSION` | Ownership of items/artifacts | owns, wields, guards, carries |
+
+- Small enough that drift is essentially impossible — a new relationship must genuinely not fit any of these six categories
+- Economic relationships (trades-with, supplies) are `POLITICAL` subtypes — economic state is handled as Facts on economic entities
+- Extensible: adding a new broad type is just a new Neo4j edge type, but the bar should be high
+- Subtypes listed are starting points — each world's canonical registry defines its own
+
+**Querying relationships:**
+```cypher
+-- All family connections at timestamp 5
+MATCH (e:Entity {id: "aradia"})-[r:FAMILY]->(target)
+WHERE r.validFrom <= 5 AND (r.validTo IS NULL OR r.validTo > 5)
+RETURN r.subtype, target.name
+
+-- All connections of any type
+MATCH (e:Entity {id: "aradia"})-[r]->(target)
+WHERE r.validFrom <= 5 AND (r.validTo IS NULL OR r.validTo > 5)
+RETURN type(r), r.subtype, target.name
+```
+
+**Alternative considered:** Many specific edge types (`:DAUGHTER_OF`, `:SPOUSE_OF`, etc.)
+- Rejected: Drift risk (LLM generates synonyms), immutable (expensive to fix), queries must enumerate all types
+
+**Alternative considered:** One generic edge type (`:RELATED_TO`) with `type` property
+- Rejected: Loses Neo4j's type-based indexing. Every query scans all edges then filters by property. Performance degrades at scale.
+
+**Alternative considered:** Keep relationships as Facts (prior design)
+- Rejected: Fights the graph data model. Turns O(1) edge traversals into O(n) property scans with string-based entity lookups.
+
+**Source:** Discussion on 2026-02-22 about Neo4j-native data model
+
+---
+
+### Facts Are Temporal Nodes (Not Entity Properties)
+
+**Decision:** Facts are separate Neo4j nodes connected to Entity nodes via `ABOUT` edges, not properties stored directly on Entity nodes.
+
+**Why:**
+- Temporal bounds are the core requirement — "what was true at timestamp 5?" is a primary query
+- Neo4j node properties are just current values with no versioning — storing `title: "Queen"` on the Aradia node loses the history that she was "Princess" before timestamp 10
+- Separate Fact nodes allow multiple values for the same property across time
+- Traversal cost is negligible — following an `ABOUT` edge is a pointer dereference in Neo4j
+
+**Design:**
+```
+(aradia:Entity:Character)
+  ◀─[:ABOUT]─ (f1:Fact {property: "title", value: "Princess", validFrom: 1, validTo: 10})
+  ◀─[:ABOUT]─ (f2:Fact {property: "title", value: "Queen", validFrom: 10})
+```
+
+**Querying facts at a point in time:**
+```cypher
+MATCH (e:Entity {id: "aradia"})◀-[:ABOUT]-(f:Fact {property: "title"})
+WHERE f.validFrom <= 10 AND (f.validTo IS NULL OR f.validTo > 10)
+RETURN f.value  -- "Queen"
+```
+
+**Alternative considered:** Store facts as properties on Entity nodes
+- Rejected: Loses temporal state, which is the entire point of the engine
+
+**Source:** Discussion on 2026-02-22 about Neo4j-native data model
+
+---
+
+### Entity Categories as Neo4j Labels
+
+**Decision:** Entity `category` (Character, Location, Kingdom, etc.) maps to Neo4j node labels at storage time. The TypeScript type keeps `category: string` for genre flexibility.
+
+**Why:**
+- Neo4j labels are the idiomatic way to categorize nodes — queries like `MATCH (c:Character)` use label scans (indexed, fast) vs property lookups (`WHERE e.category = "character"`)
+- Nodes can have multiple labels: `(:Entity:Character)`, `(:Entity:Location:Kingdom)`
+- Labels are just strings in Neo4j — no hardcoded enum, so `:Starship` works as well as `:Kingdom`
+- Neo4j Browser color-codes nodes by label for visual graph exploration
+
+**Label consistency (combination approach):**
+- TypeScript type: `category: string` — no hardcoded enum, genre-agnostic
+- Per-world canonical registry: each world defines its valid categories as data (stored in Neo4j or config)
+- Write-time validation: the store layer checks `category` against the registry before creating nodes
+- ETL normalization: during lorebook import, the LLM maps free-text categories ("country", "nation", "realm") to canonical labels ("Kingdom")
+- Aligns with existing "World Lexicon Grows Stricter Over Time" decision
+
+**Alternative considered:** Fixed enum in TypeScript (`"character" | "location" | ...`)
+- Rejected: Violates genre-agnostic principle — a sci-fi world needs different categories than a fantasy one
+
+**Alternative considered:** No labels, just a `category` string property on Entity nodes
+- Rejected: Misses Neo4j's primary indexing mechanism, slower queries, no visual distinction in browser
+
+**Source:** Discussion on 2026-02-22 about Neo4j-native data model
+
+---
+
+### Architecture Test Tooling Deferred
+
+**Decision:** Defer adding architecture test tooling until the first store layer lands. Use `dependency-cruiser` when ready.
+
+**Why:**
+- ArchUnitTS and ts-arch both require Jest — incompatible with Bun's test runner (`bun:test`)
+- `dependency-cruiser` is the best alternative: config-driven CLI, enforces layer boundaries + circular dep detection, no test framework dependency
+- At project init there are no layers to enforce — the tooling adds no value yet
+
+**When to add:**
+- Trigger: first store or infrastructure layer that imports core types
+- Install `dependency-cruiser` as dev dependency
+- Add `.dependency-cruiser.js` config with rules (core imports nothing, no circular deps)
+- Add `bun run arch` script and wire into pre-commit hook
+
+**Rejected:**
+- **ArchUnitTS (`archunit-ts`):** Requires Jest, less actively maintained
+- **ts-arch (`tsarch`):** Requires Jest (open issue #70), no Bun support
+- **madge / dpdm:** Circular deps only, no layer boundary enforcement
 
 **Source:** Discussion on 2026-02-22
 

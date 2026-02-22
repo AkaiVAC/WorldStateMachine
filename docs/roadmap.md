@@ -1667,13 +1667,22 @@ The extension system was previously designed with auto-discovery and complex dep
 
 ## Next Steps
 
-**Immediate:** Implement new extension system, then M5 (Epistemic State)
+> **Note (2026-02-22):** The rewrite replaces SQLite with Neo4j and the extension system with Mastra + MCP. The M5 section above still references SQLite schemas and `src/` paths from the prior project — these will be rewritten to use Neo4j graph patterns and `mcp/src/` paths as implementation begins.
 
-1. Design `getKnowledge(characterId, timestamp)` query interface
-2. Implement participation-based knowledge (if you were there, you know)
-3. Implement visibility-based knowledge (public vs private events)
-4. Apply ZOMBIES, write `test.todo()` cases
-5. Create POV-filtered context retrieval
+See `README.md` for current status and immediate next step.
+
+### Core Type Spec (for `mcp/src/types.d.ts`)
+
+The types must reflect the Neo4j-native graph model (not the prior flat-storage design):
+
+1. **Entity** — `id`, `worldId`, `name`, `aliases`, `category` (string, maps to Neo4j label at storage time)
+2. **Fact** — `id`, `worldId`, `property`, `value`, `validFrom?`, `validTo?` — NO `subject` (it's an `ABOUT` edge), NO `causedBy` (it's a `PRODUCED` edge traversal)
+3. **Event** — `id`, `worldId`, `timestamp`, `title`, `location?`, `visibility`, `prose?` — NO `outcomes` (they're `PRODUCED` edges), NO `participants` as embedded array (they're `PARTICIPANT` edges)
+4. **Relationship** — This is a Neo4j edge, not a node. Type shape represents the edge properties: `id`, `worldId`, `broadType` (one of 6: FAMILY, SOCIAL, POLITICAL, ORGANIZATIONAL, GEOGRAPHIC, POSSESSION), `subtype`, `validFrom?`, `validTo?`
+
+Key principle: **Types represent node/edge data, not traversal patterns.** Fields that were previously embedded (subject on Fact, outcomes on Event, participants on Event, causedBy on Fact) are now graph edges and should NOT appear as properties on the TypeScript types.
+
+After types: begin TDD on the first store layer (Neo4j driver integration).
 
 **See also:**
 - `vision.md` - What we're building toward

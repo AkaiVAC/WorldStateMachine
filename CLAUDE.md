@@ -20,6 +20,7 @@ A world state constraint engine (in `mcp/`) that prevents LLMs from generating i
 - **One step at a time.** The user can be overwhelmed easily. Discuss one element at a time with one option, get approval, then move to the next. Don't front-load all decisions.
 - **Be conversational, not pushy.** Don't repeatedly ask "should I do it?" or "want me to start?" — let the discussion flow naturally. The user will say when they're ready.
 - **Keep docs current.** When a decision is made, an approach changes, or something becomes outdated, update `docs/` immediately. Documentation must reflect reality at all times — stale docs are worse than no docs.
+- **Single source of truth.** Each kind of information lives in exactly one file. Other files point to it, never duplicate it. See "Documentation Ownership" below.
 
 ## Tech Stack
 
@@ -27,7 +28,7 @@ A world state constraint engine (in `mcp/`) that prevents LLMs from generating i
 - **Language:** TypeScript (strict mode)
 - **Linting/Formatting:** Biome
 - **Testing:** Bun's native test runner (`bun:test`)
-- **Architecture tests:** ArchUnitTS or ts-arch (enforce layer boundaries, no circular deps)
+- **Architecture tests:** `dependency-cruiser` (deferred — see Hard Rules below)
 - **Graph database:** Neo4j Community Edition (GPLv3)
 - **Containerization:** Podman (for Neo4j)
 - **Agent orchestration:** Mastra
@@ -38,12 +39,12 @@ A world state constraint engine (in `mcp/`) that prevents LLMs from generating i
 
 ### Core Data Model
 
-Carries over from prior design (see `docs/decisions.md`):
+Neo4j-native graph model (see `docs/decisions.md`):
 
-- **Entity** — World object with identity (id, name, aliases, category)
-- **Fact** — Atomic state assertion with temporal bounds (subject, property, value, validFrom/validTo)
-- **Event** — Timeline milestone (timestamp, participants, visibility, outcomes, prose)
-- **Relationship** — Typed edge between entities (from, type, to, validFrom/validTo)
+- **Entity** — Node (`:Entity:<Category>`) with identity (id, name, aliases, category). Category maps to a Neo4j node label.
+- **Fact** — Node (`:Fact`) connected to its subject Entity via `ABOUT` edge. Has temporal bounds (validFrom/validTo). Connected to source Event via `PRODUCED` edge.
+- **Event** — Node (`:Event`) connected to participant Entities via `PARTICIPANT` edges. Produces Facts via `PRODUCED` edges.
+- **Relationship** — Neo4j edge between Entity nodes using broad type categories (`:FAMILY`, `:POLITICAL`, `:SOCIAL`, `:GEOGRAPHIC`) with a `subtype` property and temporal bounds. Two-layer write validation: synonym normalization + canonical registry per world.
 
 ### Key Architectural Decisions
 
@@ -89,7 +90,7 @@ M1 (Validation) → M2 (Relationships) → M3 (Timeline) → M4 (Events)
 2. **ZOMBIES method is mandatory.** Apply it to enumerate test cases before implementation. Zero, One, Many, Boundary, Interface, Exceptions, Simple.
 3. **Four Rules of Simple Design.** Passes tests, reveals intention, no duplication, fewest elements.
 4. **SOLID principles.** Single responsibility, open/closed, Liskov substitution, interface segregation, dependency inversion.
-5. **Architecture tests.** Enforce layer boundaries and structural rules as automated tests (ArchUnitTS or ts-arch). No circular dependencies. Core types import nothing. Layers respect their boundaries.
+5. **Architecture tests.** Enforce layer boundaries and structural rules as automated tests. No circular dependencies. Core types import nothing. Layers respect their boundaries. **Tooling deferred** — neither ArchUnitTS nor ts-arch supports Bun's test runner. Add `dependency-cruiser` once there are enough layers to enforce (target: when the first store layer lands).
 6. **Zero TypeScript errors.** Must always pass typecheck.
 7. **No comments.** Code must be self-documenting through naming and structure. If code needs a comment, rename or restructure.
 
@@ -139,9 +140,27 @@ M1 (Validation) → M2 (Relationships) → M3 (Timeline) → M4 (Events)
 - **Logical grouping:** Similar changes in distinct commits
 - **Verify before commit:** All tests pass, types clean
 
+## Documentation Ownership
+
+Each kind of information has exactly one source of truth. Other files may point to it but must never duplicate it.
+
+| What | Source of truth |
+|------|----------------|
+| Rules, conventions, code style | `CLAUDE.md` (this file) |
+| Current status and next step | `README.md` |
+| Milestone specs (detailed) | `docs/roadmap.md` |
+| Design rationale (append-only) | `docs/decisions.md` |
+| End-state vision | `docs/vision.md` |
+
+**When progress happens:** Update `README.md` "Current Status" section. That's it — don't duplicate the status elsewhere.
+
+**When a decision is made:** Append to `docs/decisions.md` and update the summary table. If it affects the core data model or rules, update the relevant section in this file.
+
+**When a milestone spec changes:** Update `docs/roadmap.md`. Don't copy spec details into other files.
+
 ## Essential Reading
 
-Before starting significant engine work, read these reference documents:
+Before starting significant engine work, read `README.md` for current status, then these reference documents:
 
 1. **[docs/vision.md](docs/vision.md)** — Constraint engine vision (three pillars, constraint packages, validation loop)
 2. **[docs/roadmap.md](docs/roadmap.md)** — M1–M11 milestones with detailed specs
