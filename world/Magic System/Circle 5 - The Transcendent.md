@@ -1,0 +1,3 @@
+# Circle 5 - The Transcendent
+
+Circle 5 exists at the boundary between mortal and divine with 2-3 individuals believed alive currently, their identities unknown even to most royalty. Advancement requires accessing fundamental forces underlying reality. Capabilities include reshaping landscapes permanently, controlling weather patterns across entire regions, true resurrection without time constraints, perfect immortality, planar travel to other dimensions, creating permanent sentient life, rewriting recent history within limited spheres, manipulating time flow in localized areas, and consciousness projection across vast distances. Fifth Circle mages transcend mortal limitations—they no longer require food, water, or sleep, sustained purely by mana.

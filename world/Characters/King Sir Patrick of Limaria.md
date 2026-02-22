@@ -1,0 +1,3 @@
+# King Sir Patrick of Limaria
+
+Sir Patrick, thirty-two years old, rules Limaria with iron authority. Born into a line of warrior-kings, he was groomed from birth to lead through strength and strategy. His intimidatingly muscular build, long blue hair, piercing blue eyes, and strong features command respect and fear in equal measure. Ascending to the throne at twenty-one, Patrick has maintained Limaria's prosperity through military excellence and cunning diplomacy. He ensures order and prosperity through the Red Legion's disciplined enforcement and strategic mercenary contracts that fund the kingdom's economy. Patrick respects his wife Elizabeth's military prowess and shares her commitment to Limaria's martial traditions.

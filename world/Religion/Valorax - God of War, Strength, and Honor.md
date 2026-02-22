@@ -1,0 +1,3 @@
+# Valorax - God of War, Strength, and Honor
+
+Valorax is the god of War, Strength, and Honor, particularly favored in Limaria and Stuttgart. He represents martial prowess, courage, and noble combat. His temples double as training grounds and armories. Valorax's clergy include warriors, strategists, and judges of combat. Worship involves physical training, weapons maintenance, and honoring fallen heroes. Offerings include weapons, armor, and trophies from battle. Valorax's symbols include the crossed swords, shield, and lion. His followers value discipline, bravery, and fighting with honor according to established codes of combat.

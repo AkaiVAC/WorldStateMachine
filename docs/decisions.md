@@ -24,7 +24,9 @@ This document captures the "why" behind key architectural decisions.
 
 ## Core Philosophy
 
-### Config-Driven Extension System (2026-01-10, finalized 2026-01-10)
+### ~~Config-Driven Extension System~~ (2026-01-10, **superseded 2026-02-22**)
+
+> **Superseded:** The custom extension system has been replaced by Mastra for agent orchestration and MCP TypeScript SDK for tool integration. See "Mastra + MCP Replace Extension System" below.
 
 **Decision:** Extensions are loaded via a central config file with 6 stage arrays, not auto-discovered from directories. Config is system-managed.
 
@@ -135,7 +137,7 @@ Extensions within a stage are loaded in parallel waves based on dependency DAG:
 
 ---
 
-### Six-Stage Pipeline Architecture (2026-01-10)
+### ~~Six-Stage Pipeline Architecture~~ (2026-01-10, **superseded 2026-02-22**)
 
 **Decision:** Extensions are organized into 6 stages that execute in order. Stage determines when an extension runs, not complex dependency graphs.
 
@@ -165,7 +167,7 @@ Extensions within a stage are loaded in parallel waves based on dependency DAG:
 
 ---
 
-### Simple ExtensionContext (2026-01-10)
+### ~~Simple ExtensionContext~~ (2026-01-10, **superseded 2026-02-22**)
 
 **Decision:** ExtensionContext is a plain shared object, not a registry abstraction.
 
@@ -203,7 +205,7 @@ type ExtensionContext = {
 
 ---
 
-### Required Slots Validation (2026-01-10)
+### ~~Required Slots Validation~~ (2026-01-10, **superseded 2026-02-22**)
 
 **Decision:** The bootstrap validates that required slots are filled after all extensions activate.
 
@@ -229,7 +231,7 @@ type ExtensionContext = {
 
 ---
 
-### Extension Definition (2026-01-10)
+### ~~Extension Definition~~ (2026-01-10, **superseded 2026-02-22**)
 
 **Decision:** Extensions export a simple object with metadata and an `activate` function (using `defineExtension`).
 
@@ -1198,10 +1200,14 @@ const createEntityStore = () => {
 
 | Decision | Rationale |
 |----------|-----------|
-| Config-driven extensions | Explicit loading via JSON config, not auto-discovery |
-| Six-stage pipeline | Natural data flow, simple ordering, no cycles |
-| Simple ExtensionContext | Plain object, no registry abstraction |
-| Required slots validation | Fail fast if stores missing |
+| ~~Config-driven extensions~~ | ~~Superseded by Mastra + MCP~~ |
+| ~~Six-stage pipeline~~ | ~~Superseded by Mastra workflows~~ |
+| ~~Simple ExtensionContext~~ | ~~Superseded by Mastra~~ |
+| ~~Required slots validation~~ | ~~Superseded by Mastra~~ |
+| Neo4j as graph database | GPLv3, mature TS driver, native graph model fits entity/fact/relationship data |
+| Mastra for orchestration | TypeScript-native, stable 1.0, enforces retrieval-before-generation via workflows |
+| MCP TypeScript SDK | Tool-use interface to Claude, production-grade, replaces custom tool-calling |
+| Podman for containerization | Neo4j runs in Podman container for local dev |
 | Lorebook is import format | Entity IDs solve name disambiguation |
 | World state as RPG stats | All entities have queryable numeric attributes |
 | Tool-calling over context-stuffing | Deterministic facts, no hallucination, scalable |
@@ -1221,13 +1227,78 @@ const createEntityStore = () => {
 
 **See also:**
 - `vision.md` - What we're building
-- `current.md` - Where we are
 - `roadmap.md` - How we get there
 - `architecture/` - Detailed design docs
 
 ## See also
 - [vision.md](./vision.md)
 - [roadmap.md](./roadmap.md)
-- [current.md](./current.md)
 - [02-timeline-centric.md](./architecture/core/02-timeline-centric.md)
 - [17-constraint-validation-system.md](./architecture/core/17-constraint-validation-system.md)
+
+---
+
+## Stack Decisions (2026-02-22)
+
+### Mastra + MCP Replace Extension System
+
+**Decision:** Replace the custom six-stage extension pipeline with Mastra (TypeScript-native agent orchestration) and the MCP TypeScript SDK (tool interface to Claude).
+
+**Why:**
+- The extension system was premature — it added orchestration complexity before the core data model was proven on a real graph database
+- Mastra provides durable workflow primitives that enforce retrieval-before-generation via graph topology, which is the actual architectural guarantee we need
+- MCP TypeScript SDK is the standard tool-use interface for Claude, replacing custom tool-calling wrappers
+- Both are TypeScript-native, actively maintained, and production-used
+
+**What this replaces:**
+- Config-driven extension loading → Mastra agent/workflow definitions
+- Six-stage pipeline → Mastra workflow steps
+- ExtensionContext → Mastra's built-in state management
+- Custom tool-calling wrapper → MCP tool handlers
+
+**Source:** Discussion on 2026-02-22 about rearchitecting the stack
+
+---
+
+### Neo4j as Graph Database
+
+**Decision:** Use Neo4j Community Edition (GPLv3) as the primary data store, replacing the planned SQLite + in-memory hybrid.
+
+**Why:**
+- Entity → Fact → Relationship is inherently a graph problem — storing it in tables was fighting the data model
+- Neo4j's Cypher queries map naturally to the traversal patterns needed (epistemic state, containment, relationship expansion)
+- Official TypeScript driver at v6 with full type definitions
+- Community Edition is GPLv3 (genuinely open source), sufficient for single-node production use
+
+**Rejected:**
+- **FalkorDB:** SSPL license (not OSI open source); GraphRAG-SDK is Python-only
+- **Graphiti/Zep (self-hosted):** Python-only core; requires Python sidecar from TypeScript
+- **SQLite:** Originally planned in roadmap M5; replaced because graph queries are the primary access pattern
+
+**Source:** Discussion on 2026-02-22 about database selection
+
+---
+
+### Podman for Containerization
+
+**Decision:** Run Neo4j in a Podman container for local development.
+
+**Why:**
+- Docker alternative without daemon requirement
+- Compose file in `mcp/compose.yml` gives one-command local setup
+- Same OCI container format, no practical differences for this use case
+
+**Source:** Discussion on 2026-02-22
+
+---
+
+### Python Excluded
+
+**Decision:** No Python anywhere in the stack. TypeScript/JavaScript only.
+
+**Why:**
+- User preference — non-negotiable constraint
+- Eliminated Graphiti, FalkorDB GraphRAG-SDK, and LangGraph (Python) as options
+- All chosen tools (Mastra, MCP SDK, Neo4j driver) have first-class TypeScript support
+
+**Source:** Discussion on 2026-02-22

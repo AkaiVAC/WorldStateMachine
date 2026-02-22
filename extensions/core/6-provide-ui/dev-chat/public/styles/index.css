@@ -1,9 +1,0 @@
-@layer reset, tokens, base, layout, components, utilities;
-
-@import "reset.css";
-@import "tokens.css";
-@import "base.css";
-@import "layout.css";
-@import "components/message.css";
-@import "components/entry.css";
-@import "components/form.css";

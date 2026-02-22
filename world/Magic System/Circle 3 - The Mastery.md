@@ -1,0 +1,3 @@
+# Circle 3 - The Mastery
+
+Circle 3 mages are recognized experts representing roughly 0.04% of the population (~16,000). Advancement requires exceptional talent, decades of study, or access to rare magical knowledge. Capabilities include devastating area-effect destruction, permanent enchantments, advanced healing (regenerating limbs over days), complex illusions indistinguishable from reality, scrying distant locations, weather control over limited areas, summoning minor magical creatures, and mental domination of weak-willed subjects. Third Circle practitioners cast silently with minimal gestures, maintaining concentration during combat. Stamina permits hours of sustained casting.

@@ -1,0 +1,3 @@
+# Silvanna - Goddess of Nature, Growth, and Life
+
+Silvanna is the goddess of Nature, Growth, and Life, particularly favored in Aeldrin and Zyronia. She represents the natural world, fertility, and the cycle of life. Her temples are often natural groves, gardens, or living trees. Silvanna's clergy include druids, healers, and agricultural experts. Worship involves seasonal celebrations, planting rituals, and healing practices. Offerings include flowers, fruits, and crafted natural items. Silvanna's symbols include the leaf crown, blooming staff, and interwoven vines. Her followers value environmental stewardship, community health, and respect for all living things.

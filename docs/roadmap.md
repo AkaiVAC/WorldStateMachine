@@ -1475,10 +1475,12 @@ M1 ✅
 
 ---
 
-## Active Track: Extension System Redesign
+## ~~Active Track: Extension System Redesign~~ (Superseded 2026-02-22)
+
+> **Superseded:** The custom extension system has been replaced by Mastra for orchestration and MCP TypeScript SDK for tool integration. Neo4j replaces in-memory/SQLite stores. See `decisions.md` for rationale.
 
 **Date Started:** 2026-01-10
-**Status:** Config Schema Finalized ✅ | Config Loader Implemented ✅ | Runtime Next 🎯
+**Original Status:** Config Schema Finalized ✅ | Config Loader Implemented ✅ | Runtime Next 🎯
 
 ---
 

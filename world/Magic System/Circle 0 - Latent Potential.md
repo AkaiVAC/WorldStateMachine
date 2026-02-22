@@ -1,0 +1,3 @@
+# Circle 0 - Latent Potential
+
+Circle 0 represents untapped magical potential present in approximately 35% of Excelsia's population (~14 million). These individuals possess mana sensitivity but lack training to harness it consciously. Manifestations include instinctive danger sense, occasional prophetic dreams, minor temperature perception around magical objects, and unexplained lucky or unlucky streaks caused by unconscious mana fluctuations. Circle 0 individuals cannot cast spells or deliberately manipulate mana. Many remain unaware of their abilities throughout their lives.

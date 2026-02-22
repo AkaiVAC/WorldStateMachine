@@ -1,0 +1,3 @@
+# Ilarien - God of Wisdom, Knowledge, and Prophecy
+
+Ilarien is the god of Wisdom, Knowledge, and Prophecy, particularly favored in Ilaria. He represents learning, foresight, and intellectual pursuit. His temples function as academies, libraries, and research centers. Ilarien's clergy serve as scholars, teachers, and advisors to rulers. Worship involves study, debate, and the recording of knowledge. Offerings include books, scrolls, and inventions. Ilarien's symbols include the open book, owl, and hourglass. His followers value education, careful planning, and the preservation of knowledge for future generations.

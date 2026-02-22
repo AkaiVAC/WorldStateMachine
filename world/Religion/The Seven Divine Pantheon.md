@@ -1,0 +1,3 @@
+# The Seven Divine Pantheon
+
+The Seven Divine form the primary pantheon worshipped across Excelsia. Solarius represents Sun, Justice, and Order (favored in Sunnaria). Lunara embodies Moon, Mysteries, and Magic (favored in Lunaria). Ilarien signifies Wisdom, Knowledge, and Prophecy (favored in Ilaria). Valorax represents War, Strength, and Honor (favored in Limaria and Stuttgart). Mercuros governs Trade, Travel, and Communication (favored in Lindward). Silvanna embodies Nature, Growth, and Life (favored in Aeldrin and Zyronia). Forgefather represents Craft, Earth, and Stone (favored in Ironforge). Each kingdom maintains temples to all Seven but favors certain deities according to their culture and needs.

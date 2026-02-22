@@ -1,0 +1,3 @@
+# King Edmund of Lindward (Deceased)
+
+King Edmund of Lindward, who died four years ago at age forty-two, was a beloved monarch known for wisdom, compassion, and shrewd economic policies. Standing 185 centimeters with dark hair beginning to gray at the temples and warm brown eyes, Edmund possessed a commanding yet approachable presence. He inherited the throne at twenty-three and spent nineteen years transforming Lindward into a prosperous trade powerhouse. Edmund negotiated favorable trade agreements with all neighboring kingdoms, established Lindward's monopoly on certain luxury goods, and created economic alliances that ensured peace. A devoted husband to Queen Emily and loving father to Michael and Eleanor, Edmund prioritized family despite royal obligations.

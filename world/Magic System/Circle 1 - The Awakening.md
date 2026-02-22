@@ -1,0 +1,3 @@
+# Circle 1 - The Awakening
+
+Circle 1 mages have awakened their mana channels through training or exposure, representing roughly 8% of the population (~3.2 million). They can perform basic cantrips and utility spells including creating small flames or lights, minor telekinesis (lifting objects under 5 pounds), simple illusions, detecting magical auras, minor healing, and enhancing personal physical abilities by 20-30% temporarily. First Circle magic requires verbal components, hand gestures, and intense concentration. Continuous casting causes rapid exhaustion, with most able to maintain simple spells for 10-15 minutes before resting.

@@ -379,7 +379,7 @@ Effects become facts:
 ```
 Your existing lore (SillyTavern, JSON, text files)
     ↓
-  [Import via extension]
+  [Import via ETL pipeline]
     ↓
 This System (constraint engine)
     ↓
@@ -421,7 +421,7 @@ Extract new facts, update timeline
 4. **Multi-agent orchestration** - Characters with conflicting knowledge in the same scene
 5. **Living world simulation** - Off-screen progression with detail tiers (focus/intentional/passive/system)
 6. **General-purpose** - Works for any world (fantasy, sci-fi, historical)
-7. **Plugin architecture** - User-extensible via extensions
+7. **MCP tool interface** - LLMs query world state via standard MCP tools
 
 **Closest comparisons:**
 - **rpg-mcp** (tool-calling + state management, but D&D-specific, no epistemic isolation)

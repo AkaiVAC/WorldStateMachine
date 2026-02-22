@@ -1,0 +1,3 @@
+# Magic Academies of Excelsia
+
+Excelsia hosts eight major magic academies across its kingdoms. The three elite institutions are: Ilarian Grand Academy (oldest and most prestigious, specializing in ancient magic and theoretical studies), Sunnarian Arcane Lyceum (generalist excellence with balanced curriculum), and Lindward Institute of Innovation (focus on magical innovation and practical applications). Five lesser academies serve the remaining kingdoms, each with regional specializations. Additionally, multiple independent mage guilds operate outside formal academy structures, offering alternative training paths and specializing in niche magical disciplines.

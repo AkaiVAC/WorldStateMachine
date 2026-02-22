@@ -1,0 +1,3 @@
+# Forgefather - God of Craft, Earth, and Stone
+
+Forgefather is the god of Craft, Earth, and Stone, particularly favored in Ironforge. He represents craftsmanship, mining, and structural integrity. His temples function as workshops, forges, and architectural centers. Forgefather's clergy include artisans, engineers, and miners. Worship involves creating quality work, structural blessings, and geological studies. Offerings include crafted items, precious stones, and architectural models. Forgefather's symbols include the anvil, mountain peak, and geometric compass. His followers value skill mastery, durable construction, and the thoughtful use of earth's resources.

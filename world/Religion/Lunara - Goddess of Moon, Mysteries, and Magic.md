@@ -1,0 +1,3 @@
+# Lunara - Goddess of Moon, Mysteries, and Magic
+
+Lunara is the goddess of Moon, Mysteries, and Magic, particularly favored in Lunaria. She represents intuition, hidden knowledge, and arcane power. Her temples feature silver decorations, observatories, and libraries of occult lore. Lunara's clergy include seers, mystics, and magic theorists. Worship occurs during lunar phases, with special ceremonies at full and new moons. Offerings include silver, moonstones, and written secrets. Lunara's symbols include the crescent moon, silver mirror, and veiled face. Her followers value curiosity, discretion, and the pursuit of magical understanding.

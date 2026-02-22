@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext", "DOM"],
+    "lib": ["ESNext"],
     "target": "ESNext",
     "module": "Preserve",
     "moduleDetection": "force",
@@ -15,12 +15,7 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "paths": {
-      "@core/*": ["./src/core-types/*"],
-      "@ext/*": ["./extensions/*"],
-      "@ext-system/*": ["./src/extension-system/*"]
-    }
+    "noUnusedParameters": true
   },
-  "include": ["src", "extensions"]
+  "include": ["mcp/src"]
 }

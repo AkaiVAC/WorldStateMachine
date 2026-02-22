@@ -1,5 +1,5 @@
 {
-  "name": "lorebook-manager",
+  "name": "world-state-machine",
   "type": "module",
   "private": true,
   "scripts": {
@@ -8,9 +8,6 @@
     "typecheck": "bun run tsc --noEmit",
     "lint": "biome lint .",
     "format": "biome format --write .",
-    "bootstrap": "bun run src/extension-system/bootstrap-runner.ts",
-    "start": "bun run bootstrap",
-    "ui": "bun run extensions/core/6-provide-ui/dev-chat/main.ts",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -21,10 +18,5 @@
   },
   "peerDependencies": {
     "typescript": "^5"
-  },
-  "dependencies": {
-    "marked": "^17.0.1",
-    "vis-data": "^8.0.3",
-    "vis-network": "^10.0.2"
   }
 }

@@ -1,0 +1,3 @@
+# The Nine Circles of Magic - Overview
+
+Magic in Excelsia follows the Nine Circles system, representing exponential increases in power and understanding. Circle 0 (Latent) affects 35% of the population with minor unconscious abilities. Circle 1 (Awakened) includes 8% who can perform basic cantrips. Circle 2 (Adept) covers 0.8% with practical spellcasting ability. Circle 3 (Master) represents 0.04% with advanced magical prowess. Circle 4 (Archmage) represents 40-60 individuals continent-wide. Circle 5 (Ascendant) has 3-4 living practitioners. Circle 6 (Demigod) may have 0-1 alive. Circles 7+ represent divine and cosmic power levels.

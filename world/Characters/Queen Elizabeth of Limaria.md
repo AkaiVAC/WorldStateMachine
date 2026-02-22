@@ -1,0 +1,3 @@
+# Queen Elizabeth of Limaria
+
+Queen Elizabeth of Limaria, thirty years old, stands tall at 178 centimeters with an athletic, muscular build honed through years of weapons training. Her long blue hair cascades past her shoulders, and her piercing blue eyes mirror those of her husband King Patrick. Fair-skinned with strong, aristocratic features and an imposing presence, Elizabeth embodies Limarian martial culture. Born to a powerful noble family with renowned military traditions, she was trained from childhood in swordplay, strategy, and leadership. Elizabeth serves as commander of the Silver Shields, Limaria's elite royal guard, and personally trains promising young warriors. Disciplined and demanding, she expects excellence from herself and others.

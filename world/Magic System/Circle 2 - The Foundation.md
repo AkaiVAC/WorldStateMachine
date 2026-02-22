@@ -1,0 +1,3 @@
+# Circle 2 - The Foundation
+
+Circle 2 represents professional competency achieved by approximately 0.8% of the population (~320,000) after 5-10 years of study. These mages provide practical magical services across Excelsia. Capabilities include elemental attacks causing serious injury, sustained barriers blocking mundane weapons, healing moderate wounds, complex illusions with movement, short-range teleportation (up to 50 feet), temporary enchantments, and telepathic communication with willing subjects. Second Circle mages can cast without verbal components but still require gestures and focus. They manage 30-60 minutes of continuous spellcasting before exhaustion.

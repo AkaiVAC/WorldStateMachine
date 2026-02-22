@@ -1,0 +1,3 @@
+# Mercuros - God of Trade, Travel, and Communication
+
+Mercuros is the god of Trade, Travel, and Communication, particularly favored in Lindward. He represents commerce, movement, and connection between peoples. His temples serve as marketplaces, waystations, and message centers. Mercuros's clergy include merchants, diplomats, and messengers. Worship involves fair dealing, safe journey prayers, and information sharing. Offerings include coins, maps, and communication devices. Mercuros's symbols include the merchant scale, winged sandals, and scroll. His followers value honesty in trade, hospitality to travelers, and the free flow of information.

@@ -1,0 +1,3 @@
+# Solarius - God of Sun, Justice, and Order
+
+Solarius is the god of Sun, Justice, and Order, particularly favored in Sunnaria. He represents clarity, truth, and structured society. Temples of Solarius feature open courtyards for sunlight, golden domes, and elaborate sundials. His clergy serve as judges, legal advisors, and mediators across Excelsia. Worship involves daily prayers at sunrise, offerings of gold and wheat, and festivals during solstices. Solarius's symbols include the golden sun disk, balanced scales, and the laurel wreath. His followers value honesty, fairness, and maintaining social order.
