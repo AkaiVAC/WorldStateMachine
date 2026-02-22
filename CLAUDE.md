@@ -158,6 +158,23 @@ Each kind of information has exactly one source of truth. Other files may point 
 
 **When a milestone spec changes:** Update `docs/roadmap.md`. Don't copy spec details into other files.
 
+## Development Tools
+
+These tools are configured in `.claude/` and available in every session.
+
+### Always Active
+
+- **Test guardian** — Async hook that runs `bun tsc --noEmit` and `bun test` after every file edit. Failures surface automatically. Config: `.claude/settings.json`.
+
+### Slash Commands
+
+- **`/commit-push`** — Analyzes changes, groups into scoped micro-commits with conventional-commit messages, presents plan for review, then commits and pushes. Skill: `.claude/skills/commit-push/`.
+- **`/create-pr`** — Creates a pull request from the current branch. Analyzes all commits vs main, drafts title and summary, creates via `gh`. Skill: `.claude/skills/create-pr/`.
+
+### Background Agents
+
+- **doc-updater** — After a decision or progress is made, launch this in the background to update all relevant docs per ownership rules. Review changes via `git diff`. Agent: `.claude/agents/doc-updater.md`.
+
 ## Essential Reading
 
 Before starting significant engine work, read `README.md` for current status, then these reference documents:
